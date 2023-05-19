@@ -1,3 +1,6 @@
+* TOC
+{:toc}
+
 # Understanding Lustre Internals
 
 ## MGC
