@@ -1,1 +1,9 @@
-theme: jekyll-theme-dinky
+plugins: ["jekyll-toc"]
+
+# 默认为所有文章启用 toc
+defaults:
+  - scope:
+      path: ""
+    values:
+      toc: true
+
