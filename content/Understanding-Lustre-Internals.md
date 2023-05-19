@@ -579,8 +579,6 @@ Libcfs provides APIs comprising of fundamental primitives for process management
 
 In the following Sections we describe libcfs APIs and functionalities in detail.
 
-> Libcfs是Lustre加载的第一个模块。可以在tests/test-framework.sh脚本中找到模块加载函数，如源代码17所示。当挂载Lustre时，会调用mount\_facet()函数，它调用load\_modules()函数。load\_modules()函数调用load\_modules\_local()函数，按照相同的顺序加载Lustre模块libcfs、lnet、obdclass、ptl-rpc、fld、fid和lmv。
-
 ### Data Encryption Support in Libcfs
 
 Lustre implements two types of encryption capabilities - data on the wire and data at rest. Encryption over the wire protects data transfers between the physical nodes from Man-in-the-middle attacks. Whereas the objective of encrypting data at rest is protection against storage theft and network snooping. Lustre 2.14+ releases provides encryption for data at rest. Data is encrypted on Lustre client before being sent to servers and decrypted upon reception from the servers. That way applications running on Lustre client see clear text and servers see only encrypted text. Hence access to encryption keys is limited to Lustre clients.
