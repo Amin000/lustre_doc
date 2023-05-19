@@ -483,7 +483,7 @@ Obd devices in Lustre are components including lmv, lod, lov, mdc, mdd, mdt, mds
 > 在Lustre中，Obd设备是包括lmv、lod、lov、mdc、mdd、mdt、mds、mgc、mgs、obdecho、ofd、osc、osd-ldsikfs、osd-zfs、osp、lwp、ost和qmt在内的组件。其中，mdc、mgc、osc、osp和lwp是客户端Obd设备，这意味着两个服务器Obd设备组件（如mdt和ost）需要一个客户端设备来建立它们之间的通信。这在Lustre客户端与Lustre服务器通信的情况下也适用。客户端Obd设备由自导出和导入组成，而服务器端Obd设备由导出和反向导入组成。客户端Obd设备使用其导入向服务器发送请求，服务器使用其导出接收请求，如图16所示。服务器Obd设备上的导入称为反向导入，因为它们用于向客户端Obd设备发送请求。这些请求通常是由服务器不频繁地发送给客户端的回调请求。客户端使用自导出来接收服务器发送的这些回调请求。
 
 ![Figure 16. Import and export pair in Lustre](../image/Import_export.png)
-<center>Figure 16. Import and export pair in Lustre
+<sub>Figure 16. Import and export pair in Lustre</sub>
 
 For any two obd devices to communicate with each other, they need an import and export pair \[7]. For instance, let us consider the case of communication between ost and mdt obd devices. Logging into an OSS node and doing lctl dl shows the obd devices on the node and associated details (obd device status, type, name, uuid etc.). Examining /sys/fs/lustre directory can also show the obd devices corresponding to various device types. An example of the name of an obd device created for the data exchange between OST5 and MDT2 will be MDT2-lwp-OST5. This means that the client obd device that enables the communication here is lwp. A conceptual view of the communication between ost and mdt through import and export connections is shown in Figure 17. LWP (Light Weight Proxy) obd device manages connections established from ost to mdt, and mdts to mdt0. An lwp device is used in Lustre to send quota and FLD query requests (see Section 7). Figure 17 also shows the communication between mdt and ost through osp client obd device.
 
