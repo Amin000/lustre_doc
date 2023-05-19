@@ -6,11 +6,11 @@
 
 The Lustre client software involves primarily three components, management client (MGC), a metadata client (MDC), and multiple object storage clients (OSCs), one corresponding to each OST in the file system. Among this, the management client acts as an interface between Lustre virtual file system layer and Lustre management server (MGS). MGS stores and provides information about all Lustre file systems in a cluster. Lustre targets register with MGS to provide information to MGS while Lustre clients contact MGS to retrieve information from it.
 
-> Lustre客户端软件主要涉及三个组件，管理客户端（MGC）、元数据客户端（MDC）和多个对象存储客户端（OSC），每个文件系统中对应一个OST。其中，管理客户端充当Lustre虚拟文件系统层与Lustre管理服务器（MGS）之间的接口。MGS存储并提供有关集群中所有Lustre文件系统的信息。Lustre目标向MGS注册以向其提供信息，而Lustre客户端则通过与MGS联系以从中检索信息。
+> Lustre 客户端软件主要涉及三个组件，管理客户端（MGC）、元数据客户端（MDC）和多个对象存储客户端（OSC）。每个 OSC 对应一个 OST。其中，管理客户端作为 Lustre 虚拟文件系统层与 Lustre 管理服务器（MGS）之间的接口。MGS 存储并提供有关集群中所有 Lustre 文件系统的配置信息。Lustre 目标向MGS注册以向其提供信息，而 Lustre 客户端向 MGS 获取配置信息。
 
 The major functionalities of MGC are Lustre log handling, Lustre distributed lock management and file system setup. MGC is the first obd device created in Lustre obd device life cycle. An obd device in Lustre provides a level of abstraction on Lustre components such that generic operations can be applied without knowing the specific devices you are dealing with. The remaining Sections describe MGC module initialization, various MGC obd operations and log handling in detail. In the following Sections we will be using the terms clients and servers to represent service clients and servers created to communicate between various components in Lustre. Whereas the physical nodes representing Lustre’s clients and servers will be explicitly mentioned as ‘Lustre clients’ and ‘Lustre servers’.
 
-> MGC的主要功能包括Lustre日志处理、Lustre分布式锁管理和文件系统设置。MGC是在Lustre obd设备生命周期中创建的第一个obd设备。Lustre中的obd设备为Lustre组件提供了一层抽象，使得可以应用通用操作，而无需了解正在处理的具体设备。其余部分详细描述了MGC模块的初始化、各种MGC obd操作以及日志处理。在接下来的部分中，我们将使用"客户端"和"服务器"这些术语来代表在Lustre的各个组件之间进行通信而创建的服务客户端和服务器。而表示Lustre的客户端和服务器的物理节点将明确标注为"Lustre客户端"和"Lustre服务器"。
+> MGC 的主要功能包括 Lustre 日志处理、Lustre 分布式锁管理和文件系统的初始化。MGC 是在 Lustre obd 设备生命周期中创建的第一个 obd 设备。Lustre 中的 obd 设备为 Lustre 组件提供了一层抽象，使得可以应用通用操作，而无需了解正在处理的具体设备。其余部分详细描述了MGC模块的初始化、各种MGC obd操作以及日志处理。在接下来的部分中，我们将使用"客户端"和"服务器"这些术语来代表在Lustre的各个组件之间进行通信而创建的服务客户端和服务器。而表示Lustre的客户端和服务器的物理节点将明确标注为"Lustre客户端"和"Lustre服务器"。
 
 ### MGC Module Initialization
 
