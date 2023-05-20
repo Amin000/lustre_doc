@@ -76,6 +76,10 @@ The Lustre module initialization begins from the lustre\_init() routine defined 
 
 > Lustre 模块初始化从 llite/super25.c中的 lustre_init() 开始。当 ‘lustre’ 内核模块被加载时，这个函数就被调用。lustre_init 调用 register\_filesystem(\&lustre\_fs\_type)，注册‘lustre’到文件系统中，并把它加入内核文件系统的链表中，这个链表被用于挂载等系统调用。lustre_fs_type 也在同个文件进行定义（源码3）。
 
+![mgc_setup() call graph starting from Lustre file system mounting](../image/Mgc_setup.png "Figure 8. mgc_setup() call graph starting from Lustre file system mounting")
+
+<center><sub>Figure 8. mgc_setup() call graph starting from Lustre file system mounting.</sub></center>
+
 Source code 3: lustre\_fs\_type structure defined in llite/super25.c
 
 ```c
@@ -112,13 +116,17 @@ enum lcfg_command_type {
 
 The first lcfg\_command that is being passed to do\_lcfg() routine is LCFG\_ATTACH which will result in the invocation of obdclass function class\_attach(). We will describe class\_attach() in detail in Section 5. The second lcfg\_command passed to do\_lcfg() function is LCFG\_SETUP which will result in the invocation of mgc\_setup() eventually. do\_lcfg() calls class\_process\_config() (defined in obdclass/obd\_config.c) and passes the lcfg\_command that it received. In case of LCFG\_SETUP command the class\_setup() routine gets invoked. This is defined in the same file and its primary duty is to create hashes and self export and call obd device specific setup. The device specific setup call is in turn invoked through another routine called obd\_setup(). obd\_setup() is defined in include/obd\_class.h as an inline function in the same way obd\_get\_info() is defined. obd\_setup() calls the device specific setup routine with the help of the OBP macro (refer Section 4.3 and Figure 6). Here, in case of MGC obd device mgc\_setup() defined as part of the mgc\_obd\_ops structure (shown in Source Code 2) gets invoked by the obd\_setup() routine. Note that the yellow colored blocks in Figure 8 will be referenced again in Section 5 to illustrate the lifecycle of the MGC obd device.
 
-> 第一个传递给 do\_lcfg() 函数的 lcfg\_command 是 LCFG\_ATTACH，它将导致调用 obdclass 函数 class\_attach()。我们将在第5节详细介绍class\_attach()。传递给do\_lcfg()函数的第二个lcfg\_command是LCFG\_SETUP，最终将导致mgc\_setup()的调用。do\_lcfg()调用class\_process\_config()（在obdclass/obd\_config.c中定义）并传递接收到的lcfg\_command。对于LCFG\_SETUP命令，将调用class\_setup()。该函数在相同的文件中定义，其主要任务是创建散列和自导出，然后调用obd设备特定的设置。设备特定的设置调用通过另一个名为obd\_setup()的例程来实现。obd\_setup()在include/obd\_class.h中定义为内联函数，就像obd\_get\_info()一样。obd\_setup()通过OBP宏的帮助调用设备特定的设置例程（参见第4.3节和图6）。在这里，对于MGC obd设备，obd\_setup()例程会调用mgc\_setup()，而mgc\_setup()是mgc\_obd\_ops结构的一部分（如源代码2所示）。注意，图8中的黄色块将在第5节中再次被引用，以说明MGC obd设备的生命周期。
+> 第一个被作为 do\_lcfg() 参数的 lcfg\_command 是 LCFG\_ATTACH，并最终调用 obdclass 的函数 class\_attach()。我们将在第5节详细介绍class\_attach()。第二个作为 do\_lcfg()的 lcfg\_command 是 LCFG\_SETUP，并最终调用 mgc\_setup()。do\_lcfg() 调用 class\_process\_config()（在obdclass/obd\_config.c中定义）并传递接收到的 lcfg\_command。对于 LCFG\_SETUP 宏，将调用 class\_setup()。该函数在相同的文件中定义，其主要任务是创建散列和自导出（self export），然后调用 obd 设备特定的设置流程。设备特定的设置流程被另一个 obd\_setup() 调用。obd\_setup()在 include/obd\_class.h 中定义为内联函数，就像 obd\_get\_info() 一样。obd\_setup() 通过 OBP 宏的帮助调用设备特定的设置流程（参见第4.3节和图6）。在这里，对于 MGC obd 设备，obd\_setup() 会调用 mgc\_setup()，而 mgc\_setup() 是 mgc\_obd\_ops 结构的一部分（如源代码2所示）。注意，图8中的黄色块将在第5节中再次被引用，以说明 MGC obd 设备的生命周期。
 
 ### Operation
 
 mgc\_setup() first adds a reference to the underlying Lustre PTL-RPC layer. Then it sets up an RPC client for the obd device using client\_obd\_setup() (defined in ldlm/ldlm\_lib.c). Next mgc\_llog\_init() initializes Lustre logs which will be processed by MGC at the MGS server. These logs are also sent to the Lustre client and the client side MGC mirrors these logs to process the data. The tunable parameters persistently set at MGS are sent to MGC and Lustre logs processed at the MGC initializes these parameters. In Lustre the tunables have to be set before Lustre logs are processed and mgc\_tunables\_init() helps to initialize these tunables. Few examples of the tunables set by this function are conn\_uuid, uuid, ping and dynamic\_nids and can be viewed in /sys/fs/lustre/mgc directory by logging into any Lustre client. kthread\_run() starts an mgc\_requeue\_thread which keeps reading the lustre logs as the entries come in. A flowchart showing the mgc\_setup() workflow is shown in Figure 10.
 
-> mgc\_setup()首先添加对底层Lustre PTL-RPC层的引用。然后，它使用client\_obd\_setup()（在ldlm/ldlm\_lib.c中定义）为obd设备设置一个RPC客户端。接下来，mgc\_llog\_init()初始化Lustre日志，这些日志将在MGS服务器上由MGC进行处理。这些日志也会发送到Lustre客户端，客户端端的MGC会镜像这些日志以处理数据。在MGS上持久设置的可调参数被发送到MGC，并且在MGC上处理的Lustre日志初始化这些参数。在Lustre中，必须在处理Lustre日志之前设置这些可调参数，而mgc\_tunables\_init()帮助初始化这些可调参数。该函数设置的一些示例包括conn\_uuid、uuid、ping和dynamic\_nids，可以通过登录到任何Lustre客户端并查看/sys/fs/lustre/mgc目录来查看。kthread\_run()启动一个mgc\_requeue\_thread，它会随着Lustre日志条目的到来而不断读取这些日志。图10显示了mgc\_setup()的工作流程的流程图。
+> mgc\_setup()首先添加对底层 Lustre PTL-RPC 的引用。然后，它使用 client\_obd\_setup()（在ldlm/ldlm\_lib.c中定义）为 obd 设备设置一个 RPC 客户端。接下来，MGC 调用 mgc\_llog\_init() 初始化 Lustre 日志，这些日志将在 MGS 服务器上进行处理。这些日志也会发送到 Lustre 客户端，客户端端的 MGC 会复制这些日志以处理数据。在 MGS 上可调的持久性参数被发送到 MGC，并且在 MGC 上的 Lustre 日志处理初始化这些参数。在 Lustre 中，必须在处理 Lustre 日志之前设置这些可调参数，而 mgc\_tunables\_init() 帮助初始化这些可调参数。例如，该函数设置包括 conn\_uuid、uuid、ping 和 dynamic\_nids，这些都可以在任何 Lustre 客户端上的 /sys/fs/lustre/mgc 目录进行查看。kthread\_run() 启动一个mgc\_requeue\_thread，它会不断地读取 Lustre 日志条目。图10显示了 mgc\_setup() 的流程图。
+
+![mgc_setup() vs. mgc_cleanup()](../image/Mgc_setup_vs_cleanup.png "Figure 10. mgc_setup() vs. mgc_cleanup()")
+
+<center><sub>Figure 10. mgc_setup() vs. mgc_cleanup()</sub></center>
 
 ### Lustre Log Handling
 
@@ -130,7 +138,10 @@ Lustre extensively makes use of logging for recovery and distributed transaction
 
 The lustre\_fill\_super() routine described in Section 4.4 makes a call to ll\_fill\_super() function defined in llite/llite\_lib.c. This function initializes a config log instance specific to the super block passed from lustre\_fill\_super(). Since the same MGC may be used to follow multiple config logs (e.g. ost1, ost2, Lustre client), the config log instance is used to keep the state for a specific log. Afterwards lustre\_fill\_super() invokes lustre\_process\_log() which gets a config log from MGS and starts processing it. lustre\_process\_log() gets called for both Lustre clients and Lustre servers and it continues to process new statements appended to the logs. It first resets and allocates lustre\_cfg\_bufs (which temporarily store log data) and calls obd\_process\_config() which eventually invokes the obd device specific mgc\_process\_config() (as shown in Figure 9) with the help of OBP macro. The lcfg\_command passed to mgc\_process\_config() is LCFG\_LOG\_START which gets the config log from MGC, starts processing it and adds the log to list of logs to follow. config\_log\_add() defined in the same file accomplishes the task of adding the log to the list of active logs watched for updates by MGC. Few other important log processing functions in MGC are - mgc\_process\_log (that gets a configuration log from the MGS and processes it), mgc\_process\_recover\_nodemap\_log (called if the Lustre client was notified for target restarting by the MGS), and mgc\_apply\_recover\_logs (applies the logs after recovery).
 
-> 在第4.4节中描述的lustre\_fill\_super()例程调用ll\_fill\_super()函数，该函数定义在llite/llite\_lib.c中。该函数初始化了一个特定于从lustre\_fill\_super()传递的超级块的配置日志实例。由于同一个MGC可能用于跟踪多个配置日志（例如ost1、ost2、Lustre客户端），因此配置日志实例用于保持特定日志的状态。然后，lustre\_fill\_super()调用lustre\_process\_log()，该函数从MGS获取一个配置日志并开始处理它。lustre\_process\_log()被用于Lustre客户端和Lustre服务器，并且它继续处理追加到日志中的新语句。它首先重置并分配lustre\_cfg\_bufs（临时存储日志数据），然后调用obd\_process\_config()，最终使用OBP宏的帮助调用obd设备特定的mgc\_process\_config()（如图9所示）。传递给mgc\_process\_config()的lcfg\_command是LCFG\_LOG\_START，它从MGC获取配置日志，并开始处理它，并将日志添加到要跟踪的日志列表中。在同一文件中定义的config\_log\_add()完成了将日志添加到MGC监视更新的活动日志列表的任务。MGC中的其他重要日志处理函数包括mgc\_process\_log（从MGS获取配置日志并处理它）、mgc\_process\_recover\_nodemap\_log（如果Lustre客户端收到MGS的目标重新启动通知）、mgc\_apply\_recover\_logs（在恢复后应用日志）。
+> 在第4.4节中描述的lustre\_fill\_super()例程调用ll\_fill\_super()函数，该函数定义在llite/llite\_lib.c中。该函数初始化了一个特定于从lustre\_fill\_super()传递的超级块的配置日志实例。由于同一个MGC可能用于跟踪多个配置日志（例如ost1、ost2、Lustre客户端），因此配置日志实例用于保持特定日志的状态。然后，lustre\_fill\_super()调用lustre\_process\_log()，该函数从MGS获取一个配置日志并开始处理它。lustre\_process\_log()被用于Lustre客户端和Lustre服务器，并且它继续处理追加到日志中的新语句。它首先重置并分配lustre\_cfg\_bufs（临时存储日志数据），然后调用obd\_process\_config()，最终使用OBP宏的帮助调用obd设备特定的mgc\_process\_config()（图9）。传递给mgc\_process\_config()的lcfg\_command是LCFG\_LOG\_START，它从MGC获取配置日志，并开始处理它，并将日志添加到要跟踪的日志列表中。在同一文件中定义的config\_log\_add()完成了将日志添加到MGC监视更新的活动日志列表的任务。MGC中的其他重要日志处理函数包括mgc\_process\_log（从MGS获取配置日志并处理它）、mgc\_process\_recover\_nodemap\_log（如果Lustre客户端收到MGS的目标重新启动通知）、mgc\_apply\_recover\_logs（在恢复后应用日志）。
+
+![Figure 9. mgc_process_config() call graph](../image/Mgc_process_config.png "Figure 9. mgc_process_config() call graph")
+<center><sub>Figure 9. mgc_process_config() call graph</sub></center>
 
 ### mgc\_precleanup() and mgc\_cleanup()
 
@@ -226,11 +237,13 @@ As described in Section 4 MGC is the first obd device setup and started by Lustr
 
 Source code 9: lustre\_mount() function defined in llite/llite\_lib.c
 
-    static struct dentry *lustre_mount(struct file_system_type *fs_type, int flags,
-                                       const char *devname, void *data)
-    {
-            return mount_nodev(fs_type, flags, data, lustre_fill_super);
-    }
+```c
+static struct dentry *lustre_mount(struct file_system_type *fs_type, int flags,
+                                    const char *devname, void *data)
+{
+        return mount_nodev(fs_type, flags, data, lustre_fill_super);
+}
+```
 
 lustre\_fill\_super() function is the entry point for the mount call into Lustre. This function initializes lustre superblock, which is used by the MGC to write a local copy of config log. The lustre\_fill\_super() routine calls ll\_fill\_super() which initializes a config log instance specific for the superblock. The config\_llog\_instance structure is defined in include/obd\_class.h as shown in Source Code 10. The cfg\_instance field in this structure is unique to this superblock. This unique cfg\_instance is obtained using ll\_get\_cfg\_instance() function defined in include/obd\_class.h. The config\_llog\_instance structure also has a uuid (obtained from obd\_uuid field of ll\_sb\_info structure defined in llite/llite\_internal.h) and a callback handler defined by the function class\_config\_llog\_handler(). We will come back to this callback handler later in the MGC life cycle process. The color coded blocks in Figure 11 were also part of mgc\_setup() call graph shown in Figure 8 in Section 4.
 
@@ -238,16 +251,18 @@ lustre\_fill\_super() function is the entry point for the mount call into Lustre
 
 Source code 10: config\_llog\_instance structure is defined in include/obd\_class.h
 
-    struct config_llog_instance {
-            unsigned long            cfg_instance;
-            struct super_block      *cfg_sb;
-            struct obd_uuid          cfg_uuid;
-            llog_cb_t                cfg_callback;
-            int                      cfg_last_idx; /* for partial llog processing */
-            int                      cfg_flags;
-            __u32                    cfg_lwp_idx;
-            __u32                    cfg_sub_clds;
-    };
+```c
+struct config_llog_instance {
+        unsigned long            cfg_instance;
+        struct super_block      *cfg_sb;
+        struct obd_uuid          cfg_uuid;
+        llog_cb_t                cfg_callback;
+        int                      cfg_last_idx; /* for partial llog processing */
+        int                      cfg_flags;
+        __u32                    cfg_lwp_idx;
+        __u32                    cfg_sub_clds;
+};
+c
 
 The file system name field (ll\_fsinfo) of ll\_sb\_info structure is populated by copying the profile name obtained using the get\_profile\_name() function. get\_profile\_name() defined in include/lustre\_disk.h obtains a profile name corresponding to the mount command issued from the user from the lustre\_mount\_data structure.
 
