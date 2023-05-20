@@ -1,7 +1,7 @@
 * TOC
 {:toc}
 
-# Understanding Lustre Internals
+# Understanding Lustre Internals 中文翻译
 
 ## MGC
 
