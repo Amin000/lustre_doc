@@ -50,9 +50,7 @@ In Lustre one of the ways two subsystems share data is with the help of obd\_ops
 
 > 在 Lustre 中，两个子系统之间共享数据的一种方式是通过 obd\_ops 结构进行。为了理解两个子系统之间的通信是如何工作的，让我们以 mgc\_obd\_ops 结构中的 mgc\_get\_info() 为例。子系统 llite 通过将一个宏（KEY\_CONN\_DATA）作为参数调用 mgc\_get\_info()（位于 llite/llite\_lib.c 中）。但请注意，llite 调用的是 obd\_get\_info() 而不是直接调用 mgc\_get\_info()。obd\_get\_info() 在 include/obd\_class.h 中定义，如图6所示。我们可以看到，函数调用一个 OBP 宏，它的参数是 obd\_export 和 get\_info。OBP 宏将 o（obd\_export 设备结构）和 op（操作）连接在一起，结果变成函数调用 o\_get\_info()。
 
-<center>
 ![Figure 6. Communication between llite and mgc through obdclass.](../image/Mgc_llite_comm_1.png "Communication between llite and mgc through obdclass.")
-</center>
 
 <center><sub>Figure 6. Communication between llite and mgc through obdclass.</sub></center>
 
@@ -60,9 +58,7 @@ So how does llite make sure that this operation is directed specifically towards
 
 > 那么，llite 如何确保以上的操作是针对 MGC obd 设备的？llite/llite\_lib.c 中的 obd\_get\_info() 有一个名为 sbi->ll\_md\_exp 的参数。sbi 的类型是 ll\_sb\_info，它在 llite/llite\_internal.h 中定义（图7）。而 ll\_sb\_info 中的 ll\_md\_exp 字段在 include/lustre\_export.h 中定义，类型为 obd\_export。obd\_export 中的 \*exp\_obd 成员，它是一个 obd\_device 结构（在include/obd.h中定义）。另一个 MGC obd 操作 obd\_connect() 使用obd\_device 检查获取导出项。参与此流程的两个函数分别为 class\_name2obd() 和 class\_num2obd()，它们都在 obdclass/genops.c 中定义。
 
-<center>
 ![Data structures involved in the communication between mgc and llite subsystems.](../image/Mgc_llite_comm_2.png "Figure 7. Data structures involved in the communication between mgc and llite subsystems.")
-</center>
 
 <center><sub>Figure 7. Data structures involved in the communication between mgc and llite subsystems.</sub></center>
 
@@ -80,9 +76,7 @@ The Lustre module initialization begins from the lustre\_init() routine defined 
 
 > Lustre 模块初始化从 llite/super25.c中的 lustre_init() 开始。当 ‘lustre’ 内核模块被加载时，这个函数就被调用。lustre_init 调用 register\_filesystem(\&lustre\_fs\_type)，注册‘lustre’到文件系统中，并把它加入内核文件系统的链表中，这个链表被用于挂载等系统调用。lustre_fs_type 也在同个文件进行定义（源码3）。
 
-<center>
 ![mgc_setup() call graph starting from Lustre file system mounting](../image/Mgc_setup.png "Figure 8. mgc_setup() call graph starting from Lustre file system mounting")
-</center>
 
 <center><sub>Figure 8. mgc_setup() call graph starting from Lustre file system mounting.</sub></center>
 
@@ -130,9 +124,7 @@ mgc\_setup() first adds a reference to the underlying Lustre PTL-RPC layer. Then
 
 > mgc\_setup()首先添加对底层 Lustre PTL-RPC 的引用。然后，它使用 client\_obd\_setup()（在ldlm/ldlm\_lib.c中定义）为 obd 设备设置一个 RPC 客户端。接下来，MGC 调用 mgc\_llog\_init() 初始化 Lustre 日志，这些日志将在 MGS 服务器上进行处理。这些日志也会发送到 Lustre 客户端，客户端端的 MGC 会复制这些日志以处理数据。在 MGS 上可调的持久性参数被发送到 MGC，并且在 MGC 上的 Lustre 日志处理初始化这些参数。在 Lustre 中，必须在处理 Lustre 日志之前设置这些可调参数，而 mgc\_tunables\_init() 帮助初始化这些可调参数。例如，该函数设置包括 conn\_uuid、uuid、ping 和 dynamic\_nids，这些都可以在任何 Lustre 客户端上的 /sys/fs/lustre/mgc 目录进行查看。kthread\_run() 启动一个mgc\_requeue\_thread，它会不断地读取 Lustre 日志条目。图10显示了 mgc\_setup() 的流程图。
 
-<center>
 ![mgc_setup() vs. mgc_cleanup()](../image/Mgc_setup_vs_cleanup.png "Figure 10. mgc_setup() vs. mgc_cleanup()")
-</center>
 
 <center><sub>Figure 10. mgc_setup() vs. mgc_cleanup()</sub></center>
 
