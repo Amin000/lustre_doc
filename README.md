@@ -4,4 +4,4 @@
 
 ## 目录
 
-* [Understanding Lustre Internals](content/Understanding-Lustre-Internals-中文翻译.md)
+* [Understanding Lustre Internals-中文翻译](content/Understanding-Lustre-Internals-中文翻译.md)
