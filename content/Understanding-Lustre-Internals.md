@@ -48,13 +48,18 @@ static const struct obd_ops mgc_obd_ops = {
 
 In Lustre one of the ways two subsystems share data is with the help of obd\_ops structure. To understand how the communication between two subsystems work let us take an example of mgc\_get\_info() from the mgc\_obd\_ops structure. The subsystem llite makes a call to mgc\_get\_info() (in llite/llite\_lib.c) by passing a key (KEY\_CONN\_DATA) as an argument. But notice that llite invokes obd\_get\_info() instead of mgc\_get\_info(). obd\_get\_info() is defined in include/obd\_class.h as shown in Figure 6. We can see that this function invokes an OBP macro by passing an obd\_export device structure and a get\_info operation. The definition of this macro concatenates o with op (operation) so that the resulting function call becomes o\_get\_info().
 
-> 在Lustre中，两个子系统之间共享数据的一种方式是通过obd\_ops结构进行。为了理解两个子系统之间的通信是如何工作的，让我们以mgc\_obd\_ops结构中的mgc\_get\_info()为例。子系统llite通过将一个键（KEY\_CONN\_DATA）作为参数调用mgc\_get\_info()（位于llite/llite\_lib.c中）。但请注意，llite调用的是obd\_get\_info()而不是mgc\_get\_info()。obd\_get\_info()在include/obd\_class.h中定义，如图6所示。我们可以看到，该函数通过传递obd\_export设备结构和get\_info操作调用了一个OBP宏。此宏的定义将o（obd\_export设备结构）和op（操作）连接在一起，使得结果函数调用变为o\_get\_info()。
+> 在 Lustre 中，两个子系统之间共享数据的一种方式是通过 obd\_ops 结构进行。为了理解两个子系统之间的通信是如何工作的，让我们以 mgc\_obd\_ops 结构中的 mgc\_get\_info() 为例。子系统 llite 通过将一个宏（KEY\_CONN\_DATA）作为参数调用 mgc\_get\_info()（位于 llite/llite\_lib.c 中）。但请注意，llite 调用的是 obd\_get\_info() 而不是直接调用 mgc\_get\_info()。obd\_get\_info() 在 include/obd\_class.h 中定义，如图6所示。我们可以看到，函数调用一个 OBP 宏，它的参数是 obd\_export 和 get\_info。OBP 宏将 o（obd\_export 设备结构）和 op（操作）连接在一起，结果变成函数调用 o\_get\_info()。
+
+![Figure 6. Communication between llite and mgc through obdclass.](../image/Mgc_llite_comm_1.png "Communication between llite and mgc through obdclass.")
+<center><sub>Figure 6. Communication between llite and mgc through obdclass.</sub></center>
 
 So how does llite make sure that this operation is directed specifically towards MGC obd device? obd\_get\_info() from llite/llite\_lib.c has an argument called sbi-\>ll\_md\_exp. The sbi structure is a type of ll\_sb\_info defined in llite/llite\_internal.h (refer Figure 7). And the ll\_md\_exp field from ll\_sb\_info is a type of obd\_export structure defined in include/lustre\_export.h. obd\_export structure has a field \*exp\_obd which is an obd\_device structure (defined in include/obd.h). Another MGC obd operation obd\_connect() retrieves export using the obd\_device structure. Two functions involved in this process are class\_name2obd() and class\_num2obd() defined in obdclass/genops.c.
 
+
+> 那么，llite 如何确保这个操作是针对 MGC obd 设备的？llite/llite\_lib.c中的obd\_get\_info()有一个名为sbi->ll\_md\_exp的参数。sbi结构是llite/llite\_internal.h中定义的ll\_sb\_info类型（参见图7）。而ll\_sb\_info中的ll\_md\_exp字段是在include/lustre\_export.h中定义的obd\_export结构类型。obd\_export结构具有一个字段\*exp\_obd，它是一个obd\_device结构（在include/obd.h中定义）。另一个MGC obd操作obd\_connect()使用obd\_device结构检索导出项。参与此过程的两个函数是obdclass/genops.c中定义的class\_name2obd()和class\_num2obd()。
+
 In the following Sections we describe some of the important MGC obd operations in detail.
 
-> 那么，llite如何确保这个操作是针对MGC obd设备的？llite/llite\_lib.c中的obd\_get\_info()有一个名为sbi->ll\_md\_exp的参数。sbi结构是llite/llite\_internal.h中定义的ll\_sb\_info类型（参见图7）。而ll\_sb\_info中的ll\_md\_exp字段是在include/lustre\_export.h中定义的obd\_export结构类型。obd\_export结构具有一个字段\*exp\_obd，它是一个obd\_device结构（在include/obd.h中定义）。另一个MGC obd操作obd\_connect()使用obd\_device结构检索导出项。参与此过程的两个函数是obdclass/genops.c中定义的class\_name2obd()和class\_num2obd()。
 > 在接下来的部分中，我们将详细描述一些重要的MGC obd操作。
 
 ### mgc\_setup()
