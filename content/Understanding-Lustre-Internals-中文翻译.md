@@ -50,7 +50,9 @@ In Lustre one of the ways two subsystems share data is with the help of obd\_ops
 
 > 在 Lustre 中，两个子系统之间共享数据的一种方式是通过 obd\_ops 结构进行。为了理解两个子系统之间的通信是如何工作的，让我们以 mgc\_obd\_ops 结构中的 mgc\_get\_info() 为例。子系统 llite 通过将一个宏（KEY\_CONN\_DATA）作为参数调用 mgc\_get\_info()（位于 llite/llite\_lib.c 中）。但请注意，llite 调用的是 obd\_get\_info() 而不是直接调用 mgc\_get\_info()。obd\_get\_info() 在 include/obd\_class.h 中定义，如图6所示。我们可以看到，函数调用一个 OBP 宏，它的参数是 obd\_export 和 get\_info。OBP 宏将 o（obd\_export 设备结构）和 op（操作）连接在一起，结果变成函数调用 o\_get\_info()。
 
+<center>
 ![Figure 6. Communication between llite and mgc through obdclass.](../image/Mgc_llite_comm_1.png "Communication between llite and mgc through obdclass.")
+</center>
 
 <center><sub>Figure 6. Communication between llite and mgc through obdclass.</sub></center>
 
@@ -58,7 +60,9 @@ So how does llite make sure that this operation is directed specifically towards
 
 > 那么，llite 如何确保以上的操作是针对 MGC obd 设备的？llite/llite\_lib.c 中的 obd\_get\_info() 有一个名为 sbi->ll\_md\_exp 的参数。sbi 的类型是 ll\_sb\_info，它在 llite/llite\_internal.h 中定义（图7）。而 ll\_sb\_info 中的 ll\_md\_exp 字段在 include/lustre\_export.h 中定义，类型为 obd\_export。obd\_export 中的 \*exp\_obd 成员，它是一个 obd\_device 结构（在include/obd.h中定义）。另一个 MGC obd 操作 obd\_connect() 使用obd\_device 检查获取导出项。参与此流程的两个函数分别为 class\_name2obd() 和 class\_num2obd()，它们都在 obdclass/genops.c 中定义。
 
+<center>
 ![Data structures involved in the communication between mgc and llite subsystems.](../image/Mgc_llite_comm_2.png "Figure 7. Data structures involved in the communication between mgc and llite subsystems.")
+</center>
 
 <center><sub>Figure 7. Data structures involved in the communication between mgc and llite subsystems.</sub></center>
 
@@ -76,7 +80,9 @@ The Lustre module initialization begins from the lustre\_init() routine defined 
 
 > Lustre 模块初始化从 llite/super25.c中的 lustre_init() 开始。当 ‘lustre’ 内核模块被加载时，这个函数就被调用。lustre_init 调用 register\_filesystem(\&lustre\_fs\_type)，注册‘lustre’到文件系统中，并把它加入内核文件系统的链表中，这个链表被用于挂载等系统调用。lustre_fs_type 也在同个文件进行定义（源码3）。
 
+<center>
 ![mgc_setup() call graph starting from Lustre file system mounting](../image/Mgc_setup.png "Figure 8. mgc_setup() call graph starting from Lustre file system mounting")
+</center>
 
 <center><sub>Figure 8. mgc_setup() call graph starting from Lustre file system mounting.</sub></center>
 
@@ -124,7 +130,9 @@ mgc\_setup() first adds a reference to the underlying Lustre PTL-RPC layer. Then
 
 > mgc\_setup()首先添加对底层 Lustre PTL-RPC 的引用。然后，它使用 client\_obd\_setup()（在ldlm/ldlm\_lib.c中定义）为 obd 设备设置一个 RPC 客户端。接下来，MGC 调用 mgc\_llog\_init() 初始化 Lustre 日志，这些日志将在 MGS 服务器上进行处理。这些日志也会发送到 Lustre 客户端，客户端端的 MGC 会复制这些日志以处理数据。在 MGS 上可调的持久性参数被发送到 MGC，并且在 MGC 上的 Lustre 日志处理初始化这些参数。在 Lustre 中，必须在处理 Lustre 日志之前设置这些可调参数，而 mgc\_tunables\_init() 帮助初始化这些可调参数。例如，该函数设置包括 conn\_uuid、uuid、ping 和 dynamic\_nids，这些都可以在任何 Lustre 客户端上的 /sys/fs/lustre/mgc 目录进行查看。kthread\_run() 启动一个mgc\_requeue\_thread，它会不断地读取 Lustre 日志条目。图10显示了 mgc\_setup() 的流程图。
 
+<center>
 ![mgc_setup() vs. mgc_cleanup()](../image/Mgc_setup_vs_cleanup.png "Figure 10. mgc_setup() vs. mgc_cleanup()")
+</center>
 
 <center><sub>Figure 10. mgc_setup() vs. mgc_cleanup()</sub></center>
 
@@ -161,15 +169,17 @@ The mgc\_import\_event() function handles the events reported at the MGC import 
 
 Source code 5: obd\_import\_event enum defined in include/lustre\_import.h
 
-    enum obd_import_event {
-            IMP_EVENT_DISCON     = 0x808001,
-            IMP_EVENT_INACTIVE   = 0x808002,
-            IMP_EVENT_INVALIDATE = 0x808003,
-            IMP_EVENT_ACTIVE     = 0x808004,
-            IMP_EVENT_OCD        = 0x808005,
-            IMP_EVENT_DEACTIVATE = 0x808006,
-            IMP_EVENT_ACTIVATE   = 0x808007,
-    };
+```c
+enum obd_import_event {
+        IMP_EVENT_DISCON     = 0x808001,
+        IMP_EVENT_INACTIVE   = 0x808002,
+        IMP_EVENT_INVALIDATE = 0x808003,
+        IMP_EVENT_ACTIVE     = 0x808004,
+        IMP_EVENT_OCD        = 0x808005,
+        IMP_EVENT_DEACTIVATE = 0x808006,
+        IMP_EVENT_ACTIVATE   = 0x808007,
+};
+```
 
 Some of the remaining obd operations for MGC such as client\_import\_add\_conn(), client\_import\_del\_conn(), client\_connect\_import() and client\_disconnect\_export() will be explained in obdclass and ldlm Sections.
 
@@ -189,11 +199,15 @@ Obd devices in Lustre are stored internally in an array defined in obdclass/geno
 
 Source code 6: obd\_devs array defined in obdclass/genops.c
 
-    static struct obd_device *obd_devs[MAX_OBD_DEVICES];
+```c
+static struct obd_device *obd_devs[MAX_OBD_DEVICES];
+```
 
 Source code 7: MAX\_OBD\_DEVICES defined in include/obd.h
 
-    #define MAX_OBD_DEVICES 8192
+```c
+#define MAX_OBD_DEVICES 8192
+```
 
 ### obd\_device Structure
 
@@ -302,27 +316,31 @@ The lu\_device\_type field of obd\_type structure makes sense only for real bloc
 
 Source code 11: obd\_type structure defined in include/obd.h
 
-    struct obd_type {
-            const struct obd_ops    *typ_dt_ops;
-            const struct md_ops     *typ_md_ops;
-            struct proc_dir_entry   *typ_procroot;
-            struct dentry           *typ_debugfs_entry;
-    #ifdef HAVE_SERVER_SUPPORT
-            bool                     typ_sym_filter;
-    #endif
-            atomic_t                 typ_refcnt;
-            struct lu_device_type   *typ_lu;
-            struct kobject           typ_kobj;
-    };
+```c
+struct obd_type {
+        const struct obd_ops    *typ_dt_ops;
+        const struct md_ops     *typ_md_ops;
+        struct proc_dir_entry   *typ_procroot;
+        struct dentry           *typ_debugfs_entry;
+#ifdef HAVE_SERVER_SUPPORT
+        bool                     typ_sym_filter;
+#endif
+        atomic_t                 typ_refcnt;
+        struct lu_device_type   *typ_lu;
+        struct kobject           typ_kobj;
+};
+```
 
 Source code 12: lu\_device\_type structure for ldiskfs osd\_device\_type defined in osd-ldiskfs/osd\_handler.c
 
-    static struct lu_device_type osd_device_type = {
-            .ldt_tags     = LU_DEVICE_DT,
-            .ldt_name     = LUSTRE_OSD_LDISKFS_NAME,
-            .ldt_ops      = &osd_device_type_ops,
-            .ldt_ctx_tags = LCT_LOCAL,
-    };
+```c
+static struct lu_device_type osd_device_type = {
+        .ldt_tags     = LU_DEVICE_DT,
+        .ldt_name     = LUSTRE_OSD_LDISKFS_NAME,
+        .ldt_ops      = &osd_device_type_ops,
+        .ldt_ctx_tags = LCT_LOCAL,
+};
+```
 
 The class\_attach() then calls a class\_newdev() function which creates, allocates a new obd device and initializes it. A complete workflow of the class\_attach() function is shown in Figure 12. The class\_get\_type() function invoked by class\_newdev() registers already created obd device and loads the obd device module. All obd device loaded has metadata or data operations (or both) defined for them. For instance the LMV obd device has its md\_ops and obd\_ops defined in structures lmv\_md\_ops and lmv\_obd\_ops respectively. These structures and the associated operations can be seen in lmv/lmv\_obd.c file. The obd\_minor initialized here is the index of the obd device in obd\_devs array.
 
@@ -349,32 +367,34 @@ This Section describes some of the relevant fields of the obd\_export structure 
 
 Source code 13: obd\_export structure defined in include/lustre\_export.h
 
-    struct obd_export {
-            struct portals_handle   exp_handle;
-            atomic_t                exp_rpc_count;
-            atomic_t                exp_cb_count;
-            atomic_t                exp_replay_count;
-            atomic_t                exp_locks_count;
-    #if LUSTRE_TRACKS_LOCK_EXP_REFS
-            struct list_head        exp_locks_list; 
-            spinlock_t              exp_locks_list_guard;
-    #endif
-            struct obd_uuid         exp_client_uuid;
-            struct list_head        exp_obd_chain; 
-            struct work_struct      exp_zombie_work;
-            struct list_head        exp_stale_list; 
-            struct rhash_head       exp_uuid_hash; 
-            struct rhlist_head      exp_nid_hash; 
-            struct hlist_node       exp_gen_hash;
-            struct list_head        exp_obd_chain_timed; 
-            struct obd_device      *exp_obd;
-            struct obd_import        *exp_imp_reverse;
-            struct nid_stat          *exp_nid_stats;
-            struct ptlrpc_connection *exp_connection;
-            __u32                     exp_conn_cnt;
-            struct cfs_hash          *exp_lock_hash;
-            struct cfs_hash          *exp_flock_hash;
-    };
+```c
+struct obd_export {
+        struct portals_handle   exp_handle;
+        atomic_t                exp_rpc_count;
+        atomic_t                exp_cb_count;
+        atomic_t                exp_replay_count;
+        atomic_t                exp_locks_count;
+#if LUSTRE_TRACKS_LOCK_EXP_REFS
+        struct list_head        exp_locks_list; 
+        spinlock_t              exp_locks_list_guard;
+#endif
+        struct obd_uuid         exp_client_uuid;
+        struct list_head        exp_obd_chain; 
+        struct work_struct      exp_zombie_work;
+        struct list_head        exp_stale_list; 
+        struct rhash_head       exp_uuid_hash; 
+        struct rhlist_head      exp_nid_hash; 
+        struct hlist_node       exp_gen_hash;
+        struct list_head        exp_obd_chain_timed; 
+        struct obd_device      *exp_obd;
+        struct obd_import        *exp_imp_reverse;
+        struct nid_stat          *exp_nid_stats;
+        struct ptlrpc_connection *exp_connection;
+        __u32                     exp_conn_cnt;
+        struct cfs_hash          *exp_lock_hash;
+        struct cfs_hash          *exp_flock_hash;
+};
+```
 
 *   `exp_locks_list` maintains a linked list of all the locks and exp\_locks\_list\_guard is - the spinlock that protects this list.
 
@@ -424,19 +444,21 @@ A generic device setup function obd\_setup() defined in include/obd\_class.h is 
 
 Source Code 14: client\_obd structure defined in include/obd.h
 
-    struct  client_obd {
-            struct rw_semaphore       cl_sem;
-            struct obd_uuid           cl_target_uuid;
-            struct obd_import         *cl_import; /* ptlrpc connection state */
-            size_t                    cl_conn_count;
-            __u32                     cl_default_mds_easize;
-            __u32                     cl_max_mds_easize;
-            struct cl_client_cache    *cl_cache;
-            atomic_long_t             *cl_lru_left;
-            atomic_long_t             cl_lru_busy;
-            atomic_long_t             cl_lru_in_list;
-            . . . . .
-    };
+```c
+struct  client_obd {
+        struct rw_semaphore       cl_sem;
+        struct obd_uuid           cl_target_uuid;
+        struct obd_import         *cl_import; /* ptlrpc connection state */
+        size_t                    cl_conn_count;
+        __u32                     cl_default_mds_easize;
+        __u32                     cl_max_mds_easize;
+        struct cl_client_cache    *cl_cache;
+        atomic_long_t             *cl_lru_left;
+        atomic_long_t             cl_lru_busy;
+        atomic_long_t             cl_lru_in_list;
+        . . . . .
+};
+```
 
 client\_obd structure is mainly used for page cache and extended attributes management. It comprises of fields pointing to obd device uuid and import interfaces, counter to keep track of client connections and fields to represent maximum and default extended attribute sizes. Few other fields used for cache handling are cl\_cache - LRU cache for caching OSC pages, cl\_lru\_left - available LRU slots per OSC cache, cl\_lru\_busy - number of busy LRU pages, and cl\_lru\_in\_list - number of LRU pages in the cache for this client\_obd. Please also refer source code to see additional fields in the structure.
 
@@ -456,18 +478,20 @@ The client\_obd\_setup() then adds an initial connection for the obd device to t
 
 Source code 15: obd\_import structure defined in include/lustre\_import.h
 
-    struct obd_import {
-            refcount_t                 imp_refcount;
-            struct lustre_handle       imp_dlm_handle;
-            struct ptlrpc_connection   *imp_connection;
-            struct ptlrpc_client       *imp_client;
-            enum lustre_imp_state      imp_state;
-            struct obd_import_conn     *imp_conn_current;
-            unsigned long              imp_invalid:1,
-                                       imp_deactive:1,
-                                       imp_replayable:1,
-            . . . . .
-    };
+```c
+struct obd_import {
+        refcount_t                 imp_refcount;
+        struct lustre_handle       imp_dlm_handle;
+        struct ptlrpc_connection   *imp_connection;
+        struct ptlrpc_client       *imp_client;
+        enum lustre_imp_state      imp_state;
+        struct obd_import_conn     *imp_conn_current;
+        unsigned long              imp_invalid:1,
+                                    imp_deactive:1,
+                                    imp_replayable:1,
+        . . . . .
+};
+```
 
 ### class\_precleanup() and class\_cleanup()
 
@@ -477,18 +501,20 @@ Lustre unmount process begins from the ll\_umount\_begin() function defined as p
 
 Source code 16: lustre\_super\_operations structure defined in llite/super25.c
 
-    const struct super_operations lustre_super_operations =
-    {
-            .alloc_inode   = ll_alloc_inode,
-            .destroy_inode = ll_destroy_inode,
-            .drop_inode    = ll_drop_inode,
-            .evict_inode   = ll_delete_inode,
-            .put_super     = ll_put_super,
-            .statfs        = ll_statfs,
-            .umount_begin  = ll_umount_begin,
-            .remount_fs    = ll_remount_fs,
-            .show_options  = ll_show_options,
-    };
+```c
+const struct super_operations lustre_super_operations =
+{
+        .alloc_inode   = ll_alloc_inode,
+        .destroy_inode = ll_destroy_inode,
+        .drop_inode    = ll_drop_inode,
+        .evict_inode   = ll_delete_inode,
+        .put_super     = ll_put_super,
+        .statfs        = ll_statfs,
+        .umount_begin  = ll_umount_begin,
+        .remount_fs    = ll_remount_fs,
+        .show_options  = ll_show_options,
+};
+```
 
 The cleanup cycle then invokes the ll\_put\_super() routine defined in llite/llite\_lib.c. This function obtains the cfg\_instance and profile name corresponding to the super\_block using ll\_ get\_ cfg\_instance() and get\_profile\_name() functions respectively. Next it invokes lustre\_end\_log() routine by passing the super block, profile name and a config llog instance initialized here. The lustre\_end\_log() function defined in obdclass/obd\_mount.c ensures to stop following updates for the config log corresponding to the config llog instance passed. lustre\_end\_log() resets lustre config buffers and calls obd\_process\_config() by passing the lcfg command LCFG\_LOG\_END and MGC as obd device. This results in the invocation of mgc\_process\_config() which calls config\_log\_end() method when LCFG\_LOG\_END is passed. The config\_log\_end() finds the config log and stops watching updates for the log.
 
@@ -618,30 +644,32 @@ Lustre implements two types of encryption capabilities - data on the wire and da
 
 Source code 17: Libcfs module loading script (tests/test-framework.sh)
 
-    mount_facet() {
-        . . . . .
-        module_loaded lustre || load_modules
-    }
+```c
+mount_facet() {
+    . . . . .
+    module_loaded lustre || load_modules
+}
 
-    load_modules() {
-        . . . . .
-        load_modules_local
-    }
+load_modules() {
+    . . . . .
+    load_modules_local
+}
 
-    load_modules_local() {
-        . . . . .
-        load_module ../libcfs/libcfs/libcfs
-        . . . . .
-        load_module ../lnet/lnet/lnet
-        . . . . .
-        load_module obdclass/obdclass
-        load_module ptlrpc/ptlrpc
-        load_module ptlrpc/gss/ptlrpc_gss
-        load_module fld/fld
-        load_module fid/fid
-        load_module lmv/lmv
-        . . . . .
-    }
+load_modules_local() {
+    . . . . .
+    load_module ../libcfs/libcfs/libcfs
+    . . . . .
+    load_module ../lnet/lnet/lnet
+    . . . . .
+    load_module obdclass/obdclass
+    load_module ptlrpc/ptlrpc
+    load_module ptlrpc/gss/ptlrpc_gss
+    load_module fld/fld
+    load_module fid/fid
+    load_module lmv/lmv
+    . . . . .
+}
+```
 
 Data (at rest) encryption related algorithm and policy flags and data structures are defined in libcfs/include/uapi/linux/llcrypt.h. The encryption algorithm macros are defined in Source Code 18. Definition of an encryption key structure shown in Source Code 19 includes a name, the raw key and size fields. Maximum size of the encryption key is limited to LLCRYPT\_MAX\_KEY\_SIZE. This file also contains ioctl definitions to add and remove encryption keys, and obtain encryption policy, and key status.
 
@@ -684,11 +712,11 @@ Setup and cleanup functions (llcrypt\_init(), llcrypt\_exit()) for file system e
 
 Source code 19: llcrypt\_key structure defined in libcfs/include/uapi/linux/llcrypt.h
 
-    #define LLCRYPT_MAX_KEY_SIZE            64
-    struct llcrypt_key {
-            __u32 mode;
-            __u8 raw[LLCRYPT_MAX_KEY_SIZE];
-            __u32 size;
-    };
-
-
+```c
+#define LLCRYPT_MAX_KEY_SIZE            64
+struct llcrypt_key {
+        __u32 mode;
+        __u8 raw[LLCRYPT_MAX_KEY_SIZE];
+        __u32 size;
+};
+```
