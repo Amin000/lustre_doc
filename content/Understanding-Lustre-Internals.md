@@ -51,61 +51,68 @@ In Lustre one of the ways two subsystems share data is with the help of obd\_ops
 > 在 Lustre 中，两个子系统之间共享数据的一种方式是通过 obd\_ops 结构进行。为了理解两个子系统之间的通信是如何工作的，让我们以 mgc\_obd\_ops 结构中的 mgc\_get\_info() 为例。子系统 llite 通过将一个宏（KEY\_CONN\_DATA）作为参数调用 mgc\_get\_info()（位于 llite/llite\_lib.c 中）。但请注意，llite 调用的是 obd\_get\_info() 而不是直接调用 mgc\_get\_info()。obd\_get\_info() 在 include/obd\_class.h 中定义，如图6所示。我们可以看到，函数调用一个 OBP 宏，它的参数是 obd\_export 和 get\_info。OBP 宏将 o（obd\_export 设备结构）和 op（操作）连接在一起，结果变成函数调用 o\_get\_info()。
 
 ![Figure 6. Communication between llite and mgc through obdclass.](../image/Mgc_llite_comm_1.png "Communication between llite and mgc through obdclass.")
+
 <center><sub>Figure 6. Communication between llite and mgc through obdclass.</sub></center>
 
 So how does llite make sure that this operation is directed specifically towards MGC obd device? obd\_get\_info() from llite/llite\_lib.c has an argument called sbi-\>ll\_md\_exp. The sbi structure is a type of ll\_sb\_info defined in llite/llite\_internal.h (refer Figure 7). And the ll\_md\_exp field from ll\_sb\_info is a type of obd\_export structure defined in include/lustre\_export.h. obd\_export structure has a field \*exp\_obd which is an obd\_device structure (defined in include/obd.h). Another MGC obd operation obd\_connect() retrieves export using the obd\_device structure. Two functions involved in this process are class\_name2obd() and class\_num2obd() defined in obdclass/genops.c.
 
+> 那么，llite 如何确保以上的操作是针对 MGC obd 设备的？llite/llite\_lib.c 中的 obd\_get\_info() 有一个名为 sbi->ll\_md\_exp 的参数。sbi 的类型是 ll\_sb\_info，它在 llite/llite\_internal.h 中定义（图7）。而 ll\_sb\_info 中的 ll\_md\_exp 字段在 include/lustre\_export.h 中定义，类型为 obd\_export。obd\_export 中的 \*exp\_obd 成员，它是一个 obd\_device 结构（在include/obd.h中定义）。另一个 MGC obd 操作 obd\_connect() 使用obd\_device 检查获取导出项。参与此流程的两个函数分别为 class\_name2obd() 和 class\_num2obd()，它们都在 obdclass/genops.c 中定义。
 
-> 那么，llite 如何确保这个操作是针对 MGC obd 设备的？llite/llite\_lib.c中的obd\_get\_info()有一个名为sbi->ll\_md\_exp的参数。sbi结构是llite/llite\_internal.h中定义的ll\_sb\_info类型（参见图7）。而ll\_sb\_info中的ll\_md\_exp字段是在include/lustre\_export.h中定义的obd\_export结构类型。obd\_export结构具有一个字段\*exp\_obd，它是一个obd\_device结构（在include/obd.h中定义）。另一个MGC obd操作obd\_connect()使用obd\_device结构检索导出项。参与此过程的两个函数是obdclass/genops.c中定义的class\_name2obd()和class\_num2obd()。
+![Data structures involved in the communication between mgc and llite subsystems.](../image/Mgc_llite_comm_2.png "Figure 7. Data structures involved in the communication between mgc and llite subsystems.")
+
+<center><sub>Figure 7. Data structures involved in the communication between mgc and llite subsystems.</sub></center>
 
 In the following Sections we describe some of the important MGC obd operations in detail.
 
-> 在接下来的部分中，我们将详细描述一些重要的MGC obd操作。
+> 在接下来的部分中，我们将详细描述一些重要的 MGC obd 操作。
 
 ### mgc\_setup()
 
 mgc\_setup() is the initial routine that gets executed to start and setup the MGC obd device. In Lustre MGC is the first obd device that is being setup as part of the obd device life cycle process. To understand when mgc\_setup() gets invoked in the obd device life cycle, let us explore the workflow from the Lustre module initialization.
+
+> mgc\_setup() 是启动和配置 MGC obd 设备的初始化函数。在 Lustre 中，作为 obd 设备生命周期过程的一部分，MGC 是第一个进行配置的 obd 设备。为了理解 mgc\_setup() 在 obd 设备生命周期中何时被调用，让我们从 Lustre 模块初始化的工作流程入手。
+
 The Lustre module initialization begins from the lustre\_init() routine defined in llite/super25.c (shown in Figure 8). This routine is invoked when the ‘lustre’ module gets loaded. lustre\_init() invokes register\_filesystem(\&lustre\_fs\_type) which registers ‘lustre’ as the file system and adds it to the list of file systems the kernel is aware of for mount and other syscalls. lustre\_fs\_type structure is defined in the same file as shown in Source Code 3.
 
-> mgc\_setup()是启动和设置MGC obd设备的初始例程。在Lustre中，作为obd设备生命周期过程的一部分，MGC是首个进行设置的obd设备。为了理解mgc\_setup()在obd设备生命周期中何时被调用，让我们从Lustre模块初始化的工作流程入手。
-
-mgc\_setup() is the initial routine that gets executed to start and setup the MGC obd device. In Lustre MGC is the first obd device that is being setup as part of the obd device life cycle process. To understand when mgc\_setup() gets invoked in the obd device life cycle, let us explore the workflow from the Lustre module initialization.
-
-> Lustre模块初始化从llite/super25.c中定义的lustre\_init()例程开始（如图8所示）。当加载'lustre'模块时，将调用此例程。lustre\_init()调用register\_filesystem(\&lustre\_fs\_type)，将'lustre'注册为文件系统，并将其添加到内核知道的用于挂载和其他系统调用的文件系统列表中。lustre\_fs\_type结构在同一文件中定义，如源代码3所示。
+> Lustre 模块初始化从 llite/super25.c中的 lustre_init() 开始。当 ‘lustre’ 内核模块被加载时，这个函数就被调用。lustre_init 调用 register\_filesystem(\&lustre\_fs\_type)，注册‘lustre’到文件系统中，并把它加入内核文件系统的链表中，这个链表被用于挂载等系统调用。lustre_fs_type 也在同个文件进行定义（源码3）。
 
 Source code 3: lustre\_fs\_type structure defined in llite/super25.c
 
-    static struct file_system_type lustre_fs_type = {
-            .owner          = THIS_MODULE,
-            .name           = "lustre",
-            .mount          = lustre_mount,
-            .kill_sb        = lustre_kill_super,
-            .fs_flags       = FS_RENAME_DOES_D_MOVE,
-    };
+```c
+static struct file_system_type lustre_fs_type = {
+        .owner          = THIS_MODULE,
+        .name           = "lustre",
+        .mount          = lustre_mount,
+        .kill_sb        = lustre_kill_super,
+        .fs_flags       = FS_RENAME_DOES_D_MOVE,
+};
+```
 
 When a user mounts Lustre, the lustre\_mount() gets invoked as evident from this structure. lustre\_mount() is defined in the same file and which in turn calls mount\_nodev() routine. The mount\_nodev() invokes its call back function lustre\_fill\_super() which is also defined in llite/super25.c. lustre\_fill\_super() is the entry point for the mount call from the Lustre client into Lustre.
 
-> 当用户挂载Lustre时，lustre\_mount()被调用，正如此结构所示。lustre\_mount()在同一文件中定义，并调用mount\_nodev()例程。mount\_nodev()调用其回调函数lustre\_fill\_super()，该函数也在llite/super25.c中定义。lustre\_fill\_super()是从Lustre客户端进入Lustre的挂载调用的入口点。
+> 当用户挂载 Lustre 时，lustre\_mount() 被调用。lustre\_mount() 也在 llite/super25.c 定义，调用 mount\_nodev()。mount\_nodev() 调用其回调函数lustre\_fill\_super()，该函数也在 llite/super25.c 中定义。lustre\_fill\_super() 挂载调用是从 Lustre 客户端进入 Lustre 的入口点。
 
 lustre\_fill\_super() invokes lustre\_start\_mgc() defined in obdclass/obd\_mount.c. This sets up the MGC obd device to start processing startup logs. The lustre\_start\_simple() routine called here starts the MGC obd device (defined in obdclass/obd\_mount.c). lustre\_start\_simple() eventually leads to the invocation of obdclass specific routines class\_attach() and class\_setup() (described in detail in the Section 5) with the help of a do\_lcfg() routine that takes obd device name and a lustre configuration command (lcfg\_command) as arguments. Various lustre configuration commands are LCFG\_ATTACH, LCFG\_DETACH, LCFG\_SETUP, LCFG\_CLEANUP and so on. These are defined in include/uapi/linux/lustre/lustre\_cfg.h as shown in Source Code 4.
 
-> lustre\_fill\_super()调用obdclass/obd\_mount.c中定义的lustre\_start\_mgc()。这将设置MGC obd设备以开始处理启动日志。在这里调用的lustre\_start\_simple()例程启动MGC obd设备（在obdclass/obd\_mount.c中定义）。lustre\_start\_simple()最终会通过do\_lcfg()例程调用obdclass特定的例程class\_attach()和class\_setup()（在第5节中详细描述），do\_lcfg()例程以obd设备名称和Lustre配置命令（lcfg\_command）作为参数。各种Lustre配置命令如LCFG\_ATTACH、LCFG\_DETACH、LCFG\_SETUP、LCFG\_CLEANUP等在include/uapi/linux/lustre/lustre\_cfg.h中定义，如源代码4所示
+> lustre\_fill\_super() 调用在 obdclass/obd\_mount.c 中定义的 lustre\_start\_mgc()。这将设置 MGC obd 设备和开始处理启动日志。在这里调用的 lustre\_start\_simple() 启动 MGC obd设备（在obdclass/obd\_mount.c中定义）。lustre\_start\_simple() 最终会通过 do\_lcfg() 调用 obdclass 特定的 class\_attach() 和 class\_setup()（在第5节中详细描述），do\_lcfg() 以 obd 设备名称和 Lustre 配置命令（lcfg\_command）作为参数。Lustre 配置命令如 LCFG\_ATTACH、LCFG\_DETACH、LCFG\_SETUP、LCFG\_CLEANUP 等在 include/uapi/linux/lustre/lustre\_cfg.h 中定义，如源代码4所示。
 
 Source code 4: Lustre configuration commands defined in include/uapi/linux/lustre/lustre\_cfg.h
 
-    enum lcfg_command_type {
-            LCFG_ATTACH               = 0x00cf001, /**< create a new obd instance */
-            LCFG_DETACH               = 0x00cf002, /**< destroy obd instance */
-            LCFG_SETUP                = 0x00cf003, /**< call type-specific setup */
-            LCFG_CLEANUP              = 0x00cf004, /**< call type-specific cleanup
-                                                     */
-            LCFG_ADD_UUID             = 0x00cf005, /**< add a nid to a niduuid */
-            . . . . .
-    };
+```c
+enum lcfg_command_type {
+        LCFG_ATTACH               = 0x00cf001, /**< create a new obd instance */
+        LCFG_DETACH               = 0x00cf002, /**< destroy obd instance */
+        LCFG_SETUP                = 0x00cf003, /**< call type-specific setup */
+        LCFG_CLEANUP              = 0x00cf004, /**< call type-specific cleanup
+                                                    */
+        LCFG_ADD_UUID             = 0x00cf005, /**< add a nid to a niduuid */
+        . . . . .
+};
+```
 
 The first lcfg\_command that is being passed to do\_lcfg() routine is LCFG\_ATTACH which will result in the invocation of obdclass function class\_attach(). We will describe class\_attach() in detail in Section 5. The second lcfg\_command passed to do\_lcfg() function is LCFG\_SETUP which will result in the invocation of mgc\_setup() eventually. do\_lcfg() calls class\_process\_config() (defined in obdclass/obd\_config.c) and passes the lcfg\_command that it received. In case of LCFG\_SETUP command the class\_setup() routine gets invoked. This is defined in the same file and its primary duty is to create hashes and self export and call obd device specific setup. The device specific setup call is in turn invoked through another routine called obd\_setup(). obd\_setup() is defined in include/obd\_class.h as an inline function in the same way obd\_get\_info() is defined. obd\_setup() calls the device specific setup routine with the help of the OBP macro (refer Section 4.3 and Figure 6). Here, in case of MGC obd device mgc\_setup() defined as part of the mgc\_obd\_ops structure (shown in Source Code 2) gets invoked by the obd\_setup() routine. Note that the yellow colored blocks in Figure 8 will be referenced again in Section 5 to illustrate the lifecycle of the MGC obd device.
 
-> 第一个传递给do\_lcfg()函数的lcfg\_command是LCFG\_ATTACH，它将导致调用obdclass函数class\_attach()。我们将在第5节详细介绍class\_attach()。传递给do\_lcfg()函数的第二个lcfg\_command是LCFG\_SETUP，最终将导致mgc\_setup()的调用。do\_lcfg()调用class\_process\_config()（在obdclass/obd\_config.c中定义）并传递接收到的lcfg\_command。对于LCFG\_SETUP命令，将调用class\_setup()。该函数在相同的文件中定义，其主要任务是创建散列和自导出，然后调用obd设备特定的设置。设备特定的设置调用通过另一个名为obd\_setup()的例程来实现。obd\_setup()在include/obd\_class.h中定义为内联函数，就像obd\_get\_info()一样。obd\_setup()通过OBP宏的帮助调用设备特定的设置例程（参见第4.3节和图6）。在这里，对于MGC obd设备，obd\_setup()例程会调用mgc\_setup()，而mgc\_setup()是mgc\_obd\_ops结构的一部分（如源代码2所示）。注意，图8中的黄色块将在第5节中再次被引用，以说明MGC obd设备的生命周期。
+> 第一个传递给 do\_lcfg() 函数的 lcfg\_command 是LCFG\_ATTACH，它将导致调用 obdclass 函数 class\_attach()。我们将在第5节详细介绍class\_attach()。传递给do\_lcfg()函数的第二个lcfg\_command是LCFG\_SETUP，最终将导致mgc\_setup()的调用。do\_lcfg()调用class\_process\_config()（在obdclass/obd\_config.c中定义）并传递接收到的lcfg\_command。对于LCFG\_SETUP命令，将调用class\_setup()。该函数在相同的文件中定义，其主要任务是创建散列和自导出，然后调用obd设备特定的设置。设备特定的设置调用通过另一个名为obd\_setup()的例程来实现。obd\_setup()在include/obd\_class.h中定义为内联函数，就像obd\_get\_info()一样。obd\_setup()通过OBP宏的帮助调用设备特定的设置例程（参见第4.3节和图6）。在这里，对于MGC obd设备，obd\_setup()例程会调用mgc\_setup()，而mgc\_setup()是mgc\_obd\_ops结构的一部分（如源代码2所示）。注意，图8中的黄色块将在第5节中再次被引用，以说明MGC obd设备的生命周期。
 
 ### Operation
 
