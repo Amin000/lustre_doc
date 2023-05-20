@@ -9,48 +9,48 @@
 
 The Lustre client software involves primarily three components, management client (MGC), a metadata client (MDC), and multiple object storage clients (OSCs), one corresponding to each OST in the file system. Among this, the management client acts as an interface between Lustre virtual file system layer and Lustre management server (MGS). MGS stores and provides information about all Lustre file systems in a cluster. Lustre targets register with MGS to provide information to MGS while Lustre clients contact MGS to retrieve information from it.
 
-> Lustre 客户端软件主要涉及三个组件，管理客户端（MGC）、元数据客户端（MDC）和多个对象存储客户端（OSC）。每个 OSC 对应一个 OST。其中，管理客户端作为 Lustre 虚拟文件系统层与 Lustre 管理服务器（MGS）之间的接口。MGS 存储并提供有关集群中所有 Lustre 文件系统的配置信息。Lustre 目标向MGS注册以向其提供信息，而 Lustre 客户端向 MGS 获取配置信息。
+> Lustre 客户端软件主要涉及三个组件，管理客户端（MGC）、元数据客户端（MDC）和多个对象存储客户端（OSC）。每个 OSC 对应一个 OST。其中，管理客户端作为 Lustre 虚拟文件系统层与 Lustre 管理服务器（MGS）之间的接口。MGS 存储并提供有关集群中所有 Lustre 文件系统的配置信息。Lustre 目标通过向 MGS 注册的方式向其提供信息，同时 Lustre 客户端向 MGS 获取配置信息。
 
 The major functionalities of MGC are Lustre log handling, Lustre distributed lock management and file system setup. MGC is the first obd device created in Lustre obd device life cycle. An obd device in Lustre provides a level of abstraction on Lustre components such that generic operations can be applied without knowing the specific devices you are dealing with. The remaining Sections describe MGC module initialization, various MGC obd operations and log handling in detail. In the following Sections we will be using the terms clients and servers to represent service clients and servers created to communicate between various components in Lustre. Whereas the physical nodes representing Lustre’s clients and servers will be explicitly mentioned as ‘Lustre clients’ and ‘Lustre servers’.
 
-> MGC 的主要功能包括 Lustre 日志处理、Lustre 分布式锁管理和文件系统的初始化。MGC 是在 Lustre obd 设备生命周期中创建的第一个 obd 设备。Lustre 中的 obd 设备为 Lustre 组件提供了一层抽象，使得可以应用通用操作，而无需了解正在处理的具体设备。其余部分详细描述了MGC模块的初始化、各种MGC obd操作以及日志处理。在接下来的部分中，我们将使用"客户端"和"服务器"这些术语来代表在Lustre的各个组件之间进行通信而创建的服务客户端和服务器。而表示Lustre的客户端和服务器的物理节点将明确标注为"Lustre客户端"和"Lustre服务器"。
+> MGC 的主要功能包括 Lustre 日志处理、Lustre 分布式锁管理和文件系统的初始化。MGC 是在 Lustre obd 设备生命周期中第一个被创建的 obd 设备。Lustre 中的 obd 设备为 Lustre 组件提供了一层抽象，使得组件可以使用通用操作，而无需了解正在处理的具体设备。其余部分详细描述了 MGC 模块的初始化、各种 MGC obd 操作以及日志处理。在接下来的部分中，我们将使用"clients"和"servers"这些术语来代表为了在 Lustre 的各个组件之间进行通信而被创建的客户端和服务端的服务。而表示Lustre的客户端和服务端的物理节点将明确标注为"Lustre clients"和"Lustre servers"。
 
 ### MGC Module Initialization
 
 When the MGC module initializes, it registers MGC as an obd device type with Lustre using class\_register\_type() as shown in Source Code 1. Obd device data and metadata operations are defined using the obd\_ops and md\_ops structures respectively. Since MGC deals with metadata in Lustre, it has only obd\_ops operations defined. However the metadata client (MDC) has both metadata and data operations defined since the data operations are used to implement Data on Metadata (DoM) functionality in Lustre. The class\_register\_type() function passes \&mgc\_obd\_ops, NULL, false, LUSTRE\_MGC \_NAME, and NULL as its arguments. LUSTRE\_MGC\_NAME is defined as “mgc” in include/obd.h.
 
-> 当MGC模块初始化时，它使用class\_register\_type()将MGC注册为一种obd设备类型，如源代码1所示。通过obd\_ops和md\_ops结构分别定义了obd设备的数据和元数据操作。由于MGC处理Lustre中的元数据，因此只定义了obd\_ops操作。然而，元数据客户端（MDC）既有元数据操作，又有数据操作，因为数据操作用于实现Lustre中的元数据上的数据（DoM）功能。class\_register\_type()函数将\&mgc\_obd\_ops、NULL、false、LUSTRE\_MGC\_NAME和NULL作为其参数传递。在include/obd.h中，LUSTRE\_MGC\_NAME被定义为"mgc"。
+> 当 MGC 模块初始化时，它使用 class\_register\_type() 将 MGC 注册为一种 obd 设备类型，如源代码1所示。obd\_ops 和 md\_ops 结构分别定义了 obd 设备的数据和元数据操作。由于 MGC 只处理Lustre中的元数据，只定义了obd\_ops操作。然而，元数据客户端（MDC）既有元数据操作，又有数据操作，因为数据操作用于实现 Lustre 中DoM 功能。class\_register\_type() 的参数为 \&mgc\_obd\_ops、NULL、false、LUSTRE\_MGC\_NAME 和 NULL。在 include/obd.h 中，LUSTRE\_MGC\_NAME 被定义为"mgc"。
 
 ### MGC obd Operations
 
 MGC obd operations are defined by mgc\_obd\_ops structure as shown in Source Code 2. Note that all MGC obd operations are defined as function pointers. This type of programming style avoids complex switch cases and provides a level of abstraction on Lustre components such that the generic operations can be applied without knowing the details of specific obd devices.
 
-> MGC obd操作由mgc\_obd\_ops结构定义，如源代码2所示。请注意，所有MGC obd操作都被定义为函数指针。这种编程风格避免了复杂的switch语句，并为Lustre组件提供了一层抽象，使得可以应用通用操作，而无需了解特定obd设备的详细信息。
+> MGC obd 操作由 mgc\_obd\_ops 结构定义，如源代码2所示。请注意，所有 MGC obd 操作都被定义为函数指针。这种编程风格避免了复杂的 switch 语句，并为 Lustre 组件提供了一层抽象，使得可以进行通用操作，而无需了解特定 obd 设备的详细信息。
 
 Source Code 2: mgc\_obd\_ops structure defined in mgc/mgc\_request.c
 
-    Source Code 2: mgc_obd_ops structure defined in mgc/mgc_request.c
-
-    static const struct obd_ops mgc_obd_ops = {
-            .o_owner        = THIS_MODULE,
-            .o_setup        = mgc_setup,
-            .o_precleanup   = mgc_precleanup,
-            .o_cleanup      = mgc_cleanup,
-            .o_add_conn     = client_import_add_conn,
-            .o_del_conn     = client_import_del_conn,
-            .o_connect      = client_connect_import,
-            .o_disconnect   = client_disconnect_export,
-            .o_set_info_async = mgc_set_info_async,
-            .o_get_info       = mgc_get_info,
-            .o_import_event = mgc_import_event,
-            .o_process_config = mgc_process_config,
-    };
+```c
+static const struct obd_ops mgc_obd_ops = {
+        .o_owner        = THIS_MODULE,
+        .o_setup        = mgc_setup,
+        .o_precleanup   = mgc_precleanup,
+        .o_cleanup      = mgc_cleanup,
+        .o_add_conn     = client_import_add_conn,
+        .o_del_conn     = client_import_del_conn,
+        .o_connect      = client_connect_import,
+        .o_disconnect   = client_disconnect_export,
+        .o_set_info_async = mgc_set_info_async,
+        .o_get_info       = mgc_get_info,
+        .o_import_event = mgc_import_event,
+        .o_process_config = mgc_process_config,
+};
+```
 
 In Lustre one of the ways two subsystems share data is with the help of obd\_ops structure. To understand how the communication between two subsystems work let us take an example of mgc\_get\_info() from the mgc\_obd\_ops structure. The subsystem llite makes a call to mgc\_get\_info() (in llite/llite\_lib.c) by passing a key (KEY\_CONN\_DATA) as an argument. But notice that llite invokes obd\_get\_info() instead of mgc\_get\_info(). obd\_get\_info() is defined in include/obd\_class.h as shown in Figure 6. We can see that this function invokes an OBP macro by passing an obd\_export device structure and a get\_info operation. The definition of this macro concatenates o with op (operation) so that the resulting function call becomes o\_get\_info().
 
 > 在Lustre中，两个子系统之间共享数据的一种方式是通过obd\_ops结构进行。为了理解两个子系统之间的通信是如何工作的，让我们以mgc\_obd\_ops结构中的mgc\_get\_info()为例。子系统llite通过将一个键（KEY\_CONN\_DATA）作为参数调用mgc\_get\_info()（位于llite/llite\_lib.c中）。但请注意，llite调用的是obd\_get\_info()而不是mgc\_get\_info()。obd\_get\_info()在include/obd\_class.h中定义，如图6所示。我们可以看到，该函数通过传递obd\_export设备结构和get\_info操作调用了一个OBP宏。此宏的定义将o（obd\_export设备结构）和op（操作）连接在一起，使得结果函数调用变为o\_get\_info()。
 
-So how does llite make sure that this operation is directed specifically towards MGC obd device? obd\_get\_info() from llite/llite\_lib.c has an argument called sbi->ll\_md\_exp. The sbi structure is a type of ll\_sb\_info defined in llite/llite\_internal.h (refer Figure 7). And the ll\_md\_exp field from ll\_sb\_info is a type of obd\_export structure defined in include/lustre\_export.h. obd\_export structure has a field \*exp\_obd which is an obd\_device structure (defined in include/obd.h). Another MGC obd operation obd\_connect() retrieves export using the obd\_device structure. Two functions involved in this process are class\_name2obd() and class\_num2obd() defined in obdclass/genops.c.
+So how does llite make sure that this operation is directed specifically towards MGC obd device? obd\_get\_info() from llite/llite\_lib.c has an argument called sbi-\>ll\_md\_exp. The sbi structure is a type of ll\_sb\_info defined in llite/llite\_internal.h (refer Figure 7). And the ll\_md\_exp field from ll\_sb\_info is a type of obd\_export structure defined in include/lustre\_export.h. obd\_export structure has a field \*exp\_obd which is an obd\_device structure (defined in include/obd.h). Another MGC obd operation obd\_connect() retrieves export using the obd\_device structure. Two functions involved in this process are class\_name2obd() and class\_num2obd() defined in obdclass/genops.c.
 
 In the following Sections we describe some of the important MGC obd operations in detail.
 
