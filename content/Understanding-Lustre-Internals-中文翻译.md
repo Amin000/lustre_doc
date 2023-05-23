@@ -1,7 +1,19 @@
-* TOC
+@TOC
 {:toc}
 
 # Understanding Lustre Internals 中文翻译
+
+## Lustre Architecture
+
+略
+
+## TEST
+
+略
+
+## UTILS
+
+略
 
 ## MGC
 
@@ -132,7 +144,7 @@ mgc\_setup() first adds a reference to the underlying Lustre PTL-RPC layer. Then
 
 Lustre extensively makes use of logging for recovery and distributed transaction commits. The logs associated with Lustre are called ‘llogs’ and config logs, startup logs and change logs correspond to various kinds of llogs. As described in Section 3.2.4, the llog\_reader utility can be used to read these Lustre logs. When a Lustre target registers with MGS, the MGS constructs a log for the target. Similarly, a lustre-client log is created for the Lustre client when it is mounted. When a user mounts the Lustre client, it triggers to download the Lustre config logs on the client. As described earlier MGC subsystem is responsible for reading and processing the logs and sending them to Lustre clients and Lustre servers.
 
-> Lustre广泛使用日志记录进行恢复和分布式事务提交。与Lustre相关的日志称为“llogs”，其中配置日志、启动日志和更改日志对应于各种类型的llogs。如第3.2.4节所述，可以使用llog\_reader工具来读取这些Lustre日志。当Lustre目标注册到MGS时，MGS会为目标构建一个日志。类似地，当挂载Lustre客户端时，会为该客户端创建一个lustre-client日志。当用户挂载Lustre客户端时，它会触发在客户端上下载Lustre配置日志。正如前面所述，MGC子系统负责读取和处理这些日志，并将其发送到Lustre客户端和Lustre服务器。
+> Lustre 大量使用日志（logging）进行恢复和分布式事务提交。与 Lustre 相关的日志称为 “llogs”，其中“配置”、“启动”和“更改”对应不同类型的 llogs。如第3.2.4节所述，可以使用llog\_reader 工具来读取这些 Lustre 日志。当 Lustre 目标（lustre target）注册到 MGS 时，MGS会为目标创建一个日志。类似地，当挂载 Lustre 客户端时，会为该客户端创建一个lustre-client 日志。当用户挂载 Lustre 客户端时，它会触发在客户端上下载 Lustre 配置日志。正如前面所述，MGC 子系统负责读取和处理这些日志，并将其发送到 Lustre 客户端和 Lustre 服务器。
 
 #### Log Processing in MGC
 
