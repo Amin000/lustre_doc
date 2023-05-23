@@ -1,4 +1,4 @@
-@TOC
+* TOC
 {:toc}
 
 # Understanding Lustre Internals 中文翻译
