@@ -163,13 +163,13 @@ Cleanup functions are important in Lustre in case of file system unmounting or a
 
 mgc\_cleanup() function deletes the profiles for the last MGC obd using class\_del\_profiles() defined in obdclass/obd\_config.c. When MGS sends a buffer of data to MGC, the lustre profiles helps to identify the intended recipients of the data. Next the lprocfs\_obd\_cleanup() routine (defined in obdclass/lprocfs\_status.c) removes sysfs and debugfs entries for the obd device. It then decrements the reference to PTL-RPC layer and finally calls client\_obd\_cleanup(). This function (defined in ldlm/ldlm\_lib.c) makes the obd namespace point to NULL, destroys the client side import interface and finally frees up the obd device using OBD\_FREE macro. Figure 10 shows the workflows for both setup and cleanup routines in MGC parallely. The class\_cleanup() routine defined in obd\_config.c starts the MGC shut down process. Note that after the obd\_precleanup(), uuid-export and nid-export hashtables are freed up and destroyed. uuid-export HT stores uuids for different obd devices where as nid-export HT stores ptl-rpc network connection information.
 
-> mgc\_cleanup()函数使用在 obdclass/obd\_config.c 中定义的 class\_del\_profiles() 删除最后一个 MGC obd 的配置文件（profiles）。当 MGS 向 MGC 发送缓冲数据时，Lustre 配置文件用于区分数据的预期接收者。接下来，lprocfs\_obd\_cleanup()（定义在obdclass/lprocfs\_status.c中）删除 obd 设备的 sysfs 和 debugfs 条目。然后，它递减对 PTL-RPC 层的引用，并最后调用 client\_obd\_cleanup()。此函数（定义在ldlm/ldlm\_lib.c中）使 obd 命名空间指向NULL，销毁客户端导入接口，最后使用 OBD\_FREE 宏释放 obd 设备。图10显示了 MGC 中设置和清理的并行工作流程。在 obd\_precleanup() 之后，uuid-export 和 nid-export 哈希表被释放和销毁。uuid-export HT 存储不同 obd 设备的 UUID，而 nid-export HT 存储 ptl-rpc 网络连接信息。
+> mgc\_cleanup() 函数使用在 obdclass/obd\_config.c 中定义的 class\_del\_profiles() 删除最后一个 MGC obd 的配置文件（profiles）。当 MGS 向 MGC 发送缓冲数据时，Lustre 配置文件用于区分数据的预期接收者。接下来，lprocfs\_obd\_cleanup()（定义在obdclass/lprocfs\_status.c中）删除 obd 设备的 sysfs 和 debugfs 条目。然后，它递减对 PTL-RPC 层的引用，并最后调用 client\_obd\_cleanup()。此函数（定义在ldlm/ldlm\_lib.c中）使 obd 命名空间指向NULL，销毁客户端导入接口，最后使用 OBD\_FREE 宏释放 obd 设备。图10显示了 MGC 中设置和清理的并行工作流程。在 obd\_precleanup() 之后，uuid-export 和 nid-export 哈希表被释放和销毁。uuid-export HT 存储不同 obd 设备的 UUID，而 nid-export HT 存储 ptl-rpc 网络连接信息。
 
 ### mgc\_import\_event()
 
 The mgc\_import\_event() function handles the events reported at the MGC import interface. The type of import events identified by MGC are listed in obd\_import\_event enum defined in include/lustre\_import.h as shown in Source Code 5. Client side imports are used by the clients to communicate with the exports on the server (for instance if MDS wants to communicate with MGS, MDS will be using its client import to communicate with MGS’ server side export). More detailed description of import and export interfaces on obd device is given in Section 5.
 
-> mgc\_import\_event() 函数处理在MGC导入接口上报的事件。MGC 所识别的导入事件类型在 include/lustre\_import.h 中的 obd\_import\_event 枚举中列出，如 Source Code 5所示。客户端导入用于客户端与服务器上的导出进行通信（例如，如果MDS想要与MGS通信，MDS将使用其客户端导入与MGS的服务器端导出进行通信）。有关obd设备上导入和导出接口的更详细描述，请参阅第5节。
+> mgc\_import\_event() 函数处理在 MGC 导入接口上报的事件。MGC 所识别的导入事件类型在 include/lustre\_import.h 中的 obd\_import\_event 枚举中定义，如 Source Code 5所示。客户端导入用于客户端与服务端上的导出进行通信（例如，如果 MDS 想要与 MGS 通信，MDS 将使用其客户端导入与 MGS 的服务端导出进行通信）。有关 obd 设备上导入和导出接口的更详细描述，请参阅第5节。
 
 Source code 5: obd\_import\_event enum defined in include/lustre\_import.h
 
@@ -187,7 +187,7 @@ enum obd_import_event {
 
 Some of the remaining obd operations for MGC such as client\_import\_add\_conn(), client\_import\_del\_conn(), client\_connect\_import() and client\_disconnect\_export() will be explained in obdclass and ldlm Sections.
 
-> 在obdclass和ldlm部分将解释MGC的一些剩余的obd操作，例如client\_import\_add\_conn()、client\_import\_del\_conn()、client\_connect\_import()和client\_disconnect\_export()。
+> 在 obdclass 和 ldlm 部分将解释 MGC 的一些剩余的 obd 操作，例如 client\_import\_add\_conn()、client\_import\_del\_conn()、client\_connect\_import() 和client\_disconnect\_export()。
 
 ## OBDCLASS
 
