@@ -472,7 +472,7 @@ A generic device setup function obd_setup() defined in include/obd_class.h is th
 
 <div align=center>
     <img src="../image/Class_setup.png" alt="Figure 13. Workflow of class_setup() function in obd device lifecycle">
-<div>
+</div>
 
 <center><sub>Figure 13. Workflow of class_setup() function in obd device lifecycle</sub></center>
 
