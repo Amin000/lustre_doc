@@ -73,7 +73,7 @@ So how does llite make sure that this operation is directed specifically towards
 > 那么，llite 如何确保以上的操作是针对 MGC obd 设备的？llite/llite_lib.c 中的 obd_get_info() 有一个名为 sbi->ll_md_exp 的参数。sbi 的类型是 ll_sb_info，它在 llite/llite_internal.h 中定义（图7）。而 ll_sb_info 中的 ll_md_exp 字段在 include/lustre_export.h 中定义，类型为 obd_export。obd_export 中的 \*exp_obd 成员，它是一个 obd_device 结构（在include/obd.h中定义）。另一个 MGC obd 操作 obd_connect() 使用obd_device 检查获取导出项。参与此流程的两个函数分别为 class_name2obd() 和 class_num2obd()，它们都在 obdclass/genops.c 中定义。
 
 <div align=center>
-    <img src="../image/Mgc_llite_comm_2.png" alt=""Figure 7. Data structures involved in the communication between mgc and llite subsystems.">
+    <img src="../image/Mgc_llite_comm_2.png" alt="Figure 7. Data structures involved in the communication between mgc and llite subsystems.">
 </div>
 
 <center><sub>Figure 7. Data structures involved in the communication between mgc and llite subsystems.</sub></center>
