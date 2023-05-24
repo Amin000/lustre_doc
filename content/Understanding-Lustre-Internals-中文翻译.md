@@ -628,63 +628,63 @@ For any two obd devices to communicate with each other, they need an import and 
 
 All obdclass related function declarations are listed in the file include/obd_class.h and their definitions can be seen in obdclass/genops.c Here we list some of the important obdclass function prototypes and their purpose for quick reference.
 
-> 所有与obdclass相关的函数声明都列在include/obd_class.h文件中，它们的定义可以在obdclass/genops.c中找到。以下是一些重要的obdclass函数原型及其目的，供快速参考使用。
+> 所有与 obdclass 相关的函数声明都在 include/obd_class.h 文件中，它们的定义可以在 obdclass/genops.c 中找到。以下是一些重要的 obdclass 函数原型及其作用，以供快速参考使用。
 
-*   class_newdev() - Creates a new obd device, allocates and initializes it.
+* class_newdev() - Creates a new obd device, allocates and initializes it.
 
-    > class_newdev() - 创建一个新的obd设备，分配并初始化它。
+    > class_newdev() - 创建一个新的 obd 设备，分配并初始化它。
 
-*   class_free_dev() - Frees an obd device.
+* class_free_dev() - Frees an obd devic
 
-    > class_free_dev() - 释放一个obd设备。
+    > class_free_dev() - 释放一个 obd 设备。
 
-*   class_unregister_device() - Unregisters an obd device by feeing its slot in obd_devs array.
+* class_unregister_device() - Unregisters an obd device by feeing its slot in obd_devs array.
 
-    > class_unregister_device() - 通过释放obd_devs数组中的槽位来注销一个obd设备。
+    > class_unregister_device() - 通过释放 obd_devs 数组中的 slot 来注销一个 obd 设备。
 
-*   class_register_device() - Registers obd device by finding a free slot in in obd_devs array and filling it with the new obd device.
+* class_register_device() - Registers obd device by finding a free slot in in obd_devs array and filling it with the new obd device.
 
-    > class_register_device() -   通过在obd_devs数组中找到一个空闲槽位并将其填充为新的obd设备来注册obd设备。
+    > class_register_device() -   通过在 obd_devs 数组中找到一个空闲槽位并将其填充为新的 obd 设备来注册 obd 设备。
 
-*   class_name2dev() - Returns minor number corresponding to an obd device name.
+* class_name2dev() - Returns minor number corresponding to an obd device name.
 
-    > class_name2dev() - 返回与obd设备名称对应的次设备号。
+    > class_name2dev() - 返回与 obd 设备名称对应的次设备号。
 
-*   class_name2obd() - Returns pointer to an obd_device structure corresponding to the device name.
+* class_name2obd() - Returns pointer to an obd_device structure corresponding to the device name.
 
-    > class_name2obd() - 返回与设备名称对应的obd_device结构的指针。
+    > class_name2obd() - 返回与设备名称对应的 obd_device 结构的指针。
 
-*   class_uuid2dev() - Returns minor number of an obd device when uuid is provided.
+* class_uuid2dev() - Returns minor number of an obd device when uuid is provided.
 
-    > class_uuid2dev() - 在提供UUID时返回obd设备的次设备号。
+    > class_uuid2dev() - 在提供 UUID 时返回 obd 设备的次设备号。
 
-*   class_uuid2obd() - Returns obd_device structure pointer corresponding to a uuid.
+* class_uuid2obd() - Returns obd_device structure pointer corresponding to a uuid.
 
-    > class_uuid2obd() - 返回与UUID对应的obd_device结构的指针。
+    > class_uuid2obd() - 返回与 UUID 对应的 obd_device 结构的指针。
 
-*   class_num2obd() - Returns obd_device structure corresponding to a minor number.
+* class_num2obd() - Returns obd_device structure corresponding to a minor number.
 
-    > class_num2obd() - 返回与次设备号对应的obd_device结构。
+    > class_num2obd() - 返回与次设备号对应的 obd_device 结构。
 
-*   class_dev_by_str() - Finds an obd device in the obd_devs array by name or uuid. Also increments obd reference count if its found.
+* class_dev_by_str() - Finds an obd device in the obd_devs array by name or uuid. Also increments obd reference count if its found.
 
-    > class_dev_by_str() -   通过名称或UUID在obd_devs数组中查找obd设备。如果找到，则增加obd的引用计数。
+    > class_dev_by_str() -   通过名称或 UUID 在 obd_devs 数组中查找 obd 设备。如果找到，则增加 obd 的引用计数。
 
-*   get_devices_count() - Gets the count of the obd devices in any state.
+* get_devices_count() - Gets the count of the obd devices in any state.
 
-    > get_devices_count() - 获取obd设备的数量。
+    > get_devices_count() - 获取 obd 设备的数量。
 
-*   class_find_client_obd() - Searches for a client obd connected to a target obd device.
+* class_find_client_obd() - Searches for a client obd connected to a target obd device.
 
-    > class_find_client_obd() - 搜索连接到目标obd设备的客户端obd。
+    > class_find_client_obd() - 搜索连接到目标 obd 设备的客户端 obd。
 
-*   class_export_destroy() - Destroys and export connection of an obd device.
+* class_export_destroy() - Destroys and export connection of an obd device.
 
-    > class_export_destroy() - 销毁obd设备的导出连接。
+    > class_export_destroy() - 销毁 obd 设备的导出连接。
 
-*   __class_new_export() - Creates a new export for an obd device and add its to the hash table of exports.
+* __class_new_export() - Creates a new export for an obd device and add its to the hash table of exports.
 
-    > __class_new_export() - 为obd设备创建一个新的导出连接，并将其添加到导出哈希表中。
+    > __class_new_export() - 为 obd 设备创建一个新的导出连接，并将其添加到导出哈希表中。
 
 ## LIBCFS
 
