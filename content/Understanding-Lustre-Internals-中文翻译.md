@@ -64,7 +64,7 @@ In Lustre one of the ways two subsystems share data is with the help of obd_ops 
 
 > 在 Lustre 中，两个子系统之间共享数据的一种方式是通过 obd_ops 结构。为了理解两个子系统之间的通信是如何工作的，让我们以 mgc_obd_ops 结构中的 mgc_get_info() 为例。子系统 llite 通过将一个宏（KEY_CONN_DATA）作为参数调用 mgc_get_info()（llite/llite_lib.c）。注意，llite 调用的是 obd_get_info() 而不是直接调用 mgc_get_info()。obd_get_info()（include/obd_class.h），如图6所示。我们可以看到，函数调用一个 OBP 宏，它的参数是 obd_export 和 get_info。OBP 宏将 o（obd_export 设备结构）和 op（操作）连接在一起，宏替换为函数调用 o_get_info()。
 
-<div align=center><img src="../image/Mgc_llite_comm_1.png" alt="Communication between llite and mgc through obdclass."></img></div>
+<div align=center><img src="../image/Mgc_llite_comm_1.png" alt="Communication between llite and mgc through obdclass."></div>
 
 <center><sub>Figure 6. Communication between llite and mgc through obdclass.</sub></center>
 
@@ -72,7 +72,9 @@ So how does llite make sure that this operation is directed specifically towards
 
 > 那么，llite 如何确保以上的操作是针对 MGC obd 设备的？llite/llite_lib.c 中的 obd_get_info() 有一个名为 sbi->ll_md_exp 的参数。sbi 的类型是 ll_sb_info，它在 llite/llite_internal.h 中定义（图7）。而 ll_sb_info 中的 ll_md_exp 字段在 include/lustre_export.h 中定义，类型为 obd_export。obd_export 中的 \*exp_obd 成员，它是一个 obd_device 结构（在include/obd.h中定义）。另一个 MGC obd 操作 obd_connect() 使用obd_device 检查获取导出项。参与此流程的两个函数分别为 class_name2obd() 和 class_num2obd()，它们都在 obdclass/genops.c 中定义。
 
-![Data structures involved in the communication between mgc and llite subsystems.](../image/Mgc_llite_comm_2.png "Figure 7. Data structures involved in the communication between mgc and llite subsystems.")
+<div align=center>
+    <img src="../image/Mgc_llite_comm_2.png" alt=""Figure 7. Data structures involved in the communication between mgc and llite subsystems.">
+</div>
 
 <center><sub>Figure 7. Data structures involved in the communication between mgc and llite subsystems.</sub></center>
 
@@ -90,7 +92,9 @@ The Lustre module initialization begins from the lustre_init() routine defined i
 
 > Lustre 模块初始化从 llite/super25.c中的 lustre_init() 开始。当 ‘lustre’ 内核模块被加载时，这个函数就被调用。lustre_init 调用 register_filesystem(\&lustre_fs_type)，注册‘lustre’到文件系统中，并把它加入内核文件系统的链表中，这个链表被用于挂载等系统调用。lustre_fs_type 也在同个文件进行定义（源码3）。
 
-![mgc_setup() call graph starting from Lustre file system mounting](../image/Mgc_setup.png "Figure 8. mgc_setup() call graph starting from Lustre file system mounting")
+<div align=center>
+    <img src="../image/Mgc_setup.png" alt="Figure 8. mgc_setup() call graph starting from Lustre file system mounting">
+</div>
 
 <center><sub>Figure 8. mgc_setup() call graph starting from Lustre file system mounting.</sub></center>
 
@@ -138,7 +142,9 @@ mgc_setup() first adds a reference to the underlying Lustre PTL-RPC layer. Then 
 
 > mgc_setup()首先添加对底层 Lustre PTL-RPC 的引用。然后，它使用 client_obd_setup()（在ldlm/ldlm_lib.c中定义）为 obd 设备设置一个 RPC 客户端。接下来，MGC 调用 mgc_llog_init() 初始化 Lustre 日志，这些日志将在 MGS 服务器上进行处理。这些日志也会发送到 Lustre 客户端，客户端端的 MGC 会复制这些日志以处理数据。在 MGS 上可调的持久性参数被发送到 MGC，并且在 MGC 上的 Lustre 日志处理初始化这些参数。在 Lustre 中，必须在处理 Lustre 日志之前设置这些可调参数，而 mgc_tunables_init() 帮助初始化这些可调参数。例如，该函数设置包括 conn_uuid、uuid、ping 和 dynamic_nids，这些都可以在任何 Lustre 客户端上的 /sys/fs/lustre/mgc 目录进行查看。kthread_run() 启动一个mgc_requeue_thread，它会不断地读取 Lustre 日志条目。图10显示了 mgc_setup() 的流程图。
 
-![mgc_setup() vs. mgc_cleanup()](../image/Mgc_setup_vs_cleanup.png "Figure 10. mgc_setup() vs. mgc_cleanup()")
+<div align=center>
+    <img src="../image/Mgc_setup_vs_cleanup.png" alt="Figure 10. mgc_setup() vs. mgc_cleanup()">
+</div>
 
 <center><sub>Figure 10. mgc_setup() vs. mgc_cleanup()</sub></center>
 
@@ -154,18 +160,21 @@ The lustre_fill_super() routine described in Section 4.4 makes a call to ll_fill
 
 > 在第4.4节中描述的 lustre_fill_super() 调用ll_fill_super()，该函数定义在llite/llite_lib.c中。该函数使用 lustre_fill_super() 的超级块参数初始化了一个配置日志实例。由于同一个 MGC 可能用于跟踪多个配置日志（例如ost1、ost2、Lustre 客户端），因此配置日志（config log）实例用于维护指定的日志的状态。然后，lustre_fill_super() 调用lustre_process_log()，该函数从MGS获取一个配置日志并开始处理它。lustre_process_log()被 Lustre 客户端和 Lustre 服务端，并且它继续处理追加到日志中的新语句。它首先重置并分配 lustre_cfg_bufs（临时存储日志数据），然后调用 obd_process_config()，最终使用 OBP 宏调用 obd 设备特定的 mgc_process_config()（图9）。传递给 mgc_process_config() 的 lcfg_command 是 LCFG_LOG_START，它从 MGC 获取配置日志，并开始处理它，并将日志添加到要跟踪的日志列表中。在同一文件中定义的 config_log_add() 完成了将日志添加到 MGC 监视活动日志更新列表的任务。MGC 中的其他重要日志处理函数包括 mgc_process_log（从 MGS 获取配置日志并处理它）、mgc_process_recover_nodemap_log（如果 Lustre 客户端收到 MGS 的目标重新启动通知就被调用）、mgc_apply_recover_logs（在恢复后应用日志）。
 
-![Figure 9. mgc_process_config() call graph](../image/Mgc_process_config.png "Figure 9. mgc_process_config() call graph")
+<div align=center>
+    <img src="../image/Mgc_process_config.png" alt="Figure 9. mgc_process_config() call graph">
+</div>
+
 <center><sub>Figure 9. mgc_process_config() call graph</sub></center>
 
 ### mgc_precleanup() and mgc_cleanup()
 
 Cleanup functions are important in Lustre in case of file system unmounting or any unexpected errors during file system setup. The class_cleanup() routine defined in obdclass/obd_config.c starts the process of shutting down an obd device. This invokes mgc_precleanup() (through obd_precleanup()) which makes sure that all the exports are destroyed before shutting down the obd device. mgc_precleanup() first decrements the mgc_count that was incremented during mgc_setup(). The mgc_count keeps the count of the running MGC threads and makes sure not to shut down any threads prematurely. Next it waits for any requeue thread to gets completed and calls obd_cleanup_client_import(). obd_cleanup_client_import() destroys client side import interface of the obd device. Finally mgc_precleanup() invokes mgc_llog_fini() which cleans up the lustre logs associated with the MGC. The log cleaning is accomplished by llog_cleanup() routine defined in obdclass/llog_obd.c.
 
-> 清理函数（cleanup function）在 Lustre 中非常重要，用于处理文件系统卸载或文件系统设置期间的意外错误。在 obdclass/obd_config.c 中定义的 class_cleanup() 开始关闭 obd 设备的流程。这会通过 obd_precleanup()（通过 obd_precleanup()）调用 mgc_precleanup()，确保在关闭 obd 设备之前销毁所有导出。mgc_precleanup()首先递减了在 mgc_setup() 期间增加的 mgc_count。mgc_count 是 MGC 线程计数，确保不会过早关闭任何线程。接下来，它等待重新排队的线程完成，并调用 obd_cleanup_client_import()。obd_cleanup_client_import()销毁 obd 设备的客户端导入接口。最后，mgc_precleanup()调用 mgc_llog_fini()，清理与 MGC 相关的 Lustre 日志。日志清理由在 obdclass/llog_obd.c 中定义的 llog_cleanup() 处理。
+> cleanup 函数在 Lustre 中非常重要，用于处理文件系统卸载或文件系统设置期间的意外错误。class_cleanup()（obdclass/obd_config.c） 开始关闭 obd 设备的流程。这会通过 obd_precleanup()（通过 obd_precleanup()）调用 mgc_precleanup()，确保在关闭 obd 设备之前销毁所有导出。mgc_precleanup()首先递减了在 mgc_setup() 期间增加的 mgc_count。mgc_count 是 MGC 线程计数，确保不会过早关闭任何线程。接下来，它等待重新排队的线程完成，并调用 obd_cleanup_client_import()。obd_cleanup_client_import()销毁 obd 设备的客户端导入接口。最后，mgc_precleanup()调用 mgc_llog_fini()，清理与 MGC 相关的 Lustre 日志。日志清理由 llog_cleanup()（obdclass/llog_obd.c） 处理。
 
 mgc_cleanup() function deletes the profiles for the last MGC obd using class_del_profiles() defined in obdclass/obd_config.c. When MGS sends a buffer of data to MGC, the lustre profiles helps to identify the intended recipients of the data. Next the lprocfs_obd_cleanup() routine (defined in obdclass/lprocfs_status.c) removes sysfs and debugfs entries for the obd device. It then decrements the reference to PTL-RPC layer and finally calls client_obd_cleanup(). This function (defined in ldlm/ldlm_lib.c) makes the obd namespace point to NULL, destroys the client side import interface and finally frees up the obd device using OBD_FREE macro. Figure 10 shows the workflows for both setup and cleanup routines in MGC parallely. The class_cleanup() routine defined in obd_config.c starts the MGC shut down process. Note that after the obd_precleanup(), uuid-export and nid-export hashtables are freed up and destroyed. uuid-export HT stores uuids for different obd devices where as nid-export HT stores ptl-rpc network connection information.
 
-> mgc_cleanup() 函数使用在 obdclass/obd_config.c 中定义的 class_del_profiles() 删除最后一个 MGC obd 的配置文件（profiles）。当 MGS 向 MGC 发送缓冲数据时，Lustre 配置文件用于区分数据的预期接收者。接下来，lprocfs_obd_cleanup()（定义在obdclass/lprocfs_status.c中）删除 obd 设备的 sysfs 和 debugfs 条目。然后，它递减对 PTL-RPC 层的引用，并最后调用 client_obd_cleanup()。此函数（定义在ldlm/ldlm_lib.c中）使 obd 命名空间指向NULL，销毁客户端导入接口，最后使用 OBD_FREE 宏释放 obd 设备。图10显示了 MGC 中设置和清理的并行工作流程。需要注意的是，在 obd_precleanup() 之后，uuid-export 和 nid-export 哈希表也被释放和销毁。uuid-export HT 存储不同 obd 设备的 UUID，而 nid-export HT 存储 ptl-rpc 网络连接信息。
+> mgc_cleanup() 函数使用在 obdclass/obd_config.c 中定义的 class_del_profiles() 删除最后一个 MGC obd 的配置文件（profiles）。当 MGS 向 MGC 发送缓冲数据时，Lustre 配置文件用于区分数据的预期接收者。接下来，lprocfs_obd_cleanup()（obdclass/lprocfs_status.c）删除 obd 设备的 sysfs 和 debugfs 条目。然后，它递减对 PTL-RPC 层的引用，并最后调用 client_obd_cleanup()。此函数（ldlm/ldlm_lib.c）使 obd 命名空间指向NULL，销毁客户端导入接口，最后使用 OBD_FREE 宏释放 obd 设备。图10显示了 MGC 中设置和清理的并行工作流程。需要注意的是，在 obd_precleanup() 之后，uuid-export 和 nid-export 哈希表也被释放和销毁。uuid-export HT 存储不同 obd 设备的 UUID，而 nid-export HT 存储 ptl-rpc 网络连接信息。
 
 ### mgc_import_event()
 
@@ -294,7 +303,10 @@ Then ll_fill_super() then invokes the lustre_process_log() function (see Figure 
 
 > 然后，ll_fill_super() 调用 lustre_process_log()（obdclass/obd_mount.c，图11），该函数从 MGS 获取配置日志并开始处理它们。这个函数在 Lustre 客户端和 Lustre 服务端中都被调用，并且它将继续处理附加到日志中的新语句。传递给该函数的三个参数是超级块、日志名称和配置日志实例。配置实例唯一标识超级块，用于 MGC 写入配置日志的本地副本，而 logname 是要从 MGS 复制的日志的名称。配置日志实例用于维护特定配置日志的状态（可以来自ost1、ost2、Lustre客户端等），并添加到 MGC 的日志跟踪列表中。然后 lustre_process_log() 调用obd_process_config()，它使用 OBP 宏（参见第4.3节）调用 MGC 的 mgc_process_config() 函数。它从 MGS 获取配置日志并处理，以用于启动其他服务。日志也被添加到要监视的日志列表中。
 
-![Obd device life cycle workflow for MGC](../image/Mgc_lifecycle.png "Figure 11. Obd device life cycle workflow for MGC")
+<div align=center>
+    <img src="../image/Mgc_lifecycle.png" alt="Figure 11. Obd device life cycle workflow for MGC">
+</div>
+
 <center><sub>Figure 11. Obd device life cycle workflow for MGC</sub></center>
 
 We now describe the detailed workflow of mgc_process_config() by describing the functionalities of each sub-function that it invokes. The config_log_add() function categorizes the data in config log based on if the data is related to - ptl-rpc layer, configuration parameters, nodemaps and barriers. The log data related to each of these categories is then copied to memory using the function config_log_find_or_add(). mgc_process_config() next calls mgc_process_log() and it gets a config log from MGS and processes it. This function is called for both Lustre clients and Lustre servers to process the configuration log from the MGS. The MGC enqueues a DLM lock on the log from the MGS and if the lock gets revoked, MGC will be notified by the lock cancellation callback that the config log has changed, and will enqueue another MGS lock on it, and then continue processing the new additions to the end of the log. Lustre prevents the updation of the same log by multiple processes at the same time. The mgc_process_log() then calls mgc_process_cfg_log() function which reads the log and creates a local copy of the log on the Lustre client or Lustre server. This function first initializes an environment and a context using lu_env_init() and llog_get_context() respectively. The mgc_llog_local_copy() routine is used to create a local copy of the log with the environment and context previously initialized. Real time changes in the log are parsed using the function class_config_parse_llog(). Under read only mode, there will be no local copy or local copy will be incomplete, so Lustre will try to use remote llog first.
@@ -307,23 +319,23 @@ The class_config_parse_llog() function is defined in obdclass/obd_config.c. The 
 
 Each obd device then sets up a key to communicate with other devices through secure ptl-rpc layer. The rules for creating this key are stored in the config log. The obd device then creates a connection for communication. Note that the start log contains all state information for all configuration devices and the lustre configuration buffer (lustre_cfg_bufs) stores this information temporarily. The obd device then use this buffer to consume log data. The start log resembles to a virtual log file and it is never stored on the disk. After creating a connection, the handler performs data mining on the logs to extract information (uuid, nid etc.) required to form Lustre config_logs. The parameter llog_rec_hdr passed with class_config_llog_handler() function decides what type of information should be parsed from the logs. For instance OBD_CFG_REC indicates the handler to scan obd device configuration information and CHANGELOG_REC asks to parse for changelog records. Using the extracted nid and uuid information about the obd device, the handler now invokes class_process_config() routine. This function repeats the cycle of obd device creation for other obd devices. Notice that the only obd device exists in Lustre at this point in the life cycle is MGC. The class_process_config() function calls the generic obd class functions such as class_attach(), class_add_uuid(), class_setup() depending upon the lcfg_command that it receives for a specific obd device.
 
-> 然后，每个obd设备通过安全的ptl-rpc层设置与其他设备通信的密钥。创建此密钥的规则存储在配置日志中。然后，obd设备创建一个用于通信的连接。请注意，start_log包含所有配置设备的所有状态信息，并且lustre配置缓冲区(lustre_cfg_bufs)临时存储此信息。然后，obd设备使用此缓冲区来消耗日志数据。start_log类似于一个虚拟日志文件，它永远不会存储在磁盘上。创建连接后，处理程序对日志进行数据挖掘以提取所需的信息（uuid、nid等），以形成Lustre config_logs。传递给class_config_llog_handler()函数的llog_rec_hdr参数决定应从日志中解析哪种类型的信息。例如，OBD_CFG_REC表示处理程序要扫描obd设备的配置信息，CHANGELOG_REC要求解析changelog记录。使用有关obd设备的提取的nid和uuid信息，处理程序现在调用class_process_config()例程。此函数为其他obd设备重复执行obd设备创建的循环。请注意，在生命周期的这一点上，Lustre中唯一存在的obd设备是MGC。class_process_config()函数根据接收到的特定obd设备的lcfg_command调用通用的obd类函数，例如class_attach()、class_add_uuid()、class_setup()等。
+> 然后，每个 obd 设备会设置一个密钥，以用于通过 ptl-rpc 层与其他 obd 设备进行安全通信。创建此密钥的规则存储在配置日志中。然后，obd 设备创建一个用于通信的连接。注意，start_log 包含所有设备配置的所有状态信息，并且由 lustre 配置的缓冲区（lustre_cfg_bufs）临时存储。然后，obd 设备使用此缓冲区来处理日志数据。start_log 类似于一个虚拟日志文件，它不会存储在磁盘上。创建连接后，处理程序解析日志数据以获取所需的信息（uuid、nid等）， 并生成 Lustre config_logs。class_config_llog_handler() 函数的 llog_rec_hdr 参数决定应从日志中解析哪种类型的信息。例如，OBD_CFG_REC 表示处理程序要扫描 obd 设备的配置信息，CHANGELOG_REC要 求解析 changelog 记录。为了获取有关 obd 设备的 nid 和 uuid，处理程序调用 class_process_config()。此函数会为其他 obd 设备循环执行 obd 设备的创建。注意，在 Lustre obd 设备的生命周期的这个点上，只存在着 MGC。class_process_config()函数根据接收到的特定 obd 设备的lcfg_command 命令调用通用 obd 类函数，例如 class_attach()、class_add_uuid()、class_setup() 等。
 
 ### Obd Device Life Cycle
 
 In this Section we describe the work flow of various obd device life cycle functions such as class_attach(), class_setup(), class_precleanup(), class_cleanup(), and class_detach().
 
-> 在本节中，我们描述了各种obd设备生命周期函数的工作流程，包括class_attach()、class_setup()、class_precleanup()、class_cleanup()和class_detach()。
+> 在本节中，我们描述各种 obd 设备生命周期函数的工作流程，包括 class_attach()、class_setup()、class_precleanup()、class_cleanup() 和 class_detach()。
 
 #### class_attach()
 
 The first method that is called in the life cycle of an obd device is class_attach() and the corresponding lustre config command is LCFG_ATTACH. The class_attach() method is defined in obdclass/obd_config.c. It registers and adds the obd device to the list of obd devices. The list of obd devices is defined in obdclass/genops.c using \*obd_devs\[MAX_OBD_DEVICES]. The attach function first checks if the obd device type being passed is valid. The obd_type structure is defined in include/obd.h (as shown in Source Code 11). Two types of operations defined in this structure are obd_ops (i.e., data operations) and md_ops (i.e., metadata operations). These operations determine if the obd device is destined to perform data or metadata operations or both.
 
-> obd设备生命周期中第一个调用的方法是class_attach()，对应的Lustre配置命令是LCFG_ATTACH。class_attach()方法在obdclass/obd_config.c中定义。它将obd设备注册并添加到obd设备列表中。obd设备列表在obdclass/genops.c中使用\*obd_devs\[MAX_OBD_DEVICES]进行定义。attach函数首先检查传递的obd设备类型是否有效。obd_type结构在include/obd.h中定义（如Source Code 11所示）。该结构定义了两种操作类型：obd_ops（即数据操作）和md_ops（即元数据操作）。这些操作确定obd设备是否执行数据操作、元数据操作或两者兼而有之。
+> obd 设备生命周期中第一个调用的函数是 class_attach()（obdclass/obd_config.c），对应的 Lustre 命令是 LCFG_ATTACH。它将 obd 设备注册并添加到 obd 设备列表中。obd 设备列表（obdclass/genops.c）的定义在\*obd_devs\[MAX_OBD_DEVICES]中。attach 函数首先检查 obd 设备类型参数是否有效。obd_type结构（include/obd.h）如Source Code 11所示。该结构定义了两种操作类型：obd_ops（即数据操作）和md_ops（即元数据操作）。这些操作确定 obd 设备是否执行数据操作、元数据操作或两者兼而有之。
 
 The lu_device_type field of obd_type structure makes sense only for real block devices such as zfs and ldiskfs osd devices. Furthermore the lu_device_type differentiates metadata and data devices using the tags LU_DEVICE_MD and LU_DEVICE_DT respectively. An example of an lu_device_type structure defined for ldiskfs osd_device_type is shown in Source Code 12.
 
-> obd_type结构中的lu_device_type字段仅对真实块设备（例如zfs和ldiskfs osd设备）有意义。此外，lu_device_type使用LU_DEVICE_MD和LU_DEVICE_DT标记区分元数据设备和数据设备。Source Code 12展示了为ldiskfs osd_device_type定义的lu_device_type结构的示例。
+> obd_type 结构中的 lu_device_type 字段仅对真实块设备（例如 zfs 和 ldiskfs osd 设备）有意义。此外，lu_device_type 使用 LU_DEVICE_MD 和 LU_DEVICE_DT 标记区分元数据设备和数据设备。Source Code 12 展示了为 ldiskfs osd_device_type 定义的 lu_device_type 结构的示例。
 
 Source code 11: obd_type structure defined in include/obd.h
 
@@ -355,26 +367,31 @@ static struct lu_device_type osd_device_type = {
 
 The class_attach() then calls a class_newdev() function which creates, allocates a new obd device and initializes it. A complete workflow of the class_attach() function is shown in Figure 12. The class_get_type() function invoked by class_newdev() registers already created obd device and loads the obd device module. All obd device loaded has metadata or data operations (or both) defined for them. For instance the LMV obd device has its md_ops and obd_ops defined in structures lmv_md_ops and lmv_obd_ops respectively. These structures and the associated operations can be seen in lmv/lmv_obd.c file. The obd_minor initialized here is the index of the obd device in obd_devs array.
 
-> class_attach()函数接下来调用class_newdev()函数，该函数创建、分配一个新的obd设备并进行初始化。class_attach()函数的完整工作流程如图12所示。class_newdev()函数调用的class_get_type()函数注册已创建的obd设备并加载obd设备模块。所有加载的obd设备都具有为其定义的元数据操作或数据操作（或两者兼备）。例如，LMV obd设备的md_ops和obd_ops分别在lmv/lmv_obd.c文件中的lmv_md_ops和lmv_obd_ops结构中定义。在此初始化的obd_minor是obd设备在obd_devs数组中的索引。
+> class_attach() 函数接下来调用 class_newdev() 函数，该函数创建、分配一个新的 obd 设备并进行初始化。class_attach() 函数的完整工作流程如图12所示。class_newdev() 函数调用的 class_get_type() 函数注册已创建的 obd 设备并加载 obd 设备模块。所有加载的 obd 设备都具有为其定义的元数据操作或数据操作（或两者兼备）。例如，LMV obd 设备的 md_ops 和 obd_ops (lmv/lmv_obd.c)分别 lmv_md_ops 和 lmv_obd_ops 结构中定义。在此初始化的 obd_minor 是 obd 设备在 obd_devs 数组中的索引。
+
+<div align=center>
+    <img src="../image/Class_attach.png" alt="Figure 12. Workflow of class_attach() function in obd device lifecycle">
+</div>
+
+<center><sub>Figure 12. Workflow of class_attach() function in obd device lifecycle</sub></center>
 
 The obd device then creates a self export using the function class_new_export_self(). The class_new_export_self() function invokes a __class_new_export() function which creates a new export, adds it to the hash table of exports and returns a pointer to it. Note that a self export is created only for a client obd device. The reference count for this export when created is 2, one for the hash table reference and the other for the pointer returned by this function itself. This function populates the obd_export structure defined in include/lustre_export.h (shown in Source Code 13). Various fields associated with this structure are explained in the next Section. Two functions that are used to increment and decrement the reference count for obd devices are class_export_get() and class_export_put() respectively. The last part of class_attach() is registering/listing the obd device in the obd_devs array which is done through class_register_device() function. This functions assigns a minor number to the obd device that can be used to lookup the device in the array.
 
-> 然后，obd设备使用class_new_export_self()函数创建一个自身导出。class_new_export_self()函数调用__class_new_export()函数，创建一个新的导出，将其添加到导出的哈希表中，并返回指向该导出的指针。需要注意的是，只有客户端obd设备才会创建自身导出。创建时，该导出的引用计数为2，一个用于哈希表引用，另一个用于该函数本身返回的指针。该函数填充了在include/lustre_export.h中定义的obd_export结构（如Source Code 13所示）。与该结构相关的各个字段将在下一节中解释。用于增加和减少obd设备引用计数的两个函数分别是class_export_get()和class_export_put()。class_attach()的最后一部分是通过class_register_device()函数在obd_devs数组中注册/列出obd设备。这个函数为obd设备分配一个次设备号，可以用来在数组中查找该设备。
+> 然后，obd 设备使用 class_new_export_self() 函数创建一个自导出（self export）。class_new_export_self() 函数调用 __class_new_export() 函数，创建一个新的导出，将其添加到导出的哈希表中，并返回指向该导出的指针。需要注意的是，只有客户端 obd 设备才会创建自导出。创建时，该导出的引用计数为2，一个用于哈希表引用，另一个用于该函数本身返回的指针。该函数填充obd_export 结构（include/lustre_export.h），如Source Code 13所示。与该结构相关的各个字段将在下一节中解释。用于增加和减少 obd 设备引用计数的两个函数分别是 class_export_get() 和 class_export_put()。class_attach() 的最后一部分是通过 class_register_device() 函数在 obd_devs 数组中注册/列出 obd 设备。这个函数为 obd 设备分配一个次设备号，可以用来在数组中查找该设备。
 
 #### obd_export Structure
 
 This Section describes some of the relevant fields of the obd_export structure (shown in Source Code 13) that represents a target side export connection (using ptlrpc layer) for obd devices in Lustre. This is also used to connect between layers on the same node when there is no network connection between the nodes. For every connected client there exists an export structure on the server attached to the same obd device. Various fields of this structure are described below.
 
-> 本节介绍obd_export结构的一些相关字段（如Source Code 13所示），该结构表示Lustre中obd设备的目标端导出连接（使用ptlrpc层）。当节点之间没有网络连接时，它还用于在同一节点的不同层之间建立连接。对于每个连接的客户端，在服务器上都存在一个与同一obd设备关联的导出结构。下面描述了该结构的各个字段。
+> 本节介绍 obd_export 结构的一些相关字段（如Source Code 13所示），该结构表示 Lustre 中 obd 设备的目标端导出连接（使用 ptlrpc 层）。它用于在不同节点之间没有网络连接时，连接同一节点的不同层。对于每个已连接的客户端，在服务端上都存在一个与该 obd 设备关联的导出结构。下面描述了该结构的各个字段。
 
-*   exp_handle - On connection establishment, the export handle id is provided to client and the subsequent client RPCs contain this handle id to identify which export they are talking to.
+* exp_handle - On connection establishment, the export handle id is provided to client and the subsequent client RPCs contain this handle id to identify which export they are talking to.
 
-    > exp_handle - 在建立连接时，将导出句柄ID提供给客户端，随后客户端的RPC将包含此句柄ID，用于标识它们要连接的导出。
+    > exp_handle - 在建立连接时，将导出句柄 ID 提供给客户端，随后客户端的 RPC 将包含此句柄 ID，用于标识它们要连接的导出。
 
-*   Set of counters described below is used to track where export references are kept. exp_rpc_count is the number of RPC references, exp_cb_count counts commit callback references, exp_replay_count is the number of queued replay requests to be processed and exp_locks_count keeps track of the number of lock references.
-    Source code 13: obd_export structure defined in include/lustre_export.h
+* Set of counters described below is used to track where export references are kept. exp_rpc_count is the number of RPC references, exp_cb_count counts commit callback references, exp_replay_count is the number of queued replay requests to be processed and exp_locks_count keeps track of the number of lock references.
 
-    > 下面描述的一组计数器用于跟踪导出引用的位置。exp_rpc_count是RPC引用的数量，exp_cb_count计数提交回调的引用次数，exp_replay_count是待处理的排队重放请求的数量，exp_locks_count跟踪锁引用的数量。
+    > 下面描述的一组计数器用于跟踪导出引用的位置。exp_rpc_count 是 RPC 引用的数量，exp_cb_count 计数提交回调的引用次数，exp_replay_count 是待处理的队列中的重放请求的数量，exp_locks_count 跟踪锁引用的数量。
 
 Source code 13: obd_export structure defined in include/lustre_export.h
 
@@ -407,51 +424,57 @@ struct obd_export {
 };
 ```
 
-*   `exp_locks_list` maintains a linked list of all the locks and exp_locks_list_guard is - the spinlock that protects this list.
+* `exp_locks_list` maintains a linked list of all the locks and exp_locks_list_guard is - the spinlock that protects this list.
 
-    > exp_locks_list 维护所有锁的链表，exp_locks_list_guard是保护此链表的自旋锁。
+    > exp_locks_list 维护所有类型锁的链表，exp_locks_list_guard 是保护此链表的自旋锁。
 
-*   `exp_client_uuid` is the UUID of client connected to this export.
+* `exp_client_uuid` is the UUID of client connected to this export.
 
-    *   exp_client_uuid 是与此导出连接的客户端的UUID。
+    > exp_client_uuid 是与此导出连接的客户端的 UUID。
 
-*   `exp_obd_chain` links all the exports on an obd device.
+* `exp_obd_chain` links all the exports on an obd device.
 
-    > exp_obd_chain 将所有导出链接到一个obd设备上。
+    > exp_obd_chain 将所有导出链接到一个 obd 设备上。
 
-*   `exp_zombie_work` is used when the export connection is destroyed.
+* `exp_zombie_work` is used when the export connection is destroyed.
 
-    > exp_obd_chain将所有导出链接到一个obd设备上。
+    > exp_zombie_work 销毁导出的连接时使用
 
-*   The structure also maintains several hash tables to keep track of `uuid-exports`, nid-exports and last received messages in case of recovery from failure. (exp_uuid_hash, exp_nid_hash and exp_gen_hash).
+* The structure also maintains several hash tables to keep track of `uuid-exports`, nid-exports and last received messages in case of recovery from failure. (exp_uuid_hash, exp_nid_hash and exp_gen_hash).
 
-    > 该结构还维护了多个哈希表，用于跟踪UUID-导出、NID-导出以及在发生故障恢复时接收的最后一条消息（exp_uuid_hash、exp_nid_hash和exp_gen_hash）。
+    > 该结构还维护了多个哈希表，用于跟踪 UUID-导出、NID-导出以及在发生故障恢复时接收的最后一条消息（exp_uuid_hash、exp_nid_hash 和 exp_gen_hash）。
 
-*   The obd device for this export is defined by the pointer `*exp_obd`.
+* The obd device for this export is defined by the pointer `*exp_obd`.
 
-    > 此导出的obd设备由指针\*exp_obd定义。
+    > 导出的 obd 设备由指针 \*exp_obd 定义。
 
-*   `*exp_connection` - This defines the portal rpc connection for this export.
+* `*exp_connection` - This defines the portal rpc connection for this export.
 
-    > \*exp_connection - 这定义了此导出的portal rpc连接。
+    > \*exp_connection - 定义了导出的 portal rpc 连接。
 
-*   `*exp_lock_hash` - This lists all the ldlm locks granted on this export.
+* `*exp_lock_hash` - This lists all the ldlm locks granted on this export.
 
-    > \*exp_lock_hash - 这列出了在此导出上授予的所有ldlm锁。
+    > \*exp_lock_hash - 列出了在此导出上授予的所有 ldlm 锁。
 
-*   This structure also has additional fields such as hashes for posix deadlock detection, time for last request received, linked list to replay all requests waiting to be replayed on recovery, lists for RPCs handled, blocking ldlm locks and special union to deal with target specific data.
+* This structure also has additional fields such as hashes for posix deadlock detection, time for last request received, linked list to replay all requests waiting to be replayed on recovery, lists for RPCs handled, blocking ldlm locks and special union to deal with target specific data.
 
-    > 该结构还具有其他字段，如用于posix死锁检测的哈希、上次接收请求的时间、用于在故障恢复时重新播放所有等待重播的请求的链表、处理的RPC的列表、阻塞的ldlm锁以及处理目标特定数据的特殊union。
+    > 该结构还具有其他字段，如用于 posix 死锁检测的哈希、上次接收请求的时间、用于在故障恢复时重放所有等待重放的请求的链表、处理的 RPC 的列表、阻塞的 ldlm 锁以及处理目标特定数据的union。
 
 #### class_setup()
 
 The primary duties of class_setup() routine are create hashtables and self-export, and invoke the obd type specific setup() function. As an initial step this function obtains the obd device from obd_devs array using obd_minor number and asserts the obd_magic number to make sure data integrity. Then it sets the obd_starting flag to indicate that the set up of this obd device has started (refer Source Code 8). Next the uuid-export and nid-export hashtables are setup using Linux kernel builtin functions rhashtable_init() and rhltable_init(). For the nid-stats hashtable Lustre uses its custom implementation of hashtable namely cfs_hash.
 
-> class_setup()函数的主要任务是创建哈希表和自我导出，并调用obd类型特定的setup()函数。作为初始步骤，该函数使用obd_minor号从obd_devs数组获取obd设备，并通过断言obd_magic号来确保数据完整性。然后，它将obd_starting标志设置为指示该obd设备的设置已经开始（参见Source Code 8）。接下来，使用Linux内核内置函数rhashtable_init()和rhltable_init()设置uuid-export和nid-export哈希表。对于nid-stats哈希表，Lustre使用自定义的hashtable实现，即cfs_hash。
+> class_setup() 函数的主要任务是创建哈希表和自导出（self-export），并调用 obd 类型特定的 setup() 函数。作为初始步骤，该函数使用 obd_minor 号从 obd_devs 数组获取 obd 设备，并通过判断 obd_magic 号来确保数据完整性。然后，它将 obd_starting 标志设置为指示该 obd 设备的设置已经开始状态（见Source Code 8）。接下来，使用 Linux 内核内置函数 rhashtable_init() 和 rhltable_init() 设置 uuid-export 和 nid-export 哈希表。对于 nid-stats 哈希表，Lustre 使用自己实现的 hashtable 实现，即cfs_hash。
 
 A generic device setup function obd_setup() defined in include/obd_class.h is then invoked by class_setup() by passing the odb_device structure populated and the corresponding lcfg command (LCFG_SETUP). This leads to the invocation of device specific setup routines from various subsystems such as mgc_setup(), lwp_setup(), osc_setup_common() and so on. All of these setup routines invoke a client_obd_setup() routine that acts as a pre-setup stage before the creation of imports for the clients as shown in Figure 13. The client_obd_setup() defined in ldlm/ldlm_lib.c function populates client_obd structure defined in include/obd.h as shown in Source Code 14. Note that the client_obd_setup() routine is called only in case of client obd devices like osp, lwp, mgc, osc, and mdc.
 
-> 然后，class_setup()调用include/obd_class.h中定义的通用设备设置函数obd_setup()，并传递填充的odb_device结构和相应的lcfg命令（LCFG_SETUP）。这将导致从各个子系统调用特定于设备的设置例程，如mgc_setup()、lwp_setup()、osc_setup_common()等等。所有这些设置例程都调用client_obd_setup()例程，该例程在为客户端创建导入之前充当预设置阶段，如图13所示。client_obd_setup()在ldlm/ldlm_lib.c函数中定义，它填充了include/obd.h中定义的client_obd结构，如Source Code 14所示。请注意，client_obd_setup()例程仅在客户端obd设备（如osp、lwp、mgc、osc和mdc）的情况下调用。
+> 然后，class_setup() 调用通用设备设置函数 obd_setup()（include/obd_class.h），参数是已经填充好的 odb_device 结构和相应的 lcfg 命令（LCFG_SETUP）。这将导致从各个子系统调用特定于设备的设置流程，如 mgc_setup()、lwp_setup()、osc_setup_common() 等等。所有这些设置流程都调用 client_obd_setup()（ldlm/ldlm_lib.c），该函数为客户端在创建导入之前进行预设置，如图13所示。它填充了 client_obd 结构（include/obd.h），如 Source Code 14所示。请注意，client_obd_setup() 仅在客户端 obd 设备（如osp、lwp、mgc、osc和mdc）的情况下被调用。
+
+<div align=center>
+    <img src="../image/Class_setup.png" alt="Figure 13. Workflow of class_setup() function in obd device lifecycle">
+<div>
+
+<center><sub>Figure 13. Workflow of class_setup() function in obd device lifecycle</sub></center>
 
 Source Code 14: client_obd structure defined in include/obd.h
 
@@ -473,7 +496,7 @@ struct  client_obd {
 
 client_obd structure is mainly used for page cache and extended attributes management. It comprises of fields pointing to obd device uuid and import interfaces, counter to keep track of client connections and fields to represent maximum and default extended attribute sizes. Few other fields used for cache handling are cl_cache - LRU cache for caching OSC pages, cl_lru_left - available LRU slots per OSC cache, cl_lru_busy - number of busy LRU pages, and cl_lru_in_list - number of LRU pages in the cache for this client_obd. Please also refer source code to see additional fields in the structure.
 
-> client_obd结构主要用于页面缓存和扩展属性管理。它包含指向obd设备uuid和导入接口的字段，用于跟踪客户端连接的计数器，以及表示最大和默认扩展属性大小的字段。用于缓存处理的其他一些字段包括cl_cache-用于缓存OSC页面的LRU缓存，cl_lru_left-每个OSC缓存中可用的LRU插槽数，cl_lru_busy-忙碌的LRU页面数，以及cl_lru_in_list-此client_obd的缓存中的LRU页面数。请参考源代码以查看结构中的其他字段。
+> client_obd 结构主要用于页面缓存和扩展属性管理。它包含指向 obd 设备 uuid 和导入接口的字段，用于跟踪客户端连接的计数器，以及表示最大和默认扩展属性大小的字段。用于缓存处理的其他一些字段包括 cl_cache - 用于缓存 OSC 页面的 LRU 缓存，cl_lru_left - 每个 OSC 缓存中可用的 LRU 插槽数，cl_lru_busy - 忙状态的 LRU 页面数，以及c l_lru_in_list - 此 client_obd 缓存在缓存 LRU 页面数。请参考源代码以查看结构中的其他字段。
 
 The client_obd_setup() then obtains an LDLM lock to setup the LDLM layer references for this client obd device. Further it sets up ptl-rpc request and reply portals using the ptlrpc_init_client() routine defined in ptlrpc/client.c. The client_obd structure defines a pointer to the obd_import structure defined in include/lustre_import.h. The obd_import structure represents ptl-rpc imports that are client-side view of remote targets. A new import connection for the obd device is created using the function class_new_import(). The class_new_import() method populates obd_import structure defined in include/lustre_import.h as shown in Source Code 15.
 
@@ -549,7 +572,10 @@ Obd devices in Lustre are components including lmv, lod, lov, mdc, mdd, mdt, mds
 
 > 在Lustre中，Obd设备是包括lmv、lod、lov、mdc、mdd、mdt、mds、mgc、mgs、obdecho、ofd、osc、osd-ldsikfs、osd-zfs、osp、lwp、ost和qmt在内的组件。其中，mdc、mgc、osc、osp和lwp是客户端Obd设备，这意味着两个服务器Obd设备组件（如mdt和ost）需要一个客户端设备来建立它们之间的通信。这在Lustre客户端与Lustre服务器通信的情况下也适用。客户端Obd设备由自导出和导入组成，而服务器端Obd设备由导出和反向导入组成。客户端Obd设备使用其导入向服务器发送请求，服务器使用其导出接收请求，如图16所示。服务器Obd设备上的导入称为反向导入，因为它们用于向客户端Obd设备发送请求。这些请求通常是由服务器不频繁地发送给客户端的回调请求。客户端使用自导出来接收服务器发送的这些回调请求。
 
-![Figure 16. Import and export pair in Lustre](../image/Import_export.png "Figure 16 Import and export pair in Lustre")
+<div align=center>
+    <img src="../image/Import_export.png" alt="Figure 16 Import and export pair in Lustre">
+</div>
+
 <center><sub>Figure 16. Import and export pair in Lustre</sub></center>
 
 For any two obd devices to communicate with each other, they need an import and export pair \[7]. For instance, let us consider the case of communication between ost and mdt obd devices. Logging into an OSS node and doing lctl dl shows the obd devices on the node and associated details (obd device status, type, name, uuid etc.). Examining /sys/fs/lustre directory can also show the obd devices corresponding to various device types. An example of the name of an obd device created for the data exchange between OST5 and MDT2 will be MDT2-lwp-OST5. This means that the client obd device that enables the communication here is lwp. A conceptual view of the communication between ost and mdt through import and export connections is shown in Figure 17. LWP (Light Weight Proxy) obd device manages connections established from ost to mdt, and mdts to mdt0. An lwp device is used in Lustre to send quota and FLD query requests (see Section 7). Figure 17 also shows the communication between mdt and ost through osp client obd device.
