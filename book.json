@@ -9,8 +9,6 @@
     },
      "plugins": [
          "code",
-         "multipart",
-         "github-buttons",
          "pageview-count",
          "-search",
          "splitter",
