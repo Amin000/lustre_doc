@@ -8,6 +8,8 @@
         "title": "Lustre 文档收集概述"
     },
      "plugins": [
+         "code",
+         "pageview-count",
          "-search",
          "splitter",
          "atoc",
