@@ -1,41 +1,35 @@
-* TOC
-{:toc}
 
-# Understanding Lustre Internals 中文翻译
-
-## Lustre Architecture
+# Lustre Architecture
 
 略
 
-## TEST
+# TEST
 
 略
 
-## UTILS
+# UTILS
 
 略
 
-## MGC
+# MGC
 
-### Introduction
+<h2 id="mgc-introduction">Introduction</h2>
 
 The Lustre client software involves primarily three components, management client (MGC), a metadata client (MDC), and multiple object storage clients (OSCs), one corresponding to each OST in the file system. Among this, the management client acts as an interface between Lustre virtual file system layer and Lustre management server (MGS). MGS stores and provides information about all Lustre file systems in a cluster. Lustre targets register with MGS to provide information to MGS while Lustre clients contact MGS to retrieve information from it.
 
 > Lustre 客户端软件主要涉及三个组件，管理客户端（MGC）、元数据客户端（MDC）和多个对象存储客户端（OSC）[^1]，每个 OSC 对应一个 OST。 MGC 连接了 Lustre 虚拟文件系统层与 Lustre 管理服务器（MGS）。MGS 存储并提供有关集群中所有 Lustre 文件系统的配置信息。Lustre 目标通过向 MGS 注册的方式向 MGS 提供信息，而 Lustre 客户端向 MGS 获取配置信息。
 
-[^1]: *lustre 支持多个 MDT（DNE），存在多个 mdc*
-
 The major functionalities of MGC are Lustre log handling, Lustre distributed lock management and file system setup. MGC is the first obd device created in Lustre obd device life cycle. An obd device in Lustre provides a level of abstraction on Lustre components such that generic operations can be applied without knowing the specific devices you are dealing with. The remaining Sections describe MGC module initialization, various MGC obd operations and log handling in detail. In the following Sections we will be using the terms clients and servers to represent service clients and servers created to communicate between various components in Lustre. Whereas the physical nodes representing Lustre’s clients and servers will be explicitly mentioned as ‘Lustre clients’ and ‘Lustre servers’.
 
 > MGC 的主要功能包括 Lustre 日志处理、Lustre 分布式锁管理和文件系统的初始化。MGC 是在 Lustre obd 设备生命周期中第一个被创建的 obd 设备。Lustre 中的 obd 设备为 Lustre 组件提供了一层抽象，使得组件可以使用通用操作，而无需了解正在处理的具体设备。其余部分详细描述了 MGC 模块的初始化、各种 MGC obd 操作以及日志处理。在接下来的部分中，我们将使用"clients"和"servers"这些术语来代表为了在 Lustre 的各个组件之间进行通信而被创建的客户端和服务端的服务。而表示Lustre的客户端和服务端的物理节点将明确标注为"Lustre clients"和"Lustre servers"。
 
-### MGC Module Initialization
+## MGC Module Initialization
 
 When the MGC module initializes, it registers MGC as an obd device type with Lustre using class_register_type() as shown in Source Code 1. Obd device data and metadata operations are defined using the obd_ops and md_ops structures respectively. Since MGC deals with metadata in Lustre, it has only obd_ops operations defined. However the metadata client (MDC) has both metadata and data operations defined since the data operations are used to implement Data on Metadata (DoM) functionality in Lustre. The class_register_type() function passes &mgc_obd_ops, NULL, false, LUSTRE_MGC _NAME, and NULL as its arguments. LUSTRE_MGC_NAME is defined as “mgc” in include/obd.h.
 
 > 当 MGC 模块初始化时，它使用 class_register_type() 将 MGC 注册为一种 obd 设备类型，如源代码1所示。obd_ops 和 md_ops 结构分别定义了 obd 设备的数据和元数据操作。由于 MGC 只处理Lustre中的元数据，只定义了obd_ops操作。然而，元数据客户端（MDC）既有元数据操作，又有数据操作，因为数据操作用于实现 Lustre 中DoM 功能。class_register_type() 的参数为 &mgc_obd_ops、NULL、false、LUSTRE_MGC_NAME 和 NULL。在 include/obd.h 中，LUSTRE_MGC_NAME 被定义为"mgc"。
 
-### MGC obd Operations
+## MGC obd Operations
 
 MGC obd operations are defined by mgc_obd_ops structure as shown in Source Code 2. Note that all MGC obd operations are defined as function pointers. This type of programming style avoids complex switch cases and provides a level of abstraction on Lustre components such that the generic operations can be applied without knowing the details of specific obd devices.
 
@@ -64,25 +58,25 @@ In Lustre one of the ways two subsystems share data is with the help of obd_ops 
 
 > 在 Lustre 中，两个子系统之间共享数据的一种方式是通过 obd_ops 结构。为了理解两个子系统之间的通信是如何工作的，让我们以 mgc_obd_ops 结构中的 mgc_get_info() 为例。子系统 llite 通过将一个宏（KEY_CONN_DATA）作为参数调用 mgc_get_info()（llite/llite_lib.c）。注意，llite 调用的是 obd_get_info() 而不是直接调用 mgc_get_info()。obd_get_info()（include/obd_class.h），如图6所示。我们可以看到，函数调用一个 OBP 宏，它的参数是 obd_export 和 get_info。OBP 宏将 o（obd_export 设备结构）和 op（操作）连接在一起，宏替换为函数调用 o_get_info()。
 
-<div align=center><img src="../image/Mgc_llite_comm_1.png" alt="Communication between llite and mgc through obdclass."></div>
-
-<center><sub>Figure 6. Communication between llite and mgc through obdclass.</sub></center>
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/Mgc_llite_comm_1.png" alt="Figure 6. Communication between llite and mgc through obdclass.">
+    <figcaption style="font-size:12px">Figure 6. Communication between llite and mgc through obdclass.</figcaption>
+</div>
 
 So how does llite make sure that this operation is directed specifically towards MGC obd device? obd_get_info() from llite/llite_lib.c has an argument called sbi-\>ll_md_exp. The sbi structure is a type of ll_sb_info defined in llite/llite_internal.h (refer Figure 7). And the ll_md_exp field from ll_sb_info is a type of obd_export structure defined in include/lustre_export.h. obd_export structure has a field \*exp_obd which is an obd_device structure (defined in include/obd.h). Another MGC obd operation obd_connect() retrieves export using the obd_device structure. Two functions involved in this process are class_name2obd() and class_num2obd() defined in obdclass/genops.c.
 
 > 那么，llite 如何确保以上的操作是针对 MGC obd 设备的？llite/llite_lib.c 中的 obd_get_info() 有一个名为 sbi->ll_md_exp 的参数。sbi 的类型是 ll_sb_info，它在 llite/llite_internal.h 中定义（图7）。而 ll_sb_info 中的 ll_md_exp 字段在 include/lustre_export.h 中定义，类型为 obd_export。obd_export 中的 \*exp_obd 成员，它是一个 obd_device 结构（在include/obd.h中定义）。另一个 MGC obd 操作 obd_connect() 使用obd_device 检查获取导出项。参与此流程的两个函数分别为 class_name2obd() 和 class_num2obd()，它们都在 obdclass/genops.c 中定义。
 
-<div align=center>
-    <img src="../image/Mgc_llite_comm_2.png" alt="Figure 7. Data structures involved in the communication between mgc and llite subsystems.">
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/Mgc_llite_comm_2.png" alt="Figure 7. Data structures involved in the communication between mgc and llite subsystems.">
+    <figcaption style="font-size:12px">Figure 7. Data structures involved in the communication between mgc and llite subsystems.</figcaption>
 </div>
-
-<center><sub>Figure 7. Data structures involved in the communication between mgc and llite subsystems.</sub></center>
 
 In the following Sections we describe some of the important MGC obd operations in detail.
 
 > 在接下来的部分中，我们将详细描述一些重要的 MGC obd 操作。
 
-### mgc_setup()
+## mgc_setup()
 
 mgc_setup() is the initial routine that gets executed to start and setup the MGC obd device. In Lustre MGC is the first obd device that is being setup as part of the obd device life cycle process. To understand when mgc_setup() gets invoked in the obd device life cycle, let us explore the workflow from the Lustre module initialization.
 
@@ -92,11 +86,10 @@ The Lustre module initialization begins from the lustre_init() routine defined i
 
 > Lustre 模块初始化从 llite/super25.c中的 lustre_init() 开始。当 ‘lustre’ 内核模块被加载时，这个函数就被调用。lustre_init 调用 register_filesystem(\&lustre_fs_type)，注册‘lustre’到文件系统中，并把它加入内核文件系统的链表中，这个链表被用于挂载等系统调用。lustre_fs_type 也在同个文件进行定义（源码3）。
 
-<div align=center>
-    <img src="../image/Mgc_setup.png" alt="Figure 8. mgc_setup() call graph starting from Lustre file system mounting">
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/Mgc_setup.png" alt="Figure 8. mgc_setup() call graph starting from Lustre file system mounting.">
+    <figcaption style="font-size:12px">Figure 8. mgc_setup() call graph starting from Lustre file system mounting.</figcaption>
 </div>
-
-<center><sub>Figure 8. mgc_setup() call graph starting from Lustre file system mounting.</sub></center>
 
 Source code 3: lustre_fs_type structure defined in llite/super25.c
 
@@ -112,7 +105,7 @@ static struct file_system_type lustre_fs_type = {
 
 When a user mounts Lustre, the lustre_mount() gets invoked as evident from this structure. lustre_mount() is defined in the same file and which in turn calls mount_nodev() routine. The mount_nodev() invokes its call back function lustre_fill_super() which is also defined in llite/super25.c. lustre_fill_super() is the entry point for the mount call from the Lustre client into Lustre.
 
-> 当用户挂载 Lustre 时，lustre_mount() 就被调用（在 llite/super25.c 定义），之后调用 mount_nodev()。mount_nodev() 调用其回调函数 lustre_fill_super()（llite/super25.c 中定义），lustre_fill_super() 挂载调用是 Lustre 客户端进入 Lustre 的入口点。
+> 当用户挂载 Lustre 时，lustre_mount() 就被调用（llite/super25.c），之后调用 mount_nodev()。mount_nodev() 调用其回调函数 lustre_fill_super()（llite/super25.c 中定义），lustre_fill_super() 挂载调用是 Lustre 客户端进入 Lustre 的入口点。
 
 lustre_fill_super() invokes lustre_start_mgc() defined in obdclass/obd_mount.c. This sets up the MGC obd device to start processing startup logs. The lustre_start_simple() routine called here starts the MGC obd device (defined in obdclass/obd_mount.c). lustre_start_simple() eventually leads to the invocation of obdclass specific routines class_attach() and class_setup() (described in detail in the Section 5) with the help of a do_lcfg() routine that takes obd device name and a lustre configuration command (lcfg_command) as arguments. Various lustre configuration commands are LCFG_ATTACH, LCFG_DETACH, LCFG_SETUP, LCFG_CLEANUP and so on. These are defined in include/uapi/linux/lustre/lustre_cfg.h as shown in Source Code 4.
 
@@ -142,31 +135,29 @@ mgc_setup() first adds a reference to the underlying Lustre PTL-RPC layer. Then 
 
 > mgc_setup()首先添加对底层 Lustre PTL-RPC 的引用。然后，它使用 client_obd_setup()（在ldlm/ldlm_lib.c中定义）为 obd 设备设置一个 RPC 客户端。接下来，MGC 调用 mgc_llog_init() 初始化 Lustre 日志，这些日志将在 MGS 服务器上进行处理。这些日志也会发送到 Lustre 客户端，客户端端的 MGC 会复制这些日志以处理数据。在 MGS 上可调的持久性参数被发送到 MGC，并且在 MGC 上的 Lustre 日志处理初始化这些参数。在 Lustre 中，必须在处理 Lustre 日志之前设置这些可调参数，而 mgc_tunables_init() 帮助初始化这些可调参数。例如，该函数设置包括 conn_uuid、uuid、ping 和 dynamic_nids，这些都可以在任何 Lustre 客户端上的 /sys/fs/lustre/mgc 目录进行查看。kthread_run() 启动一个mgc_requeue_thread，它会不断地读取 Lustre 日志条目。图10显示了 mgc_setup() 的流程图。
 
-<div align=center>
-    <img src="../image/Mgc_setup_vs_cleanup.png" alt="Figure 10. mgc_setup() vs. mgc_cleanup()">
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/Mgc_setup_vs_cleanup.png" alt="Figure 10. mgc_setup() vs. mgc_cleanup()">
+    <figcaption style="font-size:12px">Figure 10. mgc_setup() vs. mgc_cleanup()</figcaption>
 </div>
 
-<center><sub>Figure 10. mgc_setup() vs. mgc_cleanup()</sub></center>
-
-### Lustre Log Handling
+## Lustre Log Handling
 
 Lustre extensively makes use of logging for recovery and distributed transaction commits. The logs associated with Lustre are called ‘llogs’ and config logs, startup logs and change logs correspond to various kinds of llogs. As described in Section 3.2.4, the llog_reader utility can be used to read these Lustre logs. When a Lustre target registers with MGS, the MGS constructs a log for the target. Similarly, a lustre-client log is created for the Lustre client when it is mounted. When a user mounts the Lustre client, it triggers to download the Lustre config logs on the client. As described earlier MGC subsystem is responsible for reading and processing the logs and sending them to Lustre clients and Lustre servers.
 
 > Lustre 大量使用日志（logging）进行恢复和分布式事务提交。与 Lustre 相关的日志称为 “llogs”，其中“配置”、“启动”和“更改”对应不同类型的 llogs。如第3.2.4节所述，可以使用llog_reader 工具来读取这些 Lustre 日志。当 Lustre 目标（lustre target）注册到 MGS 时，MGS会为目标创建一个日志。类似地，当挂载 Lustre 客户端时，会为该客户端创建一个lustre-client 日志。当用户挂载 Lustre 客户端时，它会触发在客户端上下载 Lustre 配置日志。正如前面所述，MGC 子系统负责读取和处理这些日志，并将其发送到 Lustre 客户端和 Lustre 服务器。
 
-#### Log Processing in MGC
+### Log Processing in MGC
 
 The lustre_fill_super() routine described in Section 4.4 makes a call to ll_fill_super() function defined in llite/llite_lib.c. This function initializes a config log instance specific to the super block passed from lustre_fill_super(). Since the same MGC may be used to follow multiple config logs (e.g. ost1, ost2, Lustre client), the config log instance is used to keep the state for a specific log. Afterwards lustre_fill_super() invokes lustre_process_log() which gets a config log from MGS and starts processing it. lustre_process_log() gets called for both Lustre clients and Lustre servers and it continues to process new statements appended to the logs. It first resets and allocates lustre_cfg_bufs (which temporarily store log data) and calls obd_process_config() which eventually invokes the obd device specific mgc_process_config() (as shown in Figure 9) with the help of OBP macro. The lcfg_command passed to mgc_process_config() is LCFG_LOG_START which gets the config log from MGC, starts processing it and adds the log to list of logs to follow. config_log_add() defined in the same file accomplishes the task of adding the log to the list of active logs watched for updates by MGC. Few other important log processing functions in MGC are - mgc_process_log (that gets a configuration log from the MGS and processes it), mgc_process_recover_nodemap_log (called if the Lustre client was notified for target restarting by the MGS), and mgc_apply_recover_logs (applies the logs after recovery).
 
 > 在第4.4节中描述的 lustre_fill_super() 调用ll_fill_super()，该函数定义在llite/llite_lib.c中。该函数使用 lustre_fill_super() 的超级块参数初始化了一个配置日志实例。由于同一个 MGC 可能用于跟踪多个配置日志（例如ost1、ost2、Lustre 客户端），因此配置日志（config log）实例用于维护指定的日志的状态。然后，lustre_fill_super() 调用lustre_process_log()，该函数从MGS获取一个配置日志并开始处理它。lustre_process_log()被 Lustre 客户端和 Lustre 服务端，并且它继续处理追加到日志中的新语句。它首先重置并分配 lustre_cfg_bufs（临时存储日志数据），然后调用 obd_process_config()，最终使用 OBP 宏调用 obd 设备特定的 mgc_process_config()（图9）。传递给 mgc_process_config() 的 lcfg_command 是 LCFG_LOG_START，它从 MGC 获取配置日志，并开始处理它，并将日志添加到要跟踪的日志列表中。在同一文件中定义的 config_log_add() 完成了将日志添加到 MGC 监视活动日志更新列表的任务。MGC 中的其他重要日志处理函数包括 mgc_process_log（从 MGS 获取配置日志并处理它）、mgc_process_recover_nodemap_log（如果 Lustre 客户端收到 MGS 的目标重新启动通知就被调用）、mgc_apply_recover_logs（在恢复后应用日志）。
 
-<div align=center>
-    <img src="../image/Mgc_process_config.png" alt="Figure 9. mgc_process_config() call graph">
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/Mgc_process_config.png" alt="Figure 9. mgc_process_config() call graph">
+    <figcaption style="font-size:12px">Figure 9. mgc_process_config() call graph.</figcaption>
 </div>
 
-<center><sub>Figure 9. mgc_process_config() call graph</sub></center>
-
-### mgc_precleanup() and mgc_cleanup()
+## mgc_precleanup() and mgc_cleanup()
 
 Cleanup functions are important in Lustre in case of file system unmounting or any unexpected errors during file system setup. The class_cleanup() routine defined in obdclass/obd_config.c starts the process of shutting down an obd device. This invokes mgc_precleanup() (through obd_precleanup()) which makes sure that all the exports are destroyed before shutting down the obd device. mgc_precleanup() first decrements the mgc_count that was incremented during mgc_setup(). The mgc_count keeps the count of the running MGC threads and makes sure not to shut down any threads prematurely. Next it waits for any requeue thread to gets completed and calls obd_cleanup_client_import(). obd_cleanup_client_import() destroys client side import interface of the obd device. Finally mgc_precleanup() invokes mgc_llog_fini() which cleans up the lustre logs associated with the MGC. The log cleaning is accomplished by llog_cleanup() routine defined in obdclass/llog_obd.c.
 
@@ -176,7 +167,7 @@ mgc_cleanup() function deletes the profiles for the last MGC obd using class_del
 
 > mgc_cleanup() 函数使用在 obdclass/obd_config.c 中定义的 class_del_profiles() 删除最后一个 MGC obd 的配置文件（profiles）。当 MGS 向 MGC 发送缓冲数据时，Lustre 配置文件用于区分数据的预期接收者。接下来，lprocfs_obd_cleanup()（obdclass/lprocfs_status.c）删除 obd 设备的 sysfs 和 debugfs 条目。然后，它递减对 PTL-RPC 层的引用，并最后调用 client_obd_cleanup()。此函数（ldlm/ldlm_lib.c）使 obd 命名空间指向NULL，销毁客户端导入接口，最后使用 OBD_FREE 宏释放 obd 设备。图10显示了 MGC 中设置和清理的并行工作流程。需要注意的是，在 obd_precleanup() 之后，uuid-export 和 nid-export 哈希表也被释放和销毁。uuid-export HT 存储不同 obd 设备的 UUID，而 nid-export HT 存储 ptl-rpc 网络连接信息。
 
-### mgc_import_event()
+## mgc_import_event()
 
 The mgc_import_event() function handles the events reported at the MGC import interface. The type of import events identified by MGC are listed in obd_import_event enum defined in include/lustre_import.h as shown in Source Code 5. Client side imports are used by the clients to communicate with the exports on the server (for instance if MDS wants to communicate with MGS, MDS will be using its client import to communicate with MGS’ server side export). More detailed description of import and export interfaces on obd device is given in Section 5.
 
@@ -200,9 +191,9 @@ Some of the remaining obd operations for MGC such as client_import_add_conn(), c
 
 > 在 obdclass 和 ldlm 部分将解释 MGC 的一些剩余的 obd 操作，例如 client_import_add_conn()、client_import_del_conn()、client_connect_import() 和client_disconnect_export()。
 
-## OBDCLASS
+# OBDCLASS
 
-### Introduction
+<h2 id="obdclass-introduction">Introduction</h2>
 
 The obdclass subsystem in Lustre provides an abstraction layer that allows generic operations to be applied on Lustre components without having the knowledge of specific components. MGC, MDC, OSC, LOV, LMV are examples of obd devices in Lustre that make use of the obdclass generic abstraction layer. The obd devices can be connected in different ways to form client-server pairs for internal communication and data exchange in Lustre. Note that the client and server referred here are service clients and servers roles temporarily assumed by the obd devices but not physical nodes representing Lustre clients and Lustre servers.
 
@@ -224,7 +215,7 @@ Source code 7: MAX_OBD_DEVICES defined in include/obd.h
 #define MAX_OBD_DEVICES 8192
 ```
 
-### obd_device Structure
+## obd_device Structure
 
 The structure that defines an obd device is shown in Source Code 8.
 
@@ -260,7 +251,7 @@ The first field in this structure is obd_type as shown in Source Code 11 that de
 
 > 这个结构体中的第一个字段是 obd_type，如源代码11所示，它定义了 obd 设备的类型 - 元数据设备、数据设备或两者兼有。obd_magic 用于标识 obd 设备的数据是否损坏。Lustre 在创建阶段为 obd 设备分配一个魔术数，并在代码的不同部分进行断言，以确保它返回相同的魔术数，以确保数据完整性。如前面的章节中所述，obd_minor 是 obd 设备在 obd_devs 数组中的索引。lu_device 条目标识 obd 设备是否为真实设备，如 ldiskfs 或 zfs 类型的（块）设备。obd_uuid 和 obd_name 字段分别用于 obd 设备的 UUID 和名称，如字段名称所示。obd_device 结构体还包括各种标志，用于指示 obd 设备的当前状态。其中一些是 obd_attached - 表示完成附加，obd_set_up - 设置完成，abort_recovery - 恢复过期，obd_stopping - 开始清理，obd_starting - 开始设置等等。obd_uuid_hash 和 obd_nid_hash 分别是 obd 设备的 uuid-export 和 nid-export 哈希表。obd 设备还与指向 obd_nid_stats、obd_exports、obd_unlinked_exports 和 obd_delayed_exports 等多个链表相关联。此结构体的其他相关字段包括 obd_exports、kset 和 kobject 设备模型抽象、恢复超时、proc条目、目录条目、procfs 和 debugfs 变量。
 
-### MGC Life Cycle
+## MGC Life Cycle
 
 As described in Section 4 MGC is the first obd device setup and started by Lustre in the obd device life cycle. To understand the lifecycle of MGC obd device let us start from the generic file system mount function vfs_mount(). vfs_mount() is directly invoked by the mount system call from the user and handles the generic portion of mounting a file system. It then invokes file system specific mount function, that is lustre_mount() in case of Lustre. The lustre_mount() defined in llite/llite_lib.c invokes the kernel function mount_nodev() as shown in Source Code 9 which invokes lustre_fill_super() as its call back function.
 
@@ -303,15 +294,14 @@ Then ll_fill_super() then invokes the lustre_process_log() function (see Figure 
 
 > 然后，ll_fill_super() 调用 lustre_process_log()（obdclass/obd_mount.c，图11），该函数从 MGS 获取配置日志并开始处理它们。这个函数在 Lustre 客户端和 Lustre 服务端中都被调用，并且它将继续处理附加到日志中的新语句。传递给该函数的三个参数是超级块、日志名称和配置日志实例。配置实例唯一标识超级块，用于 MGC 写入配置日志的本地副本，而 logname 是要从 MGS 复制的日志的名称。配置日志实例用于维护特定配置日志的状态（可以来自ost1、ost2、Lustre客户端等），并添加到 MGC 的日志跟踪列表中。然后 lustre_process_log() 调用obd_process_config()，它使用 OBP 宏（参见第4.3节）调用 MGC 的 mgc_process_config() 函数。它从 MGS 获取配置日志并处理，以用于启动其他服务。日志也被添加到要监视的日志列表中。
 
-<div align=center>
-    <img src="../image/Mgc_lifecycle.png" alt="Figure 11. Obd device life cycle workflow for MGC">
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/Mgc_lifecycle.png" alt="Figure 11. Obd device life cycle workflow for MGC">
+    <figcaption style="font-size:12px">Figure 11. Obd device life cycle workflow for MGC.</figcaption>
 </div>
-
-<center><sub>Figure 11. Obd device life cycle workflow for MGC</sub></center>
 
 We now describe the detailed workflow of mgc_process_config() by describing the functionalities of each sub-function that it invokes. The config_log_add() function categorizes the data in config log based on if the data is related to - ptl-rpc layer, configuration parameters, nodemaps and barriers. The log data related to each of these categories is then copied to memory using the function config_log_find_or_add(). mgc_process_config() next calls mgc_process_log() and it gets a config log from MGS and processes it. This function is called for both Lustre clients and Lustre servers to process the configuration log from the MGS. The MGC enqueues a DLM lock on the log from the MGS and if the lock gets revoked, MGC will be notified by the lock cancellation callback that the config log has changed, and will enqueue another MGS lock on it, and then continue processing the new additions to the end of the log. Lustre prevents the updation of the same log by multiple processes at the same time. The mgc_process_log() then calls mgc_process_cfg_log() function which reads the log and creates a local copy of the log on the Lustre client or Lustre server. This function first initializes an environment and a context using lu_env_init() and llog_get_context() respectively. The mgc_llog_local_copy() routine is used to create a local copy of the log with the environment and context previously initialized. Real time changes in the log are parsed using the function class_config_parse_llog(). Under read only mode, there will be no local copy or local copy will be incomplete, so Lustre will try to use remote llog first.
 
-> 现在我们通过描述 mgc_process_config() 调用的每个子函数的功能，来详细说明它的工作流程。config_log_add() 函数根据日志中的数据是否关联到 ptl-rpc 层、配置参数、节点映射和屏障，对其进行分类。然后，使用 config_log_find_or_add() 把与每个类别相关的日志数据被复制到内存中。mgc_process_config() 接下来调用 mgc_process_log()，它从 MGS 获取一个配置日志并对其进行处理。这个函数被用于 Lustre 客户端和 Lustre 服务端，以用于处理来自 MGS 的配置日志。MGC 将来着 MGS 的日志放入 DLM 锁的队列，如果锁被取消，锁取消回调将通知 MGC 配置日志已经发生了变化，并将在其上排队另一个 MGS 锁，然后继续处理日志末尾的新添加内容。Lustre 防止多个进程同时更新同一日志。然后 mgc_process_log() 调用 mgc_process_cfg_log()，该函数读取日志并在 Lustre 客户端或 Lustre 服务端上创建一个本地副本。此函数首先使用 lu_env_init() 和 llog_get_context() 分别初始化环境和上下文。mgc_llog_local_copy() 用于创建之前初始化的环境的日志和之前初始化的上下文日志的本地副本。 class_config_parse_llog() 用于解析日志中的实时更改。在只读模式下，可能没有本地副本或本地副本不完整，因此Lustre 将尝试使用远程 llog。
+> 现在我们通过描述 mgc_process_config() 调用的每个子函数的功能，来详细说明它的工作流程。config_log_add() 函数根据日志中的数据是否关联到 ptl-rpc 层、配置参数、节点映射和屏障，对其进行分类。然后，使用 config_log_find_or_add() 把与每个类别相关的日志数据被复制到内存中。mgc_process_config() 接下来调用 mgc_process_log()，它从 MGS 获取一个配置日志并对其进行处理。这个函数被用于 Lustre 客户端和 Lustre 服务端，以用于处理来自 MGS 的配置日志。MGC 将来着 MGS 的日志放入 DLM 锁的队列，如果锁被取消，锁取消回调将通知 MGC 配置日志已经发生了变化，并将在其上排队另一个 MGS 锁，然后继续处理日志末尾的新添加内容。Lustre 防止多个进程同时更新同一日志。然后 mgc_process_log() 调用 mgc_process_cfg_log()，该函数读取日志并在 Lustre 客户端或 Lustre 服务端上创建一个本地副本。此函数首先使用 lu_env_init() 和 llog_get_context() 分别初始化环境和上下文。mgc_llog_local_copy() 用于创建之前初始化的环境的日志和之前初始化的上下文日志的本地副本。 class_config_parse_llog() 用于解析日志中的实时更改。在只读模式下，可能没有本地副本或本地副本不完整，因此Lustre 将尝试使用远程的 llog。
 
 The class_config_parse_llog() function is defined in obdclass/obd_config.c. The arguments passed to this function are the environment, context and config log instance initialized in mgc_process_cfg_log() function and the config log name. The first log that is being parsed by the class_config_parse_llog() function is start_log. start_log contains configuration information for various Lustre file system components, obd devices and file system mounting process. class_config_parse_llog() first acquires a lock on the log to be parsed using a handler function (llog_init_handle()). It then continues the processing of the log from where it last stopped till the end of the log. To process the logs two entities are used by this function - 1. an index to parse through the data in the log, and 2. a callback function that processes and interprets the data. The call back function can be a generic handler function like class_config_llog_handler() or it can be customized. Note that this is the call back handler initialized by the config_llog_instance structure as previously mentioned in Source Code 10. Additionally, the callback function provides a config marker functionality that allows to inject special flags for selective processing of data in the log. The callback handler also initializes lustre_cfg_bufs to temporarily store the log data. Afterwards the following actions take place in this function: translate log names to obd device names, append uuid with obd device name for each Lustre client mount and finally attach the obd device.
 
@@ -321,13 +311,13 @@ Each obd device then sets up a key to communicate with other devices through sec
 
 > 然后，每个 obd 设备会设置一个密钥，以用于通过 ptl-rpc 层与其他 obd 设备进行安全通信。创建此密钥的规则存储在配置日志中。然后，obd 设备创建一个用于通信的连接。注意，start_log 包含所有设备配置的所有状态信息，并且由 lustre 配置的缓冲区（lustre_cfg_bufs）临时存储。然后，obd 设备使用此缓冲区来处理日志数据。start_log 类似于一个虚拟日志文件，它不会存储在磁盘上。创建连接后，处理程序解析日志数据以获取所需的信息（uuid、nid等）， 并生成 Lustre config_logs。class_config_llog_handler() 函数的 llog_rec_hdr 参数决定应从日志中解析哪种类型的信息。例如，OBD_CFG_REC 表示处理程序要扫描 obd 设备的配置信息，CHANGELOG_REC要 求解析 changelog 记录。为了获取有关 obd 设备的 nid 和 uuid，处理程序调用 class_process_config()。此函数会为其他 obd 设备循环执行 obd 设备的创建。注意，在 Lustre obd 设备的生命周期的这个点上，只存在着 MGC。class_process_config()函数根据接收到的特定 obd 设备的lcfg_command 命令调用通用 obd 类函数，例如 class_attach()、class_add_uuid()、class_setup() 等。
 
-### Obd Device Life Cycle
+## Obd Device Life Cycle
 
 In this Section we describe the work flow of various obd device life cycle functions such as class_attach(), class_setup(), class_precleanup(), class_cleanup(), and class_detach().
 
 > 在本节中，我们描述各种 obd 设备生命周期函数的工作流程，包括 class_attach()、class_setup()、class_precleanup()、class_cleanup() 和 class_detach()。
 
-#### class_attach()
+### class_attach()
 
 The first method that is called in the life cycle of an obd device is class_attach() and the corresponding lustre config command is LCFG_ATTACH. The class_attach() method is defined in obdclass/obd_config.c. It registers and adds the obd device to the list of obd devices. The list of obd devices is defined in obdclass/genops.c using \*obd_devs\[MAX_OBD_DEVICES]. The attach function first checks if the obd device type being passed is valid. The obd_type structure is defined in include/obd.h (as shown in Source Code 11). Two types of operations defined in this structure are obd_ops (i.e., data operations) and md_ops (i.e., metadata operations). These operations determine if the obd device is destined to perform data or metadata operations or both.
 
@@ -369,17 +359,16 @@ The class_attach() then calls a class_newdev() function which creates, allocates
 
 > class_attach() 函数接下来调用 class_newdev() 函数，该函数创建、分配一个新的 obd 设备并进行初始化。class_attach() 函数的完整工作流程如图12所示。class_newdev() 函数调用的 class_get_type() 函数注册已创建的 obd 设备并加载 obd 设备模块。所有加载的 obd 设备都具有为其定义的元数据操作或数据操作（或两者兼备）。例如，LMV obd 设备的 md_ops 和 obd_ops (lmv/lmv_obd.c)分别 lmv_md_ops 和 lmv_obd_ops 结构中定义。在此初始化的 obd_minor 是 obd 设备在 obd_devs 数组中的索引。
 
-<div align=center>
-    <img src="../image/Class_attach.png" alt="Figure 12. Workflow of class_attach() function in obd device lifecycle">
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/Class_attach.png" alt="Figure 12. Workflow of class_attach() function in obd device lifecycle">
+    <figcaption style="font-size:12px">Figure 12. Workflow of class_attach() function in obd device lifecycle</figcaption>
 </div>
-
-<center><sub>Figure 12. Workflow of class_attach() function in obd device lifecycle</sub></center>
 
 The obd device then creates a self export using the function class_new_export_self(). The class_new_export_self() function invokes a __class_new_export() function which creates a new export, adds it to the hash table of exports and returns a pointer to it. Note that a self export is created only for a client obd device. The reference count for this export when created is 2, one for the hash table reference and the other for the pointer returned by this function itself. This function populates the obd_export structure defined in include/lustre_export.h (shown in Source Code 13). Various fields associated with this structure are explained in the next Section. Two functions that are used to increment and decrement the reference count for obd devices are class_export_get() and class_export_put() respectively. The last part of class_attach() is registering/listing the obd device in the obd_devs array which is done through class_register_device() function. This functions assigns a minor number to the obd device that can be used to lookup the device in the array.
 
 > 然后，obd 设备使用 class_new_export_self() 函数创建一个自导出（self export）。class_new_export_self() 函数调用 __class_new_export() 函数，创建一个新的导出，将其添加到导出的哈希表中，并返回指向该导出的指针。需要注意的是，只有客户端 obd 设备才会创建自导出。创建时，该导出的引用计数为2，一个用于哈希表引用，另一个用于该函数本身返回的指针。该函数填充obd_export 结构（include/lustre_export.h），如Source Code 13所示。与该结构相关的各个字段将在下一节中解释。用于增加和减少 obd 设备引用计数的两个函数分别是 class_export_get() 和 class_export_put()。class_attach() 的最后一部分是通过 class_register_device() 函数在 obd_devs 数组中注册/列出 obd 设备。这个函数为 obd 设备分配一个次设备号，可以用来在数组中查找该设备。
 
-#### obd_export Structure
+### obd_export Structure
 
 This Section describes some of the relevant fields of the obd_export structure (shown in Source Code 13) that represents a target side export connection (using ptlrpc layer) for obd devices in Lustre. This is also used to connect between layers on the same node when there is no network connection between the nodes. For every connected client there exists an export structure on the server attached to the same obd device. Various fields of this structure are described below.
 
@@ -460,7 +449,7 @@ struct obd_export {
 
     > 该结构还具有其他字段，如用于 posix 死锁检测的哈希、上次接收请求的时间、用于在故障恢复时重放所有等待重放的请求的链表、处理的 RPC 的列表、阻塞的 ldlm 锁以及处理目标特定数据的 union 结构。
 
-#### class_setup()
+### class_setup()
 
 The primary duties of class_setup() routine are create hashtables and self-export, and invoke the obd type specific setup() function. As an initial step this function obtains the obd device from obd_devs array using obd_minor number and asserts the obd_magic number to make sure data integrity. Then it sets the obd_starting flag to indicate that the set up of this obd device has started (refer Source Code 8). Next the uuid-export and nid-export hashtables are setup using Linux kernel builtin functions rhashtable_init() and rhltable_init(). For the nid-stats hashtable Lustre uses its custom implementation of hashtable namely cfs_hash.
 
@@ -470,11 +459,10 @@ A generic device setup function obd_setup() defined in include/obd_class.h is th
 
 > 然后，class_setup() 调用通用设备设置函数 obd_setup()（include/obd_class.h），参数是已经填充好的 odb_device 结构和相应的 lcfg 命令（LCFG_SETUP）。这将导致从各个子系统调用特定于设备的设置流程，如 mgc_setup()、lwp_setup()、osc_setup_common() 等等。所有这些设置流程都调用 client_obd_setup()（ldlm/ldlm_lib.c），该函数为客户端在创建导入之前进行预设置，如图13所示。它填充了 client_obd 结构（include/obd.h），如 Source Code 14所示。请注意，client_obd_setup() 仅在客户端 obd 设备（如osp、lwp、mgc、osc和mdc）的情况下被调用。
 
-<div align=center>
-    <img src="../image/Class_setup.png" alt="Figure 13. Workflow of class_setup() function in obd device lifecycle">
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/Class_setup.png" alt="Figure 13. Workflow of class_setup() function in obd device lifecycle">
+    <figcaption style="font-size:12px">Figure 13. Workflow of class_setup() function in obd device lifecycle.</figcaption>
 </div>
-
-<center><sub>Figure 13. Workflow of class_setup() function in obd device lifecycle</sub></center>
 
 Source Code 14: client_obd structure defined in include/obd.h
 
@@ -527,7 +515,7 @@ struct obd_import {
 };
 ```
 
-### class_precleanup() and class_cleanup()
+## class_precleanup() and class_cleanup()
 
 Lustre unmount process begins from the ll_umount_begin() function defined as part of the lustre_super_operations structure (shown in Source Code 16). The ll_umount_begin() function accepts a super_block from which the metadata and data exports for the obd_device are extracted using the class_exp2obd() routine. The obd_force flag from obd_device structure is set to indicate that cleanup will be performed even though the obd reference count is greater than zero. Then it periodically checks and waits to finish until there are no outstanding requests from vfs layer.
 
@@ -562,43 +550,39 @@ class_cleanup() starts the shut down process of the obd device. This first sets 
 
 > class_cleanup() 开始 obd 设备的关闭流程。首先将 obd_stopping 标志设置为指示清理已开始状态，然后等待任何已经到达的连接请求完成。一旦所有请求完成，它使用class_disconnect_exports() 函数（图14）断开所有导出。然后，它调用 obd 通用函数 obd_precleanup()，以确保所有导出都被销毁。obd_precleanup() 调用设备特定的 precleanup 函数（例如mgc_precleanup()）。然后 class_cleanup() 销毁 uuid-export、nid-export 和 nid-stats 哈希表，并调用 class_decref() 函数。class_decref() 函数断言所有导出都被销毁。
 
-<div align=center>
-    <img src="../image/Class_cleanup_1.png" alt="Figure 14. Lustre unmounting and initiation of class_cleanup() in obd device lifecycle.">
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/Class_cleanup_1.png" alt="Figure 14. Lustre unmounting and initiation of class_cleanup() in obd device lifecycle.">
+    <figcaption style="font-size:12px">Figure 14. Lustre unmounting and initiation of class_cleanup() in obd device lifecycle.</figcaption>
 </div>
-
-<center><sub>Figure 14. Lustre unmounting and initiation of class_cleanup() in obd device lifecycle.</sub></center>
 
 class_manual_cleanup() then invokes class_detach() function by passing the LCFG_DETACH command. class_detach() (defined in obdclass/obd_config.c) makes the obd_attached flag to zero and unregisters the device (frees the slot in obd_devs array) using class_unregister_device() function. Next it invokes the class_decref() routine that destroys the last export (self export) by calling class_unlink_export() method. class_unlink_export() calls class_export_put() that frees the obd device using class_free_dev() function. class_free_dev() calls device specific cleanup through obd_cleanup() and finally invokes class_put_type() routine that unloads the module. This is the end of the life cycle for the obd device. An end to end workflow of class_cleanup() routine is illustrated in Figure 15.
 
 > 然后 class_manual_cleanup() 通过 LCFG_DETACH 命令作为参数调用 class_detach() 函数。class_detach()（obdclass/obd_config.c）将 obd_attached 标志设置为零，并使用class_unregister_device() 函数取消注册设备（释放 obd_devs 数组中的 slot）。接下来，它通过调用 class_unlink_export() 调用 class_decref()，class_decref 通过调用class_export_put() 释放最后一个导出（自导出）。class_unlink_export() 调用 class_free_dev() 函数释放 obd 设备。class_free_dev() 通过 obd_cleanup() 调用设备特定的清理函数，最后调用 class_put_type() 卸载模块。这标志着 obd 设备的生命周期的结束。class_cleanup() 的端到端工作流程示例如图15所示。
 
-<div align=center>
-    <img src="../image/Class_cleanup_2.png" alt="Figure 15. class_cleanup() workflow in obd device lifecycle.">
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/Class_cleanup_2.png" alt="Figure 15. class_cleanup() workflow in obd device lifecycle.">
+    <figcaption style="font-size:12px">Figure 15. class_cleanup() workflow in obd device lifecycle.</figcaption>
 </div>
 
-<center><sub>Figure 15. class_cleanup() workflow in obd device lifecycle.</sub></center>
-
-### Imports and Exports
+## Imports and Exports
 
 Obd devices in Lustre are components including lmv, lod, lov, mdc, mdd, mdt, mds, mgc, mgs, obdecho, ofd, osc, osd-ldsikfs, osd-zfs, osp, lwp, ost, and qmt. Among these mdc, mgc, osc, osp, and lwp are client obd devices meaning two server odb device components such as mdt and ost need one client device to establish communication between them. This is also applicable in case of a Lustre client communicating with Lustre servers. Client side obd devices consist of self export and import whereas server side obd devices consist of exports and reverse imports. A client obd device sends requests to the server using its import and the server receives requests using its export as illustrated in Figure 16. The imports on server obd devices are called reverse imports because they are used to send requests to the client obd devices. These requests are mostly callback requests sent by the server to clients infrequently. And the client uses it’s self export to receive these callback requests from the server.
 
 > 在 Lustre 中，obd设备是包括 lmv、lod、lov、mdc、mdd、mdt、mds、mgc、mgs、obdecho、ofd、osc、osd-ldsikfs、osd-zfs、osp、lwp、ost 和 qmt 在内的组件。其中，mdc、mgc、osc、osp 和 lwp 是客户端 obd 设备，这意味着两个服务端 obd 设备组件（如 mdt 和 ost）需要一个客户端设备来建立它们之间的通信。这在 Lustre 客户端与 Lustre 服务端通信的情况下也适用。客户端Obd设备由自导出和导入组成，而服务器端 obd 设备由导出和反向导入组成。客户端 obd 设备使用其导入向服务器发送请求，服务端使用其导出接收请求，如图16所示。服务端 obd 设备上的导入称为反向导入，因为它们用于向客户端 obd 设备发送请求。这些请求通常是由服务端发送给客户端的回调请求，但请求并不频繁。客户端使用自导出来接收服务器发送的这些回调请求。
 
-<div align=center>
-    <img src="../image/Import_export.png" alt="Figure 16 Import and export pair in Lustre">
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/Import_export.png" alt="Figure 16 Import and export pair in Lustre">
+    <figcaption style="font-size:12px">Figure 16 Import and export pair in Lustre.</figcaption>
 </div>
-
-<center><sub>Figure 16. Import and export pair in Lustre</sub></center>
 
 For any two obd devices to communicate with each other, they need an import and export pair \[7]. For instance, let us consider the case of communication between ost and mdt obd devices. Logging into an OSS node and doing lctl dl shows the obd devices on the node and associated details (obd device status, type, name, uuid etc.). Examining /sys/fs/lustre directory can also show the obd devices corresponding to various device types. An example of the name of an obd device created for the data exchange between OST5 and MDT2 will be MDT2-lwp-OST5. This means that the client obd device that enables the communication here is lwp. A conceptual view of the communication between ost and mdt through import and export connections is shown in Figure 17. LWP (Light Weight Proxy) obd device manages connections established from ost to mdt, and mdts to mdt0. An lwp device is used in Lustre to send quota and FLD query requests (see Section 7). Figure 17 also shows the communication between mdt and ost through osp client obd device.
 
 > 为了使任意两个 obd 设备能互相通信，它们需要一个导入和导出配对。例如，让我们考虑 ost 和 mdt obd 设备之间的通信情况。登录到 OSS 节点并执行 lctl dl 命令会显示节点上的 obd 设备及其相关详细信息（obd设备状态、类型、名称、UUID等）。检查 /sys/fs/lustre 目录也可以显示与各种设备类型对应的 obd 设备。一个例子：用于 OST5 和 MDT2 之间数据交换的 obd 设备的名称是MDT2-lwp-OST5。这意味着在这里启用通信的客户端 obd 设备是 lwp。图17展示了通过导入和导出连接在 ost 和 mdt 之间通信的概念视图。LWP（轻量级代理）obd 设备管理从 ost 到 mdt 和从 mdts 到 mdt0 建立的连接。在 Lustre 中，使用 lwp 设备发送配额和 FLD 查询请求（参见第7节）。图17还显示了通过 osp 客户端 obd设备在 mdt 和 ost 之间进行的通信。
 
-<div align=center>
-    <img src="../image/Ost_mdt_comm.png" alt="Figure 17. Communication between ost and mdt server obd devices in Lustre">
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/Ost_mdt_comm.png" alt="Figure 17. Communication between ost and mdt server obd devices in Lustre">
+    <figcaption style="font-size:12px">Figure 17. Communication between ost and mdt server obd devices in Lustre.</figcaption>
 </div>
-
-<center><sub>Figure 17. Communication between ost and mdt server obd devices in Lustre</sub></center>
 
 * `name`: Shows the name of the ost device.
 
@@ -624,7 +608,7 @@ For any two obd devices to communicate with each other, they need an import and 
 
     > grant: 表示特定目标的导出数据。
 
-### Useful APIs in Obdclass
+## Useful APIs in Obdclass
 
 All obdclass related function declarations are listed in the file include/obd_class.h and their definitions can be seen in obdclass/genops.c Here we list some of the important obdclass function prototypes and their purpose for quick reference.
 
@@ -686,9 +670,9 @@ All obdclass related function declarations are listed in the file include/obd_cl
 
     > __class_new_export() - 为 obd 设备创建一个新的导出连接，并将其添加到导出哈希表中。
 
-## LIBCFS
+# LIBCFS
 
-### Introduction
+<h2 id="libcfs-introduction">Introduction</h2>
 
 Libcfs provides APIs comprising of fundamental primitives for process management and debugging support in Lustre. Libcfs is used throughout LNet, Lustre, and associated utilities. Its APIs define a portable run time environment that is implemented consistently on all supported build targets \[8]. Besides debugging support libcfs provides APIs for failure injection, Linux kernel compatibility, encryption for data, Linux 64 bit time addition, log collection using tracefile, string parsing support and capabilities for querying and manipulating CPU partition tables. Libcfs is the first module that Lustre loads. The module loading function can be found in tests/test-framework.sh script as shown in Source Code 17. When Lustre is mounted, mount_facet() function gets invoked and it calls load_modules() function. load_modules() invokes load_modules_local() that loads Lustre modules libcfs, lnet, obdclass, ptl-rpc, fld, fid, and lmv in the same order.
 
@@ -696,7 +680,7 @@ Libcfs provides APIs comprising of fundamental primitives for process management
 
 In the following Sections we describe libcfs APIs and functionalities in detail.
 
-### Data Encryption Support in Libcfs
+## Data Encryption Support in Libcfs
 
 Lustre implements two types of encryption capabilities - data on the wire and data at rest. Encryption over the wire protects data transfers between the physical nodes from Man-in-the-middle attacks. Whereas the objective of encrypting data at rest is protection against storage theft and network snooping. Lustre 2.14+ releases provides encryption for data at rest. Data is encrypted on Lustre client before being sent to servers and decrypted upon reception from the servers. That way applications running on Lustre client see clear text and servers see only encrypted text. Hence access to encryption keys is limited to Lustre clients.
 
@@ -780,3 +764,4 @@ struct llcrypt_key {
         __u32 size;
 };
 ```
+[^1]: *lustre 支持多个 MDT（DNE），存在多个 mdc*

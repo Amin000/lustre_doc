@@ -1,0 +1,48 @@
+{
+    "title": "Lustre doc",
+    "description": "收集一些 lustre 文档和笔记",
+    "keywords": "Lustre，storage，filesystem",
+    "language": "zh-hans",
+    "introduction": {
+        "path": "README.md",
+        "title": "Lustre 文档收集概述"
+    },
+     "plugins": [
+         "-search",
+         "splitter",
+         "atoc",
+         "anchors",
+         "theme-default",
+         "expandable-chapters",
+         "theme-comscore"
+    ],
+    "pluginsConfig": {
+        "fontSettings": {
+        "theme": "white",
+        "family": "serif",
+        "size":  4
+        },
+        "ga": {
+            "token": "UA-39088953-8"
+        },
+        "atoc": {
+            "addClass": true,
+            "className": "atoc"
+        },
+        "theme-default": {
+             "showLevel": true
+        }
+    },
+    "pdf": {
+        "toc": true,
+        "pageNumbers": true,
+        "fontSize": 12,
+        "paperSize": "a4",
+        "margin": {
+            "right": 62,
+            "left": 62,
+            "top": 36,
+            "bottom": 36
+        }
+    }
+}
