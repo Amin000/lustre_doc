@@ -686,7 +686,7 @@ In the following Sections we describe libcfs APIs and functionalities in detail.
 
 Lustre implements two types of encryption capabilities - data on the wire and data at rest. Encryption over the wire protects data transfers between the physical nodes from Man-in-the-middle attacks. Whereas the objective of encrypting data at rest is protection against storage theft and network snooping. Lustre 2.14+ releases provides encryption for data at rest. Data is encrypted on Lustre client before being sent to servers and decrypted upon reception from the servers. That way applications running on Lustre client see clear text and servers see only encrypted text. Hence access to encryption keys is limited to Lustre clients.
 
-> Lustre实现了两种类型的加密功能：数据传输时的加密和数据静态存储时的加密。通过在数据传输过程中进行加密，可以保护物理节点之间的数据传输免受中间人攻击。而对数据进行静态存储时的加密旨在保护数据存储不受存储设备盗窃和网络窃听的威胁。Lustre 2.14+ 版本提供了数据静态存储的加密功能。数据在发送到服务器之前在 Lustre 客户端上进行加密，并在接收服务器返回数据时进行解密。这样，运行在 Lustre 客户端上的应用程序可以看到明文，而服务器只能看到加密的文本。因此，对加密密钥的访问仅限于 Lustre 客户端。
+> Lustre 实现了两种类型的加密功能：数据传输时的加密和静态数据的加密。通过对传输过程中的数据进行加密，可以保护物理节点之间的数据传输免受中间人攻击。而对静态数据的的加密旨在保护数据存储不受存储设备盗窃和网络窃听的威胁。Lustre 2.14+ 版本提供了静态数据的加密功能。数据在发送到服务器之前在 Lustre 客户端上进行加密，并在接收服务器返回数据时进行解密。这样，运行在 Lustre 客户端上的应用程序可以看到明文，而服务器只能看到加密的文本。因此，对加密密钥的访问仅限于 Lustre 客户端。
 
 Source code 17: Libcfs module loading script (tests/test-framework.sh)
 
@@ -719,14 +719,16 @@ load_modules_local() {
 
 Data (at rest) encryption related algorithm and policy flags and data structures are defined in libcfs/include/uapi/linux/llcrypt.h. The encryption algorithm macros are defined in Source Code 18. Definition of an encryption key structure shown in Source Code 19 includes a name, the raw key and size fields. Maximum size of the encryption key is limited to LLCRYPT_MAX_KEY_SIZE. This file also contains ioctl definitions to add and remove encryption keys, and obtain encryption policy, and key status.
 
-> 数据（静态存储）加密相关的算法、策略标志和数据结构在libcfs/include/uapi/linux/llcrypt.h中进行了定义。加密算法宏在Source Code 18中进行了定义。Source Code 19中展示了加密密钥结构的定义，包括名称、原始密钥和大小字段。加密密钥的最大大小限制为LLCRYPT_MAX_KEY_SIZE。该文件还包含了用于添加和删除加密密钥、获取加密策略和密钥状态的ioctl定义。
+> 数据（静态）加密相关的算法、策略标志和数据结构在 libcfs/include/uapi/linux/llcrypt.h 中进行了定义。加密算法宏在Source Code 18中进行了定义。Source Code 19中展示了加密密钥结构的定义，包括名称、原始密钥和大小字段。加密密钥的最大大小限制为LLCRYPT_MAX_KEY_SIZE。该文件还包含了用于添加和删除加密密钥、获取加密策略和密钥状态的ioctl定义。
 
 Source code 18: Encryption algorithm macros defined in libcfs/include/uapi/linux/llcrypt.h
 
-    #define LLCRYPT_MODE_AES_256_XTS                1
-    #define LLCRYPT_MODE_AES_256_CTS                4
-    #define LLCRYPT_MODE_AES_128_CBC                5
-    #define LLCRYPT_MODE_AES_128_CTS                6
+```c
+#define LLCRYPT_MODE_AES_256_XTS                1
+#define LLCRYPT_MODE_AES_256_CTS                4
+#define LLCRYPT_MODE_AES_128_CBC                5
+#define LLCRYPT_MODE_AES_128_CTS                6
+```
 
 While userland headers for data encryption are listed in libcfs/include/uapi/linux/llcrypt.h, the corresponding kernel headers can be found in libcfs/include/libcfs/crypto/llcrypt.h. Some of the kernel APIs for data encryption are shown in Source Code 20. The definitions of these APIs can be found in libcfs/libcfs/crypto/hooks.c.
 
