@@ -773,6 +773,185 @@ struct llcrypt_key {
 
 Libcfs includes APIs and data structures that help with CPU partition table management in Lustre. A CPU partition is a virtual processing unit and can have 1-N cores or 1-N NUMA nodes. Therefore a CPU partition is also viewed as a pool of processors.
 
+> libcfs 包含的 API 和数据结构，用于协助处理 Lustre 中的 CPU 分区表。CPU 分区表是虚拟化处理单元，它有 1-N 个核心和 1-N 个 NUMA 节点。所以，一个 CPU 分区也是处理器池的视图。
+
+Source code 20: Kernel APIs for data encryption defined in libcfs/include/libcfs/crypto/llcrypt.h
+
+```c
+//Prepares for a rename between possibly-encrypted directories
+static inline int llcrypt_prepare_rename(struct inode *old_dir,
+                                         struct dentry *old_dentry,
+                                         struct inode *new_dir,
+                                         struct dentry *new_dentry,
+                                         unsigned int flags)
+//Prepares to lookup a name in a possibly-encrypted directory
+static inline int llcrypt_prepare_lookup(struct inode *dir,
+                                         struct dentry *dentry,
+                                         struct llcrypt_name *fname)
+
+// Prepares to change a possibly-encrypted inode's attributes
+static inline int llcrypt_prepare_setattr(struct dentry *dentry,
+                                          struct iattr *attr)
+//Prepares to create a possibly-encrypted symlink
+static inline int llcrypt_prepare_symlink(struct inode *dir,
+                                          const char *target,
+                                          unsigned int len,
+                                          unsigned int max_len,
+                                          struct llcrypt_str *disk_link)
+//Encrypts the symlink target if needed
+static inline int llcrypt_encrypt_symlink(struct inode *inode,
+                                          const char *target,
+                                          unsigned int len,
+                                          struct llcrypt_str *disk_link)
+```
+
+A CPU partition table (CPT) consists of a set of CPU partitions. CPTs can have two modes of operation, NUMA and SMP denoted by CFS_CPU_MODE_NUMA and CFS_CPU_MODE_SMP respectively. Users can specify total number of CPU partitions while creating a CPT and ID of a CPU partition always starts from 0. For example: if there are 8 cores in the system, creating a CPT:
+
+> 一个 CPU 分区表（CPT）包含一组 CPU 分区。CPTs 有两种模式：NUMA 和 SMB，分别对应 CFS_CPU_MODE_NUMA 和 CFS_CPU_MODE_SMP。当在创建 CPT 时，用户可以指定全部的 CPU 分区的到该 CPT 上，CPU 的分区 ID 从 0 开始。例如：如果在一个系统中有 8 个核心，当创建一个 CPT 时：
+
+```c
+with cpu_npartitions=4:
+    core[0, 1] = partition[0], core[2, 3] = partition[1]
+    core[4, 5] = partition[2], core[6, 7] = partition[3]
+cpu_npartitions=1:
+    core[0, 1, ... 7] = partition[0]
+```
+
+Users can also specify CPU partitions by a string pattern.
+
+> 用户可以通过字符串 pattern 指定 CPU 分区
+
+```c
+cpu_partitions="0[0,1], 1[2,3]"
+cpu_partitions="N 0[0-3], 1[4-8]"
+```
+
+The first character “N” means following numbers are NUMA IDs. By default, Lustre modules should refer to the global cfs_cpt_tab, instead of accessing hardware CPUs directly, so concurrency of Lustre can be configured by cpu_npartitions of the global cfs_cpt_tab.
+
+> 第一个字符 "N" 表示接下来的数字都是 NUMA IDs。默认的，Lustre 模块应该引用全部 cfs_cpt_tab，而不是直接访问 CPU 硬件，所以，Lustre 的并发度可以通过配置全局 cfs_cpt_tab 的 cpu_npartitions。
+
+Source Code 21 and Source Code 22 show data structures that define CPU partition and CPT. A CPU partition consists of fields representing CPU mask (cpt_cpumask) and node mask (*cpt_nodemask) for the partition, NUMA distance between CPTs (*cpt_distance), spread rotor for NUMA allocator (cpt_spread_rotor) and NUMA node if cpt_nodemask is empty (cpt_node). Number of CPU partitions, structure representing partition tables and masks to represent all CPUs and nodes are the significant fields in the cfs_cpt_table structure.
+
+> 源码21和源码22 显示了定义 CPU 分区和分区表的数据结构。一个 CPU 分区中，包含表示 CPU 掩码（cpt_cpumask）和表示分区节点掩码（*cpt_nodemask），CPTs（*cpt_distance）之间的 NUMA 距离，NUMA 分配器的广播旋转子，NUMA 节点（如果 cpt_nodemask 为空）。CPU 分区数，表示分区表的结构体和所有 CPU 的掩码，是 cfs_cpt_table 结构体中最重要的部分。
+
+Source code 21: cfs_cpu_partition structure defined in libcfs/libcfs/libcfs_cpu.c
+
+```c
+struct cfs_cpu_partition {
+        cpumask_var_t                   cpt_cpumask;
+        nodemask_t                      *cpt_nodemask;
+        unsigned int                    *cpt_distance;
+        unsigned int                    cpt_spread_rotor;
+        int                             cpt_node;
+};
+```
+
+Source code 22: cfs_cpt_table structure defined in libcfs/libcfs/libcfs_cpu.c
+
+```c
+struct cfs_cpt_table {
+        unsigned int                    ctb_spread_rotor;
+        unsigned int                    ctb_distance;
+        int                             ctb_nparts;
+        struct cfs_cpu_partition        *ctb_parts;
+        int                             *ctb_cpu2cpt;
+        cpumask_var_t                   ctb_cpumask;
+        int                             *ctb_node2cpt;
+        nodemask_t                      *ctb_nodemask;
+};
+```
+
+Libcfs provides the following APIs to access and manipulate CPU partitions and CPTs.
+
+> libcfs 提供下面 APIs 函数，用于访问和管理 CPU 分区 和 CPTs。
+
+* cfs_cpt_table_alloc() - Allocates a CPT given the number of CPU partitions.
+
+* cfs_cpt_table_free() - Frees a CPT corresponding to the given reference.
+
+* cfs_cpt_table_print() - Prints a CPT corresponding to the given reference.
+
+* cfs_cpt_number() - Returns number of CPU partitions in a CPT.
+
+* cfs_cpt_online() - returns the number of online CPTs.
+
+* cfs_cpt_distance_calculate() - Calculates the maximum NUMA distance between all nodes in the from_mask and all nodes in the to_mask.
+
+Additionally libcfs includes functions to initialize and remove CPUs, set and unset node masks and add and delete CPUs and nodes. Per CPU data and partition variables management functions are located in libcfs/libcfs/libcfs_mem.c file.
+
+> 此外，libcfs 还包含初始化和删除 CPU 的函数，设置和取消设置节点掩码，增加和删除 CPU 和节点等函数。每个 CPU 数据和分区的变量管理函数位于 libcfs/libcfs/libcfs_mem.c 文件中。
+
+## Debugging Support and Failure Injection
+
+Lustre debugging infrastructure contains a number of macros that can be used to report errors and warnings. The debugging macros are defined in libcfs/include/libcfs/libcfs_debug.h. CERROR, CNETERR, CWARN, CEMERG, LCONSOLE, CDEBUG are examples of the debugging macros. Complete list of the debugging macros and their detailed description can be found in this link.
+
+> lustre 调试基础套件包含各种用在报告错误和告警的宏。调试宏例如 CERROR, CNETERR, CWARN, CEMERG, LCONSOLE, CDEBUG，都定义在 libcfs/include/libcfs/libcfs_debug.h 上。完整的调试宏和它们的详细描述都在该[连接](https://github.com/DDNStorage/lustre_manual_markdown)找到。
+
+Failure macros defined in libcfs_fail.h are used to deliberately inject failure conditions in Lustre for testing purposes. CFS_FAIL_ONCE, CFS_FAILv SKIP, CFS_FAULT, CFS_FAIL_SOME are examples of such failure macros (see Source Code 23). Libcfs module defines the failure macros starting with the keyword CFS whereas Lustre redefines them in lustre/include/obd_support.h file starting with the keyword OBD. The hex values representing these failure macros are used in the lctl set_param fail_loc command inject specific failures. Instances of OBD_FAIL macro usage can be seen in llite/vvp_io.c file.
+
+> 故障宏（libcfs_fail.h）通过注入故障条件以达到测试的目标。一些故障宏的例子包括：CFS_FAIL_ONCE, CFS_FAILv SKIP, CFS_FAULT, CFS_FAIL_SOME（见源码23）。Libcfs 定义的故障宏的前缀为 CFS，而 Lustre 在 lustre/include/obd_support.h 文件中使用 OBD 的前缀重定义了故障宏。这些宏的十六进制的值被用在 lctl set_param fail_loc 命令上，以用于实现注入特定的故障。宏 OBD_FAIL 实例使用方法可以在 llite/vvp_io.c 中找到。
+
+Source code 23: CFS_FAIL macros defined in libcfs/include/libcfs/libcfs_fail.h
+
+```c
+#define CFS_FAIL_SKIP        0x20000000 /* skip N times then fail */
+#define CFS_FAIL_SOME        0x10000000 /* only fail N times */
+#define CFS_FAIL_RAND        0x08000000 /* fail 1/N of the times */
+#define CFS_FAIL_USR1        0x04000000 /* user flag */
+```
+
+## Additional Supporting Software in Libcfs
+
+Files located in libcfs/include/libcfs/linux furnish additional supporting software for Lustre for having 64bit time, atomics, extended arrays and spin locks.
+
+> 在 libcfs/include/libcfs/linux 目录中的文件提供额外的软件支持，包括64位时间，原子性，扩展数组，spin lock。
+
+* `linux-time.h` - Implementation of portable time API for Linux for both kernel and user-level.
+
+* `refcount.h` - Implements a variant of atomic_t specialized for reference counts.
+
+* `xarray.h` - Implementation of large array of pointers that has the functionality of resizable arrays.
+
+* `processor.h` - Provides spin_begin(), spin_cpu_yield() and spin_until_cond() capabilities for spin locks.
+
+# File Identifiers, FID Location Database, and Object Index
+
+## File Identifier (FID)
+
+Lustre refers to all the data that it stores as objects. This includes not only the individual components of a striped file but also such things as directory entries, internal configuration files, etc. To identify an object, Lustre assigns a File IDentifier (FID) to the object that is unique across the file system. A FID is a 128-bit number that consists of three components: a 64-bit sequence number, a 32-bit object ID, and a 32-bit version number. The data structure for a FID is shown in Source Code 24. As noted in the code, the version number is not currently used but is reserved for future purposes.
+
+> Lustre 涉及到的数据都作为“对象”进行存储。“对象”不仅包含条带文件的独立组件，还包括目录条目，内部配置等等。为了标识一个对象，Lustre 分配一个在 Lustre 文件系统唯一的文件标识符（FID）给该对象。一个 FID 有128为，分为三个部分：一个64位的连续数字，一个32位的对象 ID，和32位的版本号。FID 的数据结构展示在源码24上。需要注意的是，版本号在当前是没有含义的，只是作为保留字段用于将来的扩展。
+
+Source Code 24: FID structure (include/uapi/linux/lustre/lustre_user.h)
+
+```c
+struct lu_fid {
+       /**
+        * FID sequence. Sequence is a unit of migration: all files (objects)
+        * with FIDs from a given sequence are stored on the same server.
+        * Lustre should support 2^64 objects, so even if each sequence
+        * has only a single object we can still enumerate 2^64 objects.
+        **/
+        __u64 f_seq;
+        /* FID number within sequence. */
+        __u32 f_oid;
+        /**
+         * FID version, used to distinguish different versions (in the sense
+         * of snapshots, etc.) of the same file system object. Not currently
+         * used.
+         **/
+        __u32 f_ver;
+} __attribute__((packed));
+```
+
+Sequence numbers are controlled by the Lustre file system and allocated to clients. The entire space of sequence numbers is overseen by the sequence controller that runs on MDT0, and every storage target (MDTs and OSTs) runs a sequence manager. As the file system is started and the storage targets are brought online, each sequence manager contacts the sequence controller to obtain a unique range of sequence numbers (known as a super sequence). Every client that establishes a connection to a storage target will be granted a unique sequence number by the target’s sequence manager. This ensures that no two clients share a sequence number and that the same sequence number will always map to the same storage target.
+
+When a client creates a new object on a storage target, the client allocates a new FID to use for the object. The FID is created by using the sequence number granted to the client by the storage target and adding a unique object ID chosen by the client. The client maintains a counter for each sequence number and increments that counter when a new object ID is needed. This combination of target-specific sequence number and client-chosen object ID (along with a version number of zero) is used to populate the lu_fid structure for the new object. It should be noted that FIDs are never reused within the same Lustre file system (with a few exceptions for special internal-only objects). If a client exhausts a sequence number and cannot create more FIDs, the client will contact the target and request a new sequence number.
+
+It is important to understand that the use of the term “client” in this context does not just refer to Lustre file system clients that present the POSIX file system interface to end-users. A FID client is any node that is responsible for creating new objects, and this can include other Lustre servers. When a Lustre file system client uses the POSIX interface to create a new file, it will use a sequence number granted by an MDT target to construct a FID for the new file. This FID will be used to identify the object on the MDT that corresponds to this new file. However, the MDS server hosting the MDT will use the layout configuration for this new file to allocate objects on one or more OSTs that will contain the actual file data. In this scenario, the MDS is acting as a FID client to the OST targets. The MDS server will have been granted sequence numbers by the OST targets and use these sequence numbers to generate the FIDs that identify all the OST objects associated with the file layout.
+
 [^1]: *lustre 支持多个 MDT（DNE），存在多个 mdc*
+
 [^2]: *严谨一点地说，是在 Lustre 客户端上的第一个组件*
+
 [^3]: *好像也不能翻译为加法，我的理解是，可以把内核中的时间调整，以用于测试*

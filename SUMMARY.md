@@ -57,3 +57,11 @@
       * [Data Encryption Support in Libcfs](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#data-encryption-support-in-libcfs)
 
       * [CPU Partition Table Management](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#cpu-partition-table-management)
+
+      * [Debugging Support and Failure Injection](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#debugging-support-and-failure-injection)
+
+      * [Additional Supporting Software in Libcfs](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#additional-supporting-software-in-libcfs)
+
+   * [File Identifiers, FID Location Database, and Object Index](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifiers-fid-location-database-and-object-index)
+
+      * [File Identifier (FID)](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifier-fid)

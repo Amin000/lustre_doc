@@ -2,8 +2,9 @@
 
 CTE 4 过线2分的翻译，自己把握哈
 
-
 对于每个章节的序号，由于把不同的文章都放在一个仓库下，所以章节的序号都会多两极。例如原来的chapter 1的序号为1，放在仓库中，自动生成了1.x.1的章节序号，即如果文章中关于序号的指向为1.2.3，那么在分级目录的序号减去前面两级数字就对应1.2.3。
+
+## 目录
 
 * [Lustre Architecture](./Understanding-Lustre-Internals-中文翻译.md#lustre-architecture)
 
@@ -60,3 +61,11 @@ CTE 4 过线2分的翻译，自己把握哈
    * [Data Encryption Support in Libcfs](./Understanding-Lustre-Internals-中文翻译.md#data-encryption-support-in-libcfs)
 
    * [CPU Partition Table Management](./Understanding-Lustre-Internals-中文翻译.md#cpu-partition-table-management)
+
+   * [Debugging Support and Failure Injection](./Understanding-Lustre-Internals-中文翻译.md#debugging-support-and-failure-injection)
+
+   * [Additional Supporting Software in Libcfs](./Understanding-Lustre-Internals-中文翻译.md#additional-supporting-software-in-libcfs)
+
+* [File Identifiers, FID Location Database, and Object Index](./Understanding-Lustre-Internals-中文翻译.md#file-identifiers-fid-location-database-and-object-index)
+
+   * [File Identifier (FID)](./Understanding-Lustre-Internals-中文翻译.md#file-identifier-fid)
