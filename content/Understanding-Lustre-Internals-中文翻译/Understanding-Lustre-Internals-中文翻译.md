@@ -719,7 +719,7 @@ load_modules_local() {
 
 Data (at rest) encryption related algorithm and policy flags and data structures are defined in libcfs/include/uapi/linux/llcrypt.h. The encryption algorithm macros are defined in Source Code 18. Definition of an encryption key structure shown in Source Code 19 includes a name, the raw key and size fields. Maximum size of the encryption key is limited to LLCRYPT_MAX_KEY_SIZE. This file also contains ioctl definitions to add and remove encryption keys, and obtain encryption policy, and key status.
 
-> 数据（静态）加密相关的算法、策略标志和数据结构在 libcfs/include/uapi/linux/llcrypt.h 中进行了定义。加密算法宏在Source Code 18中进行了定义。Source Code 19中展示了加密密钥结构的定义，包括名称、原始密钥和大小字段。加密密钥的最大大小限制为LLCRYPT_MAX_KEY_SIZE。该文件还包含了用于添加和删除加密密钥、获取加密策略和密钥状态的ioctl定义。
+> 数据（静态）加密相关的算法、策略标志和数据结构定义在 libcfs/include/uapi/linux/llcrypt.h 中。加密算法的相关宏在 Source Code 18 中显示。Source Code 19 中展示了加密密钥结构的定义，包括名称、原始密钥和大小字段。加密密钥的最大大小限制为 LLCRYPT_MAX_KEY_SIZE。该文件还包含了用于添加和删除加密密钥、获取加密策略和密钥状态的 ioctl 定义。
 
 Source code 18: Encryption algorithm macros defined in libcfs/include/uapi/linux/llcrypt.h
 
@@ -732,11 +732,11 @@ Source code 18: Encryption algorithm macros defined in libcfs/include/uapi/linux
 
 While userland headers for data encryption are listed in libcfs/include/uapi/linux/llcrypt.h, the corresponding kernel headers can be found in libcfs/include/libcfs/crypto/llcrypt.h. Some of the kernel APIs for data encryption are shown in Source Code 20. The definitions of these APIs can be found in libcfs/libcfs/crypto/hooks.c.
 
-> 虽然用户空间的数据加密头文件列在了libcfs/include/uapi/linux/llcrypt.h中，但相应的内核头文件可以在libcfs/include/libcfs/crypto/llcrypt.h中找到。一些用于数据加密的内核API显示在Source Code 20中。这些API的定义可以在libcfs/libcfs/crypto/hooks.c中找到。
+> 虽然用户空间的数据加密头文件都在 libcfs/include/uapi/linux/llcrypt.h 中，但相应的内核头文件可以在 libcfs/include/libcfs/crypto/llcrypt.h 中找到。一些用于数据加密的内核 API 显示在 Source Code 20 中。这些 API 的定义可以在 libcfs/libcfs/crypto/hooks.c 中找到。
 
 Support functions for data encryption are defined in libcfs/libcfs/crypto/crypto.c file. These include:
 
-> 数据加密的支持函数定义在libcfs/libcfs/crypto/crypto.c文件中。其中包括：
+> 支持数据加密的函数定义在 libcfs/libcfs/crypto/crypto.c 文件中。其中包括：
 
 * llcrypt_release_ctx() - Releases a decryption context.
 
@@ -756,7 +756,7 @@ Support functions for data encryption are defined in libcfs/libcfs/crypto/crypto
 
 Setup and cleanup functions (llcrypt_init(), llcrypt_exit()) for file system encryption are also defined here. fname.c implements functions to encrypt and decrypt filenames, allocate and free buffers for file name encryption and to convert a file name from disk space to user space. keyring.c and keysetup.c implement functions to manage cryptographic master keys and policy.c provides APIs to find supported policies, check the equivalency of two policies and policy context management.
 
-> 文件系统加密的设置和清理函数（llcrypt_init()、llcrypt_exit()）也在这里定义。fname.c 实现了对文件名的加密和解密函数，分配和释放文件名加密的缓冲区，并将文件名从磁盘空间转换为用户空间。keyring.c 和 keysetup.c 实现了管理加密主密钥的功能，而policy.c 提供了查找支持的策略、检查两个策略的等效性以及策略上下文管理的API。
+> 文件系统加密的设置和清理函数（llcrypt_init()、llcrypt_exit()）也在 crypto.c 定义。fname.c 实现了对文件名的加密和解密函数，分配和释放文件名加密的缓冲区，并将文件名从磁盘空间转换为用户空间。keyring.c 和 keysetup.c 实现了管理加密主密钥的功能，而 policy.c 提供了查找支持的策略、检查两个策略的等效性以及策略上下文管理的 API。
 
 Source code 19: llcrypt_key structure defined in libcfs/include/uapi/linux/llcrypt.h
 
@@ -768,6 +768,10 @@ struct llcrypt_key {
         __u32 size;
 };
 ```
+
+## CPU Partition Table Management
+
+Libcfs includes APIs and data structures that help with CPU partition table management in Lustre. A CPU partition is a virtual processing unit and can have 1-N cores or 1-N NUMA nodes. Therefore a CPU partition is also viewed as a pool of processors.
 
 [^1]: *lustre 支持多个 MDT（DNE），存在多个 mdc*
 [^2]: *严谨一点地说，是在 Lustre 客户端上的第一个组件*
