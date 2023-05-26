@@ -21,7 +21,7 @@ The Lustre client software involves primarily three components, management clien
 
 The major functionalities of MGC are Lustre log handling, Lustre distributed lock management and file system setup. MGC is the first obd device created in Lustre obd device life cycle. An obd device in Lustre provides a level of abstraction on Lustre components such that generic operations can be applied without knowing the specific devices you are dealing with. The remaining Sections describe MGC module initialization, various MGC obd operations and log handling in detail. In the following Sections we will be using the terms clients and servers to represent service clients and servers created to communicate between various components in Lustre. Whereas the physical nodes representing Lustre’s clients and servers will be explicitly mentioned as ‘Lustre clients’ and ‘Lustre servers’.
 
-> MGC 的主要功能包括 Lustre 日志处理、Lustre 分布式锁管理和文件系统的初始化。MGC 是在 Lustre obd 设备生命周期中第一个被创建的 obd 设备。Lustre 中的 obd 设备为 Lustre 组件提供了一层抽象，使得组件可以使用通用操作，而无需了解正在处理的具体设备。其余部分详细描述了 MGC 模块的初始化、各种 MGC obd 操作以及日志处理。在接下来的部分中，我们将使用"clients"和"servers"这些术语来代表为了在 Lustre 的各个组件之间进行通信而被创建的客户端和服务端的服务。而表示Lustre的客户端和服务端的物理节点将明确标注为"Lustre clients"和"Lustre servers"。
+> MGC 的主要功能包括 Lustre 日志处理、Lustre 分布式锁管理和文件系统的初始化。MGC 是在 Lustre obd 设备生命周期中第一个被创建的 obd 设备[^2]。Lustre 中的 obd 设备为 Lustre 组件提供了一层抽象，使得组件可以使用通用操作，而无需了解正在处理的具体设备。其余部分详细描述了 MGC 模块的初始化、各种 MGC obd 操作以及日志处理。在接下来的部分中，我们将使用"clients"和"servers"这些术语来代表为了在 Lustre 的各个组件之间进行通信而被创建的客户端和服务端的服务。而表示Lustre的客户端和服务端的物理节点将明确标注为"Lustre clients"和"Lustre servers"。
 
 ## MGC Module Initialization
 
@@ -674,17 +674,19 @@ All obdclass related function declarations are listed in the file include/obd_cl
 
 <h2 id="libcfs-introduction">Introduction</h2>
 
-Libcfs provides APIs comprising of fundamental primitives for process management and debugging support in Lustre. Libcfs is used throughout LNet, Lustre, and associated utilities. Its APIs define a portable run time environment that is implemented consistently on all supported build targets \[8]. Besides debugging support libcfs provides APIs for failure injection, Linux kernel compatibility, encryption for data, Linux 64 bit time addition, log collection using tracefile, string parsing support and capabilities for querying and manipulating CPU partition tables. Libcfs is the first module that Lustre loads. The module loading function can be found in tests/test-framework.sh script as shown in Source Code 17. When Lustre is mounted, mount_facet() function gets invoked and it calls load_modules() function. load_modules() invokes load_modules_local() that loads Lustre modules libcfs, lnet, obdclass, ptl-rpc, fld, fid, and lmv in the same order.
+Libcfs provides APIs comprising of fundamental primitives for process management and debugging support in Lustre. Libcfs is used throughout LNet, Lustre, and associated utilities. Its APIs define a portable run time environment that is implemented consistently on all supported build targets. Besides debugging support libcfs provides APIs for failure injection, Linux kernel compatibility, encryption for data, Linux 64 bit time addition, log collection using tracefile, string parsing support and capabilities for querying and manipulating CPU partition tables. Libcfs is the first module that Lustre loads. The module loading function can be found in tests/test-framework.sh script as shown in Source Code 17. When Lustre is mounted, mount_facet() function gets invoked and it calls load_modules() function. load_modules() invokes load_modules_local() that loads Lustre modules libcfs, lnet, obdclass, ptl-rpc, fld, fid, and lmv in the same order.
 
-> Libcfs提供了在Lustre中进行进程管理和调试支持的基本原语的API。Libcfs在LNet、Lustre和相关工具中被广泛使用。其API定义了一个可在所有支持的构建目标上一致实现的可移植运行时环境\[8]。除了调试支持外，Libcfs还提供了故障注入、Linux内核兼容性、数据加密、Linux 64位时间增加、使用跟踪文件进行日志收集、字符串解析支持以及查询和操作CPU分区表的功能。
+> 在 Lustre 中，Libcfs 提供了进程管理和调试的基础 API。Libcfs 被大量地使用在 LNet、Lustre 和相关工具中。其 API 定义了一套可移植的运行时环境，以追求在所有支持的构建目标上的一致实现。除了调试支持外，Libcfs 还提供了错误注入、Linux 内核兼容性、数据加密、Linux 64 位时间加法[^3]、使用文件跟踪手段进行日志收集、字符串解析支持以及查询和操作 CPU 分区表的功能。当 lustre 被挂载时，mount_facet() 函数被调用，它调用 load_modules() 函数。load_modules() 函数调用 load_modules_local()，用于按顺序加载 lustre 的模块：libcfs, lnet, obdclass, ptl-rpc, fld, fid, and lmv。
 
 In the following Sections we describe libcfs APIs and functionalities in detail.
+
+> 在接下来的章节中，我们将详细地描述 libcfs APIs 和其 功能。
 
 ## Data Encryption Support in Libcfs
 
 Lustre implements two types of encryption capabilities - data on the wire and data at rest. Encryption over the wire protects data transfers between the physical nodes from Man-in-the-middle attacks. Whereas the objective of encrypting data at rest is protection against storage theft and network snooping. Lustre 2.14+ releases provides encryption for data at rest. Data is encrypted on Lustre client before being sent to servers and decrypted upon reception from the servers. That way applications running on Lustre client see clear text and servers see only encrypted text. Hence access to encryption keys is limited to Lustre clients.
 
-> Lustre实现了两种类型的加密功能：数据传输时的加密和数据静态存储时的加密。通过在数据传输过程中进行加密，可以保护物理节点之间的数据传输免受中间人攻击。而对数据进行静态存储时的加密旨在保护数据存储不受存储设备盗窃和网络窃听的威胁。Lustre 2.14+版本提供了数据静态存储的加密功能。数据在发送到服务器之前在Lustre客户端上进行加密，并在接收服务器返回数据时进行解密。这样，运行在Lustre客户端上的应用程序可以看到明文，而服务器只能看到加密的文本。因此，对加密密钥的访问仅限于Lustre客户端。
+> Lustre实现了两种类型的加密功能：数据传输时的加密和数据静态存储时的加密。通过在数据传输过程中进行加密，可以保护物理节点之间的数据传输免受中间人攻击。而对数据进行静态存储时的加密旨在保护数据存储不受存储设备盗窃和网络窃听的威胁。Lustre 2.14+ 版本提供了数据静态存储的加密功能。数据在发送到服务器之前在 Lustre 客户端上进行加密，并在接收服务器返回数据时进行解密。这样，运行在 Lustre 客户端上的应用程序可以看到明文，而服务器只能看到加密的文本。因此，对加密密钥的访问仅限于 Lustre 客户端。
 
 Source code 17: Libcfs module loading script (tests/test-framework.sh)
 
@@ -734,21 +736,21 @@ Support functions for data encryption are defined in libcfs/libcfs/crypto/crypto
 
 > 数据加密的支持函数定义在libcfs/libcfs/crypto/crypto.c文件中。其中包括：
 
-*   llcrypt_release_ctx() - Releases a decryption context.
+* llcrypt_release_ctx() - Releases a decryption context.
 
-*   llcrypt_get_ctx() - Gets a decryption context.
+* llcrypt_get_ctx() - Gets a decryption context.
 
-*   llcrypt_free_bounce_page() - Frees a ciphertext bounce page.
+* llcrypt_free_bounce_page() - Frees a ciphertext bounce page.
 
-*   llcrypt_crypt_block() - Encrypts or decrypts a single file system block of file contents.
+* llcrypt_crypt_block() - Encrypts or decrypts a single file system block of file contents.
 
-*   llcrypt_encrypt_pagecache_blocks() - Encrypts file system blocks from a page cache page.
+* llcrypt_encrypt_pagecache_blocks() - Encrypts file system blocks from a page cache page.
 
-*   llcrypt_encrypt_block_inplace() - Encrypts a file system block in place.
+* llcrypt_encrypt_block_inplace() - Encrypts a file system block in place.
 
-*   llcrypt_decrypt_pagecache_blocks() - Decrypts file system blocks in a page cache page.
+* llcrypt_decrypt_pagecache_blocks() - Decrypts file system blocks in a page cache page.
 
-*   llcrypt_decrypt_block_inplace() - Decrypts a file system block in place.
+* llcrypt_decrypt_block_inplace() - Decrypts a file system block in place.
 
 Setup and cleanup functions (llcrypt_init(), llcrypt_exit()) for file system encryption are also defined here. fname.c implements functions to encrypt and decrypt filenames, allocate and free buffers for file name encryption and to convert a file name from disk space to user space. keyring.c and keysetup.c implement functions to manage cryptographic master keys and policy.c provides APIs to find supported policies, check the equivalency of two policies and policy context management.
 
@@ -764,4 +766,7 @@ struct llcrypt_key {
         __u32 size;
 };
 ```
+
 [^1]: *lustre 支持多个 MDT（DNE），存在多个 mdc*
+[^2]: *严谨一点地说，是在 Lustre 客户端上的第一个组件*
+[^3]: *好像也不能翻译为加法，我的理解是，可以把内核中的时间调整，以用于测试*
