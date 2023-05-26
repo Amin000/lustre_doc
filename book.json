@@ -16,7 +16,8 @@
          "anchors",
          "theme-default",
          "expandable-chapters",
-         "theme-comscore"
+         "theme-comscore",
+         "back-to-top-button"
     ],
     "pluginsConfig": {
         "fontSettings": {
