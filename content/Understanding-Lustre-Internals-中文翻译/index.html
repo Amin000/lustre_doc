@@ -595,6 +595,72 @@
             
         </li>
     
+        <li class="chapter " data-level="1.2.6.4" data-path="Understanding-Lustre-Internals-中文翻译.html">
+            
+                <a href="Understanding-Lustre-Internals-中文翻译.html#debugging-support-and-failure-injection">
+            
+                    
+                        <b>1.2.6.4.</b>
+                    
+                    Debugging Support and Failure Injection
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.6.5" data-path="Understanding-Lustre-Internals-中文翻译.html">
+            
+                <a href="Understanding-Lustre-Internals-中文翻译.html#additional-supporting-software-in-libcfs">
+            
+                    
+                        <b>1.2.6.5.</b>
+                    
+                    Additional Supporting Software in Libcfs
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.7" data-path="Understanding-Lustre-Internals-中文翻译.html">
+            
+                <a href="Understanding-Lustre-Internals-中文翻译.html#file-identifiers-fid-location-database-and-object-index">
+            
+                    
+                        <b>1.2.7.</b>
+                    
+                    File Identifiers, FID Location Database, and Object Index
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.7.1" data-path="Understanding-Lustre-Internals-中文翻译.html">
+            
+                <a href="Understanding-Lustre-Internals-中文翻译.html#file-identifier-fid">
+            
+                    
+                        <b>1.2.7.1.</b>
+                    
+                    File Identifier (FID)
+            
+                </a>
+            
+
+            
+        </li>
+    
 
             </ul>
             
@@ -650,6 +716,84 @@
                                 <h1 id="understanding-lustre-internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;"><a name="understanding-lustre-internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;" class="plugin-anchor" href="#understanding-lustre-internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;"><i class="fa fa-link" aria-hidden="true"></i></a>Understanding Lustre Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;</h1>
 <p>CTE 4 &#x8FC7;&#x7EBF;2&#x5206;&#x7684;&#x7FFB;&#x8BD1;&#xFF0C;&#x81EA;&#x5DF1;&#x628A;&#x63E1;&#x54C8;</p>
 <p>&#x5BF9;&#x4E8E;&#x6BCF;&#x4E2A;&#x7AE0;&#x8282;&#x7684;&#x5E8F;&#x53F7;&#xFF0C;&#x7531;&#x4E8E;&#x628A;&#x4E0D;&#x540C;&#x7684;&#x6587;&#x7AE0;&#x90FD;&#x653E;&#x5728;&#x4E00;&#x4E2A;&#x4ED3;&#x5E93;&#x4E0B;&#xFF0C;&#x6240;&#x4EE5;&#x7AE0;&#x8282;&#x7684;&#x5E8F;&#x53F7;&#x90FD;&#x4F1A;&#x591A;&#x4E24;&#x6781;&#x3002;&#x4F8B;&#x5982;&#x539F;&#x6765;&#x7684;chapter 1&#x7684;&#x5E8F;&#x53F7;&#x4E3A;1&#xFF0C;&#x653E;&#x5728;&#x4ED3;&#x5E93;&#x4E2D;&#xFF0C;&#x81EA;&#x52A8;&#x751F;&#x6210;&#x4E86;1.x.1&#x7684;&#x7AE0;&#x8282;&#x5E8F;&#x53F7;&#xFF0C;&#x5373;&#x5982;&#x679C;&#x6587;&#x7AE0;&#x4E2D;&#x5173;&#x4E8E;&#x5E8F;&#x53F7;&#x7684;&#x6307;&#x5411;&#x4E3A;1.2.3&#xFF0C;&#x90A3;&#x4E48;&#x5728;&#x5206;&#x7EA7;&#x76EE;&#x5F55;&#x7684;&#x5E8F;&#x53F7;&#x51CF;&#x53BB;&#x524D;&#x9762;&#x4E24;&#x7EA7;&#x6570;&#x5B57;&#x5C31;&#x5BF9;&#x5E94;1.2.3&#x3002;</p>
+<h2 id="&#x76EE;&#x5F55;"><a name="&#x76EE;&#x5F55;" class="plugin-anchor" href="#&#x76EE;&#x5F55;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x76EE;&#x5F55;</h2>
+<ul>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#lustre-architecture">Lustre Architecture</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#test">TEST</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#utils">UTILS</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#mgc">MGC</a></p>
+<ul>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#mgc-introduction">Introduction</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#mgc-module-initialization">MGC Module Initialization</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#mgc-obd-operations">MGC obd Operations</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#mgcsetup">mgc_setup()</a></p>
+<ul>
+<li><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#operation">Operation</a></li>
+</ul>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#lustre-log-handling">Lustre Log Handling</a></p>
+<ul>
+<li><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#log-processing-in-mgc">Log Processing in MGC</a></li>
+</ul>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#mgcprecleanup-and-mgccleanup">mgc_precleanup() and mgc_cleanup()</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#mgcimportevent">mgc_import_event()</a></p>
+</li>
+</ul>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#obdclass">OBDCLASS</a></p>
+<ul>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#obdclass-introduction">Introduction</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#obddevice-structure">obd_device Structure</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#mgc-life-cycle">MGC Life Cycle</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#obd-device-life-cycle">Obd Device Life Cycle</a></p>
+<ul>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#classattach">class_attach()</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#obdexport-structure">obd_export Structure</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#classsetup">class_setup()</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#classprecleanup-and-classcleanup">class_precleanup() and class_cleanup()</a></p>
+</li>
+</ul>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#imports-and-exports">Imports and Exports</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#useful-apis-in-obdclass">Useful APIs in Obdclass</a></p>
+</li>
+</ul>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#libcfs">LIBCFS</a></p>
+<ul>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#libcfs-introduction">Introduction</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#data-encryption-support-in-libcfs">Data Encryption Support in Libcfs</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#cpu-partition-table-management">CPU Partition Table Management</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#debugging-support-and-failure-injection">Debugging Support and Failure Injection</a></p>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#additional-supporting-software-in-libcfs">Additional Supporting Software in Libcfs</a></p>
+</li>
+</ul>
+</li>
+<li><p><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#file-identifiers-fid-location-database-and-object-index">File Identifiers, FID Location Database, and Object Index</a></p>
+<ul>
+<li><a href="Understanding-Lustre-Internals-&#x4E2D;&#x6587;&#x7FFB;&#x8BD1;.html#file-identifier-fid">File Identifier (FID)</a></li>
+</ul>
+</li>
+</ul>
 <script type="text/javascript">var className='atoc';</script>
                                 
                                 </section>
@@ -677,7 +821,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Understanding Lustre Internals 中文翻译","level":"1.2","depth":1,"next":{"title":"Lustre Architecture","level":"1.2.1","depth":2,"anchor":"#lustre-architecture","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-architecture","articles":[]},"previous":{"title":"介绍","level":"1.1","depth":1,"path":"README.md","ref":"README.md","articles":[]},"dir":"ltr"},"config":{"plugins":["code","pageview-count","-search","splitter","atoc","anchors","theme-default","expandable-chapters","theme-comscore","back-to-top-button"],"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"},"pluginsConfig":{"atoc":{"addClass":true,"className":"atoc"},"splitter":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"code":{"copyButtons":true},"fontsettings":{"theme":"white","family":"sans","size":2},"fontSettings":{"theme":"white","family":"serif","size":4},"highlight":{},"theme-comscore":{},"back-to-top-button":{},"pageview-count":{},"ga":{"token":"UA-39088953-8"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"showLevel":true,"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"}},"anchors":{},"expandable-chapters":{}},"theme":"default","keywords":"Lustre，storage，filesystem","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":36,"bottom":36},"toc":true},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Lustre doc","language":"zh-hans","introduction":{"path":"README.md","title":"Lustre 文档收集概述"},"gitbook":"*","description":"收集一些 lustre 文档和笔记"},"file":{"path":"content/Understanding-Lustre-Internals-中文翻译/README.md","mtime":"2023-05-26T01:50:52.603Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2023-05-26T01:51:41.102Z"},"basePath":"../..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Understanding Lustre Internals 中文翻译","level":"1.2","depth":1,"next":{"title":"Lustre Architecture","level":"1.2.1","depth":2,"anchor":"#lustre-architecture","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-architecture","articles":[]},"previous":{"title":"介绍","level":"1.1","depth":1,"path":"README.md","ref":"README.md","articles":[]},"dir":"ltr"},"config":{"plugins":["code","pageview-count","-search","splitter","atoc","anchors","theme-default","expandable-chapters","theme-comscore","back-to-top-button"],"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"},"pluginsConfig":{"atoc":{"addClass":true,"className":"atoc"},"splitter":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"code":{"copyButtons":true},"fontsettings":{"theme":"white","family":"sans","size":2},"fontSettings":{"theme":"white","family":"serif","size":4},"highlight":{},"theme-comscore":{},"back-to-top-button":{},"pageview-count":{},"ga":{"token":"UA-39088953-8"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"showLevel":true,"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"}},"anchors":{},"expandable-chapters":{}},"theme":"default","keywords":"Lustre，storage，filesystem","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":36,"bottom":36},"toc":true},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Lustre doc","language":"zh-hans","introduction":{"path":"README.md","title":"Lustre 文档收集概述"},"gitbook":"*","description":"收集一些 lustre 文档和笔记"},"file":{"path":"content/Understanding-Lustre-Internals-中文翻译/README.md","mtime":"2023-05-26T10:06:19.317Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2023-05-26T10:07:08.758Z"},"basePath":"../..","book":{"language":""}});
         });
     </script>
 </div>
