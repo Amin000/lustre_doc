@@ -1,67 +1,78 @@
 # Lustre doc
 
 * [介绍](README.md)
+
 * [Understanding Lustre Internals 中文翻译](content/Understanding-Lustre-Internals-中文翻译/README.md)
-   * [Lustre Architecture](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-architecture)
+  * [Lustre Architecture](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-architecture)
 
-   * [TEST](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#test)
+    * [What is Lustre?](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#what-is-lustre)
 
-   * [UTILS](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#utils)
+    * [Lustre Features](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-features)
 
-   * [MGC](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc)
+    * [Lustre Components](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-components)
 
-      * [Introduction](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-introduction)
+    * [Lustre File Layouts](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-file-layouts)
 
-      * [MGC Module Initialization](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-module-initialization)
+      * [Normal (RAID0) Layouts](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#normal-raid0-layouts)
 
-      * [MGC obd Operations](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-obd-operations)
+  * [TEST](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#test)
 
-      * [mgc_setup()](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgcsetup)
+  * [UTILS](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#utils)
 
-         * [Operation](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#operation)
+  * [MGC](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc)
 
-      * [Lustre Log Handling](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-log-handling)
+    * [Introduction](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-introduction)
 
-         * [Log Processing in MGC](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#log-processing-in-mgc)
+    * [MGC Module Initialization](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-module-initialization)
 
-      * [mgc_precleanup() and mgc_cleanup()](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgcprecleanup-and-mgccleanup)
+    * [MGC obd Operations](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-obd-operations)
 
-      * [mgc_import_event()](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgcimportevent)
+    * [mgc_setup()](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgcsetup)
 
-   * [OBDCLASS](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obdclass)
+      * [Operation](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#operation)
 
-      * [Introduction](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obdclass-introduction)
+    * [Lustre Log Handling](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-log-handling)
 
-      * [obd_device Structure](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obddevice-structure)
+      * [Log Processing in MGC](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#log-processing-in-mgc)
 
-      * [MGC Life Cycle](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-life-cycle)
+    * [mgc_precleanup() and mgc_cleanup()](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgcprecleanup-and-mgccleanup)
 
-      * [Obd Device Life Cycle](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obd-device-life-cycle)
+    * [mgc_import_event()](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgcimportevent)
 
-         * [class_attach()](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#classattach)
+  * [OBDCLASS](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obdclass)
 
-         * [obd_export Structure](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obdexport-structure)
+    * [Introduction](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obdclass-introduction)
 
-         * [class_setup()](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#classsetup)
+    * [obd_device Structure](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obddevice-structure)
 
-         * [class_precleanup() and class_cleanup()](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#classprecleanup-and-classcleanup)
+    * [MGC Life Cycle](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-life-cycle)
 
-      * [Imports and Exports](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#imports-and-exports)
+    * [Obd Device Life Cycle](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obd-device-life-cycle)
 
-      * [Useful APIs in Obdclass](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#useful-apis-in-obdclass)
+      * [class_attach()](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#classattach)
 
-   * [LIBCFS](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#libcfs)
+      * [obd_export Structure](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obdexport-structure)
 
-      * [Introduction](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#libcfs-introduction)
+      * [class_setup()](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#classsetup)
 
-      * [Data Encryption Support in Libcfs](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#data-encryption-support-in-libcfs)
+      * [class_precleanup() and class_cleanup()](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#classprecleanup-and-classcleanup)
 
-      * [CPU Partition Table Management](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#cpu-partition-table-management)
+    * [Imports and Exports](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#imports-and-exports)
 
-      * [Debugging Support and Failure Injection](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#debugging-support-and-failure-injection)
+    * [Useful APIs in Obdclass](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#useful-apis-in-obdclass)
 
-      * [Additional Supporting Software in Libcfs](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#additional-supporting-software-in-libcfs)
+  * [LIBCFS](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#libcfs)
 
-   * [File Identifiers, FID Location Database, and Object Index](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifiers-fid-location-database-and-object-index)
+    * [Introduction](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#libcfs-introduction)
 
-      * [File Identifier (FID)](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifier-fid)
+    * [Data Encryption Support in Libcfs](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#data-encryption-support-in-libcfs)
+
+    * [CPU Partition Table Management](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#cpu-partition-table-management)
+
+    * [Debugging Support and Failure Injection](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#debugging-support-and-failure-injection)
+
+    * [Additional Supporting Software in Libcfs](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#additional-supporting-software-in-libcfs)
+
+  * [File Identifiers, FID Location Database, and Object Index](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifiers-fid-location-database-and-object-index)
+
+    * [File Identifier (FID)](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifier-fid)

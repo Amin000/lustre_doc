@@ -1,7 +1,135 @@
 
 # Lustre Architecture
 
-略
+## What is Lustre?
+
+Lustre is a GNU General Public licensed, open-source distributed parallel file system developed and maintained by DataDirect Networks (DDN). Due to the extremely scalable architecture of the Lustre file system, Lustre deployments are popular in scientific supercomputing, as well as in the oil and gas, manufacturing, rich media, and finance sectors. Lustre presents a POSIX interface to its clients with parallel access capabilities to the shared file objects. As of this writing, Lustre is the most widely used file system on the top 500 fastest computers in the world. Lustre is the file system of choice on 7 out of the top 10 fastest computers in the world today, over 70% of the top 100, and also for over 60% of the top 500。
+
+> Lustre 是一个由 DDN 开发和维护的、开源的、GPL协议下的分布式并行文件系统。Lustre 架构具有极强的扩展性，在超算，石油，天然气，制造业，富媒体，金融行业等领域大量部署。Lustre 向其客户端提供具有并行访问共享文件对象的 POSIX 接口。截至目前，Lustre 是全球最快计算机 TOP 500榜单中使用最多的文件系统。在前十名中，有7台选择 Lustre 作为文件系统，并且在前100名中，超过70%的使用率；在前500名中，也超过60%的使用率。
+
+## Lustre Features
+
+Lustre is designed for scalability and performance. The aggregate storage capacity and file system bandwidth can be scaled up by adding more servers to the file system, and performance for parallel applications can often be increased by utilizing more Lustre clients. Some practical limits are shown in Table 1 along with values from known production file systems.
+
+> Lustre 为了扩展性和性能的目录而设计。它的存储容量和聚合性能随着服务器增加不断扩展，并且提供给并行应用的性能可以随着客户端的增加而增长。下表展示一些当前的理论限制范围和在已知生产系统中的实践值。
+
+特性 | 理论限制范围 | 已知生产系统的实践值
+:- | :- | :-
+客户端扩展性 | 100 - 100,000个 | 50,000+ 客户端, 大多数在10,000到20,000之间
+客户端性能 | 单客户端：90%的网络带宽 <br> 聚合：10TB/s | 单客户端带宽：4.5GB/s(FDR IB, OPA1), 元数据性能：1000 ops/s <br> 聚合：2.5TB/s
+OSS 扩展性 | OSS：每个OSS可拥有1-32个 OST <br> OST（ldiskfs）：300M 个对象，每个 OST 可达256TiB  <br> OST（ZFS）：500M个对象，每个 OST 可达256TiB <br> OSS 数量：最多1000个 OSS，每个 OSS最多拥有4000个 OST | OSS（ldiskfs）：每个 OSS 可拥有32个8TiB OST，或者每个OSS可拥有8个32TiB OST <br> OSS（ZFS）：每个OSS可拥有1个72TiB OST <br> OSS数量：有450个 OSS，每个OSS有1000个4TiB OST；或者有192个 OSS，每个 OSS 有1344个8TiB OST；或者有768个OSS，每个OSS有768个72TiB OST
+OSS 性能 | 单个OSS：15GB/s <br> 聚合：10TB/s | 单个 OSS: 10 GB/s <br> 聚合: 2.5 TB/s
+MDS 扩展性 | MDS：每个 MDS 可拥有 1-4个 MDT <br> MDT（ldiskfs）：每个MDT可拥有40亿个文件，8 TiB容量 <br> MDT（ZFS）：每个 MDT 可拥有640亿个文件，64 TiB容量 <br> MDS数量：有256个 MDS，每个 MDS 最多拥有265个 MDT | MDS：每个 MDS 可拥有30亿个文件 <br> MDS数量：在生产环境中有7个 MDS，每个 MDS 拥有7个2 TiB的 MDT（在测试环境中有256个 MDS，每个 MDS 拥有256个64 GiB 的 MDT）
+MDS 性能 | create： 50,000 ops/s <br> stats：200,000 ops/s | create： 15,000 ops/s <br> stats：50,000 ops/s
+文件系统扩展性 | 单个文件（最大大小）：32 PiB（ldiskfs）或 $$ 2^{63} $$ bytes（ZFS） <br> 总体：512 PiB 的总容量，1万亿个文件 | 单个文件（最大大小）：TiB 级 <br> 总体：55 PiB 的总容量，80亿个文件
+
+Lustre has several features that enhance performance, usability, and stability. Some of these features include:
+
+Lustre 具有多种特性，以用于性能提升、可用性和稳定性的需求。一些特性总结如下：
+
+- POSIX Compliance: With few exceptions, Lustre passes the full POSIX test suite. Most operations are atomic to ensure that clients do not see stale data or metadata. Lustre also supports mmap() file IO.
+
+> POSIX 兼容性：Lustre 几乎通过了 POSIX 的兼容性测试。其大部分操作是原子性，以确保对客户端的透明性。另外 Lustre 支持 mmap 文件 IO。
+
+- Online file system checking: Lustre provides a file system checker (LFSCK) to detect and correct file system inconsistencies. LFSCK can be run while the file system in online and in production, minimizing potential downtime.
+
+> 数据在线校验：Lustre 使用 LFSCK 工具检查文件系统的数据一致性。LFSCK 可以在生产环境中在线运行，减少潜在的存储服务下线时间。
+
+- Controlled file layouts: The file layouts that determine how data is placed across the Lustre servers can be customized on a per-file basis. This allows users to optimize the layout to best fit their specific use case.
+
+> 可控的文件布局：文件布局决定数据的存放位置。Lustre 布局方式可以基于文件的粒度。用户可根据其使用场景优化文件布局方式。
+
+- Support for multiple backend file systems: When formatting a Lustre file system, the underlying storage can be formatted as either ldiskfs (a performance-enhanced version of ext4) or ZFS.
+
+> 后端文件系统：Lustre 现支持两种后端文件系统：ldiskfs 和 zfs。
+
+- Support for high-performance and heterogeneous networks: Lustre can utilize RDMA over low latency networks such as Infiniband or Intel OmniPath in addition to supporting TCP over commodity networks. The Lustre networking layer provides the ability to route traffic between multiple networks making it feasible to run a single site-wide Lustre file system.
+
+> 异构网络和高性能网络：Lustre 不仅支持在低延时的 IB 和 OmniPath 网络使用 RDMA，也支持普通的 TCP 网络。Lustre 的网络层适配不同网络，所以在不同网络环境中可以部署一套 Lustre 系统。
+
+- High-availability: Lustre supports active/active failover of storage resources and multiple mount protection (MMP) to guard against errors that may results from mounting the storage simultaneously on multiple servers. High availability software such as Pacemaker/Corosync can be used to provide automatic failover capabilities.
+
+> 高可用性：提供 active/active 存储资源的 failover 机制和 MMP 机制，防止不同服务器同时挂载同一个存储介质的问题。Pcs 等高可用软件提供自动挂载的故障恢复功能。
+
+- Security features: Lustre follows the normal UNIX file system security model enhanced with POSIX ACLs. The root squash feature limits the ability of Lustre clients to perform privileged operations. Lustre also supports the configuration of Shared-Secret Key (SSK) security.
+
+- 数据安全：Lustre 遵循 UNIX 文件安全标准：ACLs。root squash 特性限制客户端执行特权操作。Lustre 也支持 SSK。
+
+- Capacity growth: File system capacity can be increased by adding additional storage for data and metadata while the file system in online.
+
+- 容量扩容：在线扩容。通过增加存储的方式增加数据或元数据的容量。
+
+## Lustre Components
+
+Lustre is an object-based file system that consists of several components:
+
+> Lustre 是一个基于对象的存储，包含以下几个组件：
+
+- Management Server (MGS) - Provides configuration information for the file system. When mounting the file system, the Lustre clients will contact the MGS to retrieve details on how the file system is configured (what servers are part of the file system, failover information, etc.). The MGS can also proactively notify clients about changes in the file system configuration and plays a role in the Lustre recovery process.
+
+> 管理服务器（MGS）：提供文件系统的配置信息。Lustre 客户端挂载时，会和 MGS 请求检索详细的配置信息，如文件系统中服务器部分，故障对信息等等。当配置更改时，MGS 主动通知客户端。另外担任恢复处理的角色。
+
+- Management Target (MGT) - Block device used by the MGS to persistently store Lustre file system configuration information. It typically only requires a relatively small amount of space (on the order to 100 MB).
+
+> 管理器目标（MGT）：MGS 存储 Lustre 文件系统配置信息的块设备。容量需求不大，一般为100MB。
+
+- Metadata Server (MDS) - Manages the file system namespace and provides metadata services to clients such as filename lookup, directory information, file layouts, and access permissions. The file system will contain at least one MDS but may contain more.
+
+> 元数据服务器（MDS）：管理文件系统命名空间和提供元数据服务，例如查找文件名，目录信息，文件布局和访问权限。Lustre 至少包含一个 MDS。
+
+- Metadata Target (MDT) - Block device used by an MDS to store metadata information. A Lustre file system will contain at least one MDT which holds the root of the file system, but it may contain multiple MDTs. Common configurations will use one MDT per MDS server, but it is possible for an MDS to host multiple MDTs. MDTs can be shared among multiple MDSs to support failover, but each MDT can only be mounted by one MDS at any given time.
+
+> 元数据目标（MDT）：MDS 存储元数据的块设备。Lustre 至少包含一个 MDT 提供文件系统的根。一般情况下，每个 MDS 上配置一个 MDT，但也有可能一个 MDS 包含多个 MDT。故障对可以通过多个 MDS 共享同一个 MDT的方式实现，但在同一个时刻，一个 MDT 只能被一个 MDS 挂载。
+
+- Object Storage Server (OSS) - Stores file data objects and makes the file contents available to Lustre clients. A file system will typically have many OSS nodes to provide a higher aggregate capacity and network bandwidth.
+
+> 对象存储服务器：存储文件数据对象，提供文件数据的访问给客户端。通常 Lustre 会配置多个 OSS 来增加容量和提高网络带宽。
+
+- Object Storage Target (OST) - Block device used by an OSS node to store the contents of user files. An OSS node will often host several OSTs. These OSTs may be shared among multiple hosts, but just like MDTs, each OST can only be mounted on a single OSS at any given time. The total capacity of the file system is the sum of all the individual OST capacities.
+
+> 对象存储目录：OSS 存储用户文件数据的块设备。OSS 节点挂载多个 OST，另外，每一个 OST 也被多个 OSS 共享。和 MDT 相同，同一时刻，每个 OST 只能被一个 OSS 挂载。Lustre 系统的总容量为所有 OST 容量之和。
+
+- Lustre Client - Mounts the Lustre file system and makes the contents of the namespace visible to the users. There may be hundreds or even thousands of clients accessing a single Lustre file system. Each client can also mount more than one Lustre file system at a time.
+
+> Lustre 客户端：挂载 Lustre 文件系统，提供给用户统一文件系统命名空间。Lustre 文件系统可以同时存在成百上千的客户端。另外，客户端也可以同时挂载不同的 Lustre 系统。
+
+- Lustre Networking (LNet) - Network protocol used for communication between Lustre clients and servers. Supports RDMA on low-latency networks and routing between heterogeneous networks.
+
+> Lustre 网络（LNet）：LNet 用于客户端和服务端之间的通信，支持在异构的低延时网络和路由上使用 RDMA。
+
+The collection of MGS, MDS, and OSS nodes are sometimes referred to as the “frontend”. The individual OSTs and MDTs must be formatted with a local file system in order for Lustre to store data and metadata on those block devices. Currently, only ldiskfs (a modified version of ext4) and ZFS are supported for this purpose. The choice of ldiskfs or ZFS if often referred to as the “backend file system”. Lustre provides an abstraction layer for these backend file systems to allow for the possibility of including other types of backend file systems in the future.
+
+> MGS、MDS 和 OSS 节点被称为“前端”，ldiskfs 或 ZFS 称为“后端文件系统”。在 Lustre 中，OST 和 MDT 对应的块设备必须格式化为本地文件系统：ldiskfs（ext4 的修改版） 或 ZFS，以用于存放数据。Lustre 为不同的后端文件系统提供一个抽象层。未来也支持其他的类型的后端文件系统（基本没动力的）。
+
+Figure 1 shows a simplified version of the Lustre file system components in a basic cluster. In this figure, the MGS server is distinct from the MDS servers, but for small file systems, the MGS and MDS may be combined into a single server and the MGT may coexist on the same block device as the primary MDT.
+
+> 图1展示一个简化的 Lustre 组件图。在这张图中，MGS 和 MDS 在不同的服务器上。不过在小型的 Lustre集群上，MGS 和 MDS 使用同一个块设备作为 MGT 和 MDT。
+
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/Lustre_components.png" alt="Figure 1. Lustre file system components in a basic cluster.">
+    <figcaption style="font-size:12px">Figure 1. Lustre file system components in a basic cluster.</figcaption>
+</div>
+
+## Lustre File Layouts
+
+Lustre stores file data by splitting the file contents into chunks and then storing those chunks across the storage targets. By spreading the file across multiple targets, the file size can exceed the capacity of any one storage target. It also allows clients to access parts of the file from multiple Lustre servers simultaneously, effectively scaling up the bandwidth of the file system. Users have the ability to control many aspects of the file’s layout by means of the lfs setstripe command, and they can query the layout for an existing file using the lfs getstripe command.
+
+File layouts fall into one of two categories:
+
+1. Normal / RAID0 - File data is striped across multiple OSTs in a round-robin manner.
+
+1. Composite - Complex layouts that involve several components with potentially different striping patterns.
+
+### Normal (RAID0) Layouts
+
+A normal layout is characterized by a stripe count and a stripe size. The stripe count determines how many OSTs will be used to store the file data, while the stripe size determines how much data will be written to an OST before moving to the next OST in the layout. As an example, consider the file layouts shown in Figure 2 for a simple file system with 3 OSTs residing on 3 different OSS nodes. Note that Lustre indexes the OSTs starting at zero.
+
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/File_striping.png" alt="Figure 2. Normal RAID0 file striping in Lustre.">
+    <figcaption style="font-size:12px">Figure 2. Normal RAID0 file striping in Lustre.</figcaption>
+</div>
+
+File A has a stripe count of three, so it will utilize all OSTs in the file system. We will assume that it uses the default Lustre stripe size of 1MB. When File A is written, the first 1MB chunk gets written to OST0. Lustre then writes the second 1MB chunk of the file to OST1 and the third chunk to OST2. When the file exceeds 3 MB in size, Lustre will round-robin back to the first allocated OST and write the fourth 1MB chunk to OST0, followed by OST1, etc. This illustrates how Lustre writes data in a RAID0 manner for a file. It should be noted that although File A has three chunks of data on OST0 (chunks #1, #4, and #7), all these chunks reside in a single object on the backend file system. From Lustre’s point of view, File A consists of three objects, one per OST. Files B and C show layouts with the default Lustre stripe count of one, but only File B uses the default stripe size of 1MB. The layout for File C has been modified to use a larger stripe size of 2MB. If both File B and File C are 2MB in size, File B will be treated as two consecutive chunks written to the same OST whereas File C will be treated as a single chunk. However, this difference is mostly irrelevant since both files will still consist of a single 2MB object on their respective OSTs.
 
 # TEST
 

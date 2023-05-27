@@ -18,7 +18,8 @@
          "expandable-chapters",
          "theme-comscore",
          "back-to-top-button",
-         "auto-scroll-table"
+         "auto-scroll-table",
+         "katex"
     ],
     "pluginsConfig": {
         "fontSettings": {
