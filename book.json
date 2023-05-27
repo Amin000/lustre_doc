@@ -17,7 +17,8 @@
          "theme-default",
          "expandable-chapters",
          "theme-comscore",
-         "back-to-top-button"
+         "back-to-top-button",
+         "auto-scroll-table"
     ],
     "pluginsConfig": {
         "fontSettings": {
