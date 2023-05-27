@@ -901,7 +901,7 @@ struct llcrypt_key {
 
 Libcfs includes APIs and data structures that help with CPU partition table management in Lustre. A CPU partition is a virtual processing unit and can have 1-N cores or 1-N NUMA nodes. Therefore a CPU partition is also viewed as a pool of processors.
 
-> libcfs 包含的 API 和数据结构，用于协助处理 Lustre 中的 CPU 分区表。CPU 分区表是虚拟化处理单元，它有 1-N 个核心和 1-N 个 NUMA 节点。所以，一个 CPU 分区也是处理器池的视图。
+> libcfs 中的 API 和数据结构，用于处理 Lustre 中的 CPU 分区表。CPU 分区表是虚拟化处理单元，它有 1到 N 个核心和 1到 N 个 NUMA 节点。所以，CPU 分区也是处理器池的视图。
 
 Source code 20: Kernel APIs for data encryption defined in libcfs/include/libcfs/crypto/llcrypt.h
 
@@ -993,31 +993,31 @@ Libcfs provides the following APIs to access and manipulate CPU partitions and C
 
 > libcfs 提供下面 APIs 函数，用于访问和管理 CPU 分区 和 CPTs。
 
-* cfs_cpt_table_alloc() - Allocates a CPT given the number of CPU partitions.
+- cfs_cpt_table_alloc() - Allocates a CPT given the number of CPU partitions.
 
-* cfs_cpt_table_free() - Frees a CPT corresponding to the given reference.
+- cfs_cpt_table_free() - Frees a CPT corresponding to the given reference.
 
-* cfs_cpt_table_print() - Prints a CPT corresponding to the given reference.
+- cfs_cpt_table_print() - Prints a CPT corresponding to the given reference.
 
-* cfs_cpt_number() - Returns number of CPU partitions in a CPT.
+- cfs_cpt_number() - Returns number of CPU partitions in a CPT.
 
-* cfs_cpt_online() - returns the number of online CPTs.
+- cfs_cpt_online() - returns the number of online CPTs.
 
-* cfs_cpt_distance_calculate() - Calculates the maximum NUMA distance between all nodes in the from_mask and all nodes in the to_mask.
+- cfs_cpt_distance_calculate() - Calculates the maximum NUMA distance between all nodes in the from_mask and all nodes in the to_mask.
 
 Additionally libcfs includes functions to initialize and remove CPUs, set and unset node masks and add and delete CPUs and nodes. Per CPU data and partition variables management functions are located in libcfs/libcfs/libcfs_mem.c file.
 
-> 此外，libcfs 还包含初始化和删除 CPU 的函数，设置和取消设置节点掩码，增加和删除 CPU 和节点等函数。每个 CPU 数据和分区的变量管理函数位于 libcfs/libcfs/libcfs_mem.c 文件中。
+> 此外，libcfs 还包含初始化和删除 CPU 的函数，设置、取消设置节点掩码，增加、删除 CPU 和节点等函数。每个 CPU 数据和分区的变量管理函数位于 libcfs/libcfs/libcfs_mem.c 文件中。
 
 ## Debugging Support and Failure Injection
 
 Lustre debugging infrastructure contains a number of macros that can be used to report errors and warnings. The debugging macros are defined in libcfs/include/libcfs/libcfs_debug.h. CERROR, CNETERR, CWARN, CEMERG, LCONSOLE, CDEBUG are examples of the debugging macros. Complete list of the debugging macros and their detailed description can be found in this link.
 
-> lustre 调试基础套件包含各种用在报告错误和告警的宏。调试宏例如 CERROR, CNETERR, CWARN, CEMERG, LCONSOLE, CDEBUG，都定义在 libcfs/include/libcfs/libcfs_debug.h 上。完整的调试宏和它们的详细描述都在该[连接](https://github.com/DDNStorage/lustre_manual_markdown)找到。
+> lustre 调试基础套件包含各种用在报告错误和告警的宏。文件 libcfs/include/libcfs/libcfs_debug.h 定义了诸如 CERROR, CNETERR, CWARN, CEMERG, LCONSOLE, CDEBUG 调试宏。调试宏的完整列表和细描述都在该[链接](https://github.com/DDNStorage/lustre_manual_markdown)中。
 
 Failure macros defined in libcfs_fail.h are used to deliberately inject failure conditions in Lustre for testing purposes. CFS_FAIL_ONCE, CFS_FAILv SKIP, CFS_FAULT, CFS_FAIL_SOME are examples of such failure macros (see Source Code 23). Libcfs module defines the failure macros starting with the keyword CFS whereas Lustre redefines them in lustre/include/obd_support.h file starting with the keyword OBD. The hex values representing these failure macros are used in the lctl set_param fail_loc command inject specific failures. Instances of OBD_FAIL macro usage can be seen in llite/vvp_io.c file.
 
-> 故障宏（libcfs_fail.h）通过注入故障条件以达到测试的目标。一些故障宏的例子包括：CFS_FAIL_ONCE, CFS_FAILv SKIP, CFS_FAULT, CFS_FAIL_SOME（见源码23）。Libcfs 定义的故障宏的前缀为 CFS，而 Lustre 在 lustre/include/obd_support.h 文件中使用 OBD 的前缀重定义了故障宏。这些宏的十六进制的值被用在 lctl set_param fail_loc 命令上，以用于实现注入特定的故障。宏 OBD_FAIL 实例使用方法可以在 llite/vvp_io.c 中找到。
+> 故障宏（见 libcfs_fail.h）通过注入故障条件以达到测试的目标。一些故障宏的例子包括：CFS_FAIL_ONCE, CFS_FAILv SKIP, CFS_FAULT, CFS_FAIL_SOME（见源码23）。Libcfs 定义的故障宏的前缀为 CFS，而 Lustre 在 lustre/include/obd_support.h 文件中使用前缀 OBD 重新定义了故障宏。这些宏的十六进制的值被用在 lctl set_param fail_loc 命令上，以用于注入特定的故障。宏 OBD_FAIL 实例使用方法可以在 llite/vvp_io.c 中找到。
 
 Source code 23: CFS_FAIL macros defined in libcfs/include/libcfs/libcfs_fail.h
 
@@ -1048,7 +1048,7 @@ Files located in libcfs/include/libcfs/linux furnish additional supporting softw
 
 Lustre refers to all the data that it stores as objects. This includes not only the individual components of a striped file but also such things as directory entries, internal configuration files, etc. To identify an object, Lustre assigns a File IDentifier (FID) to the object that is unique across the file system. A FID is a 128-bit number that consists of three components: a 64-bit sequence number, a 32-bit object ID, and a 32-bit version number. The data structure for a FID is shown in Source Code 24. As noted in the code, the version number is not currently used but is reserved for future purposes.
 
-> Lustre 所有的数据都作为“对象”进行存储。“对象”不仅包含独立的条带文件组件，还包含目录条目，内部配置文件等。Lustre 使用 FID 唯一标识对象，FID 共128位，分为三个部分：一个64位的序列号，一个32位的对象 ID，和32位的版本号。源码24为 FID 的结构体。需要注意的是，当前版本号未被使用，只是作为保留字段，
+> Lustre 使用“对象”描述它所存储的所有数据。“对象”不仅包含独立的条带化文件组件，还包含目录条目，内部配置文件等。Lustre 使用 FID 唯一标识对象，FID 共128位，分为三个部分：一个64位的序列号，一个32位的对象 ID，和32位的版本号。源码24为 FID 的结构体。需要注意的是，当前版本号未被使用，只是作为保留字段，
 
 Source Code 24: FID structure (include/uapi/linux/lustre/lustre_user.h)
 
@@ -1082,19 +1082,25 @@ When a client creates a new object on a storage target, the client allocates a n
 
 It is important to understand that the use of the term “client” in this context does not just refer to Lustre file system clients that present the POSIX file system interface to end-users. A FID client is any node that is responsible for creating new objects, and this can include other Lustre servers. When a Lustre file system client uses the POSIX interface to create a new file, it will use a sequence number granted by an MDT target to construct a FID for the new file. This FID will be used to identify the object on the MDT that corresponds to this new file. However, the MDS server hosting the MDT will use the layout configuration for this new file to allocate objects on one or more OSTs that will contain the actual file data. In this scenario, the MDS is acting as a FID client to the OST targets. The MDS server will have been granted sequence numbers by the OST targets and use these sequence numbers to generate the FIDs that identify all the OST objects associated with the file layout.
 
-> 术语“client”在上下文的含义非常重要。它不仅仅指代呈现给终端用户的 POSIX 文件系统接口类型的 Lustre 客户端。FID 客户端可以在 Lustre 的任何一个节点上，包括 Lustre 服务器，只要它需要创建新的对象。当 Lustre 客户端使用 POSIX 文件系统接口去创建新的文件时，它将使用 MDT 授予给客户端的序列号来创建新的 FID 给该文件。然而，MDS 服务器挂载的 MDT 会使用布局配置在单个或多个 OST 上申请对象给新创建的文件数据，在这种场景下，MDS 时作为一个 OST 目标的 FID 客户端而存在。MDS 服务器被 OST 目标授予序列号，然后使用这些序列号生成新的，可以标识所有关联到文件布局的 OST 对象的 FID。
+> 术语“client”在上下文的含义非常重要。它不仅仅指代呈现给终端用户的 POSIX 文件系统接口类型的 Lustre 客户端。FID 客户端可以在 Lustre 的任何一个节点上，例如 Lustre 服务器，只要是需要创建新对象的地方。当 Lustre 客户端使用 POSIX 文件系统接口去创建新的文件时，它将使用 MDT 授予给客户端的序列号来创建新的 FID 给该文件。然而，MDS 服务器挂载的 MDT 会使用布局配置在单个或多个 OST 上申请对象给新创建的文件数据，在这种场景下，MDS 时作为一个 OST 目标的 FID 客户端而存在。MDS 服务器被 OST 目标授予序列号，然后使用这些序列号生成新的，可以标识所有关联到文件布局的 OST 对象的 FID。
 
 ### Reserved Sequence Numbers and Object IDs
 
 The sequence controller does not allocate certain sequence numbers to the sequence managers. These sequence numbers are reserved for special uses such as testing or compatibility with older Lustre versions. Information about these reserved sequence numbers can be found in include/lustrefid.h. Below is a list of sequence ranges used by Lustre:
 
+> 序列控制器不会给序列管理器分配特殊的序列号。这些保留序列号被用于如测试或旧版本兼容性目的。有关保留序列号信息可以在 include/lustrefid.h 文件中查看。以下列出在 lustre 中使用的序列范围：
+
 - IGIF (Inode and Generation In FID): sequence range = [12, 2^{32} - 1]
 
     This range is reserved for compatibility with older Lustre versions that previously identified MDT objects using the ext3 inode number on the backend file system. Since those inode values were only 32-bit integers, a FID can be generated for these older objects by simply using the inode number as the sequence number. Since ext3 reserves inodes 0-11 for internal purposed, these sequence numbers will be used for other internal purposes by Lustre.
 
+    > 这个范围用于与旧版本的兼容性。早期 Lustre 使用 ext3 inode 号来标识 MDT 对象。因为这些 inode 号只有32位，所以可以简单地通过把 inode 号作为序列号来为这些旧版本的对象生成 FID。由于 ext3 保留 inode 的 0到11 作为内部用途，这些序列号可以被用于 Lustre 的其他内部需求。
+
 - IDIF (object ID In FID): sequence range = [2^{32}, 2^{33} - 1]
 
     This range is used for compatibility to distinguish OST objects allocated from MDT0000 with sequence 0. Bit 33 of the FID Sequence is set to 1, and the OST index along with the high 16 bits of the object number are encoded into the lower 32 bits of the sequence number. The low 32 bits of the OST Object ID is stored in the FID OID.
+
+    > 这个范围的序列用于识别 OST 从 MDT0000 申请到的序列号为0的对象。FID 的第33位设置为1，并将 OST 的下标和高16位的对象号编码到序列号的低32。对象 ID 的低32位存放在 FID 的 OID中。
 
 - OST_MDT0: sequence = 0
 
@@ -1104,17 +1110,29 @@ The sequence controller does not allocate certain sequence numbers to the sequen
 
     Used internally for Lustre Log objects.
 
+    > Lustre 内部的日志对象。
+
 - ECHO: sequence = 2
 
     Used for testing OST IO performance to avoid conflicting with any "real" data objects.
+
+    > 测试用途。避免和实际数据产生冲突。
 
 - OST_MDT1 ... OSTMAX: sequence range = [3-9]
 
     Used for testing file systems with multiple MDTs prior to the release of DNE. These have never been used in production.
 
-- Normal Sequences: sequence range = [2^{33}, 2^{64} - 1] This is the sequence range used in normal production and allocated to the sequence manager and clients. NOTE: The first 1024 sequence numbers in this range are reserved for system use.
+    > 用于在发布 DNE 之前，测试多 MDT 文件系统的测试。这个范围的序列号从没有在生产中使用。
+
+- Normal Sequences: sequence range = [2^{33}, 2^{64} - 1] 
+
+    This is the sequence range used in normal production and allocated to the sequence manager and clients. NOTE: The first 1024 sequence numbers in this range are reserved for system use.
+
+    > 这个范围的序列，用于正常的生产和分配给序列管理器、客户端。注意：最开始的1024个序列号保留给系统使用。
 
 The header file also contains some predefined object IDs that are used for local files such as user/group/project accounting logs, LFSCK checkpoints, etc. These are part of the local_oid enumeration, a portion of which is shown in Source Code 25.
+
+> 头文件还包含一些预定义的对象 ID，被用于内部文件，如 user/group/project 账户日志，LFSCK 校验点。它们都属于 local_oid 枚举，源码25展示了其中的一部分。
 
 Source Code 25: Portion of local_oid enumeration (include/lustre_fid.h)
 
@@ -1135,6 +1153,16 @@ enum local_oid {
 ```
 
 Unless otherwise noted, the remainder of this chapter will focus on FIDs that use Normal Sequences or ones reserved for special internal objects. It will not deal with sequences reserved for compatibility reasons (IGIF, IDIF, etc).
+
+> 除非有其他说明，否则，在本章的剩余部分，不会涉及到兼容性的保留序列，但会重点介绍正常序列和用于内部对象的保留序列，
+
+### fid Kernel Module
+
+FID-related functions are built into the fid kernel module. The source code for this module is located in the lustre/fid directory. For Lustre clients, two files are used to build this module: lproc_fid.c and fid_request.c. The lproc_fid.c file just contains functions needed to support debugfs and won’t be discussed in detail here.
+
+The fid_request.c file contains the core functions needed to support the FID client functionality. The module entry/exit points are fid_init() and fid_exit(), but these functions just call debugfs_create_dir(...) and debugfs_remove_recursive(...) to add/remove the necessary debugfs entries. The real initialization starts in the client_fid_init function. This function is registered as part of the OBD operations (struct obd_ops) to be invoked by the MDC and OSP subsystems. The function’s main responsibility is to allocate memory for a lu_client_seq structure which is then passed to seq_client_init(..) (an abbreviated version of which is shown in Source Code 26) where the structure is initialized. The cleanup routine starts in client_fid_fini(..) which then calls seq_client_fini(..). These two functions decrement the appropriate reference counts on other structures and free up the memory allocated to the lu_client_seq structure.
+
+There are only two other functions exported by the fid module: seq_client_get_seq and seq_client_alloc_fid. The seq_client_get_seq function is mainly used by the OSP subsystem when requesting a new sequence number that will be used for precreating objects. The seq_client_alloc_fid function is used to request a new FID from the client’s currently allocated sequence. If the FID values in the current sequence are exhausted, a call is made to seq_client_alloc_seq to request a new sequence number.
 
 [^1]: *lustre 支持多个 MDT（DNE），存在多个 mdc*
 

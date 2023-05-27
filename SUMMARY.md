@@ -78,3 +78,5 @@
     * [File Identifier (FID)](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifier-fid)
 
       * [Reserved Sequence Numbers and Object IDs](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#reserved-sequence-numbers-and-object-ids)
+
+      * [fid Kernel Module](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#fid-kernel-module)

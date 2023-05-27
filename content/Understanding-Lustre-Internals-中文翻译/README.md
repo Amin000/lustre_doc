@@ -81,3 +81,5 @@ CTE 4 过线2分的翻译，自己把握哈
   * [File Identifier (FID)](./Understanding-Lustre-Internals-中文翻译.md#file-identifier-fid)
 
     * [Reserved Sequence Numbers and Object IDs](./Understanding-Lustre-Internals-中文翻译.md#reserved-sequence-numbers-and-object-ids)
+
+    * [fid Kernel Module](./Understanding-Lustre-Internals-中文翻译.md#fid-kernel-module)
