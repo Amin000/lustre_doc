@@ -1034,13 +1034,13 @@ Files located in libcfs/include/libcfs/linux furnish additional supporting softw
 
 > 在 libcfs/include/libcfs/linux 目录中的文件提供额外的软件支持，包括64位时间，原子性，扩展数组，spin lock。
 
-* `linux-time.h` - Implementation of portable time API for Linux for both kernel and user-level.
+- `linux-time.h` - Implementation of portable time API for Linux for both kernel and user-level.
 
-* `refcount.h` - Implements a variant of atomic_t specialized for reference counts.
+- `refcount.h` - Implements a variant of atomic_t specialized for reference counts.
 
-* `xarray.h` - Implementation of large array of pointers that has the functionality of resizable arrays.
+- `xarray.h` - Implementation of large array of pointers that has the functionality of resizable arrays.
 
-* `processor.h` - Provides spin_begin(), spin_cpu_yield() and spin_until_cond() capabilities for spin locks.
+- `processor.h` - Provides spin_begin(), spin_cpu_yield() and spin_until_cond() capabilities for spin locks.
 
 # File Identifiers, FID Location Database, and Object Index
 
@@ -1048,7 +1048,7 @@ Files located in libcfs/include/libcfs/linux furnish additional supporting softw
 
 Lustre refers to all the data that it stores as objects. This includes not only the individual components of a striped file but also such things as directory entries, internal configuration files, etc. To identify an object, Lustre assigns a File IDentifier (FID) to the object that is unique across the file system. A FID is a 128-bit number that consists of three components: a 64-bit sequence number, a 32-bit object ID, and a 32-bit version number. The data structure for a FID is shown in Source Code 24. As noted in the code, the version number is not currently used but is reserved for future purposes.
 
-> Lustre 涉及到的数据都作为“对象”进行存储。“对象”不仅包含条带文件的独立组件，还包括目录条目，内部配置等等。为了标识一个对象，Lustre 分配一个在 Lustre 文件系统唯一的文件标识符（FID）给该对象。一个 FID 有128为，分为三个部分：一个64位的连续数字，一个32位的对象 ID，和32位的版本号。FID 的数据结构展示在源码24上。需要注意的是，版本号在当前是没有含义的，只是作为保留字段用于将来的扩展。
+> Lustre 所有的数据都作为“对象”进行存储。“对象”不仅包含独立的条带文件组件，还包含目录条目，内部配置文件等。Lustre 使用 FID 唯一标识对象，FID 共128位，分为三个部分：一个64位的序列号，一个32位的对象 ID，和32位的版本号。源码24为 FID 的结构体。需要注意的是，当前版本号未被使用，只是作为保留字段，
 
 Source Code 24: FID structure (include/uapi/linux/lustre/lustre_user.h)
 
@@ -1074,9 +1074,67 @@ struct lu_fid {
 
 Sequence numbers are controlled by the Lustre file system and allocated to clients. The entire space of sequence numbers is overseen by the sequence controller that runs on MDT0, and every storage target (MDTs and OSTs) runs a sequence manager. As the file system is started and the storage targets are brought online, each sequence manager contacts the sequence controller to obtain a unique range of sequence numbers (known as a super sequence). Every client that establishes a connection to a storage target will be granted a unique sequence number by the target’s sequence manager. This ensures that no two clients share a sequence number and that the same sequence number will always map to the same storage target.
 
+> Lustre 控制着序列号和分配（给客户端）。序列控制器运行在 MDT0 上，它监视着整个序列号空间。序列管理器运行在存储目标上（MDT 和 OST）。当文件系统启动，且存储目标上线时，每个序列管理器连接到序列控制器获取唯一的某段序列号，也称为超级序列。随后客户端的序列管理器建立和存储目标的链接，并授予存储目标一个序列号。这种机制保证了不同客户端之间序列号的唯一性和同一个序列号总是映射到相同存储目标上。
+
 When a client creates a new object on a storage target, the client allocates a new FID to use for the object. The FID is created by using the sequence number granted to the client by the storage target and adding a unique object ID chosen by the client. The client maintains a counter for each sequence number and increments that counter when a new object ID is needed. This combination of target-specific sequence number and client-chosen object ID (along with a version number of zero) is used to populate the lu_fid structure for the new object. It should be noted that FIDs are never reused within the same Lustre file system (with a few exceptions for special internal-only objects). If a client exhausts a sequence number and cannot create more FIDs, the client will contact the target and request a new sequence number.
 
+> 当客户端在存储目标上创建新对象时，客户端会给该对象申请新的 FID。该 FID 由存储目标授予给客户端的序列号，加上客户端选择的唯一的对象 ID 组成。客户端维护序列号的计数器，并且在创建对象时自增。基于特定目标的序列号和客户端选择的对象 ID 的组合（还有全为0的版本号）在创建新对象时填充 lu_fid 结构体。需要注意的是，在 lustre 中，FID 不会被重复使用。如果客户端耗尽序列号，客户端将向目标器请求新的序列号。
+
 It is important to understand that the use of the term “client” in this context does not just refer to Lustre file system clients that present the POSIX file system interface to end-users. A FID client is any node that is responsible for creating new objects, and this can include other Lustre servers. When a Lustre file system client uses the POSIX interface to create a new file, it will use a sequence number granted by an MDT target to construct a FID for the new file. This FID will be used to identify the object on the MDT that corresponds to this new file. However, the MDS server hosting the MDT will use the layout configuration for this new file to allocate objects on one or more OSTs that will contain the actual file data. In this scenario, the MDS is acting as a FID client to the OST targets. The MDS server will have been granted sequence numbers by the OST targets and use these sequence numbers to generate the FIDs that identify all the OST objects associated with the file layout.
+
+> 术语“client”在上下文的含义非常重要。它不仅仅指代呈现给终端用户的 POSIX 文件系统接口类型的 Lustre 客户端。FID 客户端可以在 Lustre 的任何一个节点上，包括 Lustre 服务器，只要它需要创建新的对象。当 Lustre 客户端使用 POSIX 文件系统接口去创建新的文件时，它将使用 MDT 授予给客户端的序列号来创建新的 FID 给该文件。然而，MDS 服务器挂载的 MDT 会使用布局配置在单个或多个 OST 上申请对象给新创建的文件数据，在这种场景下，MDS 时作为一个 OST 目标的 FID 客户端而存在。MDS 服务器被 OST 目标授予序列号，然后使用这些序列号生成新的，可以标识所有关联到文件布局的 OST 对象的 FID。
+
+### Reserved Sequence Numbers and Object IDs
+
+The sequence controller does not allocate certain sequence numbers to the sequence managers. These sequence numbers are reserved for special uses such as testing or compatibility with older Lustre versions. Information about these reserved sequence numbers can be found in include/lustrefid.h. Below is a list of sequence ranges used by Lustre:
+
+- IGIF (Inode and Generation In FID): sequence range = [12, 2^{32} - 1]
+
+    This range is reserved for compatibility with older Lustre versions that previously identified MDT objects using the ext3 inode number on the backend file system. Since those inode values were only 32-bit integers, a FID can be generated for these older objects by simply using the inode number as the sequence number. Since ext3 reserves inodes 0-11 for internal purposed, these sequence numbers will be used for other internal purposes by Lustre.
+
+- IDIF (object ID In FID): sequence range = [2^{32}, 2^{33} - 1]
+
+    This range is used for compatibility to distinguish OST objects allocated from MDT0000 with sequence 0. Bit 33 of the FID Sequence is set to 1, and the OST index along with the high 16 bits of the object number are encoded into the lower 32 bits of the sequence number. The low 32 bits of the OST Object ID is stored in the FID OID.
+
+- OST_MDT0: sequence = 0
+
+    Used to identify existing objects allocated by MDT0000 on old formatted OSTs before the introduction of FID-on-OST.
+
+- LLOG: sequence = 1
+
+    Used internally for Lustre Log objects.
+
+- ECHO: sequence = 2
+
+    Used for testing OST IO performance to avoid conflicting with any "real" data objects.
+
+- OST_MDT1 ... OSTMAX: sequence range = [3-9]
+
+    Used for testing file systems with multiple MDTs prior to the release of DNE. These have never been used in production.
+
+- Normal Sequences: sequence range = [2^{33}, 2^{64} - 1] This is the sequence range used in normal production and allocated to the sequence manager and clients. NOTE: The first 1024 sequence numbers in this range are reserved for system use.
+
+The header file also contains some predefined object IDs that are used for local files such as user/group/project accounting logs, LFSCK checkpoints, etc. These are part of the local_oid enumeration, a portion of which is shown in Source Code 25.
+
+Source Code 25: Portion of local_oid enumeration (include/lustre_fid.h)
+
+```c
+enum local_oid {
+        FLD_INDEX_OID           = 3UL,
+        FID_SEQ_CTL_OID         = 4UL,
+        FID_SEQ_SRV_OID         = 5UL,
+        ...
+        ACCT_USER_OID           = 15UL,
+        ACCT_GROUP_OID          = 16UL,
+        LFSCK_BOOKMARK_OID      = 17UL,
+        ...
+        LFSCK_NAMESPACE_OID     = 4122UL,
+        REMOTE_PARENT_DIR_OID   = 4123UL,
+        BATCHID_COMMITTED_OID   = 4125UL,
+};
+```
+
+Unless otherwise noted, the remainder of this chapter will focus on FIDs that use Normal Sequences or ones reserved for special internal objects. It will not deal with sequences reserved for compatibility reasons (IGIF, IDIF, etc).
 
 [^1]: *lustre 支持多个 MDT（DNE），存在多个 mdc*
 

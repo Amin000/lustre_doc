@@ -76,3 +76,5 @@
   * [File Identifiers, FID Location Database, and Object Index](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifiers-fid-location-database-and-object-index)
 
     * [File Identifier (FID)](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifier-fid)
+
+      * [Reserved Sequence Numbers and Object IDs](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#reserved-sequence-numbers-and-object-ids)

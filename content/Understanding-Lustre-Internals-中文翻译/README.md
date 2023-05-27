@@ -79,3 +79,5 @@ CTE 4 过线2分的翻译，自己把握哈
 * [File Identifiers, FID Location Database, and Object Index](./Understanding-Lustre-Internals-中文翻译.md#file-identifiers-fid-location-database-and-object-index)
 
   * [File Identifier (FID)](./Understanding-Lustre-Internals-中文翻译.md#file-identifier-fid)
+
+    * [Reserved Sequence Numbers and Object IDs](./Understanding-Lustre-Internals-中文翻译.md#reserved-sequence-numbers-and-object-ids)
