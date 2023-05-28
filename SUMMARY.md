@@ -80,3 +80,7 @@
       * [Reserved Sequence Numbers and Object IDs](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#reserved-sequence-numbers-and-object-ids)
 
       * [fid Kernel Module](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#fid-kernel-module)
+
+    * [FID Location Database (FLD)](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#fid-location-database-fld)
+
+    * [Object Index (OI)](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#object-index-oi)

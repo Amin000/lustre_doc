@@ -1160,12 +1160,127 @@ Unless otherwise noted, the remainder of this chapter will focus on FIDs that us
 
 FID-related functions are built into the fid kernel module. The source code for this module is located in the lustre/fid directory. For Lustre clients, two files are used to build this module: lproc_fid.c and fid_request.c. The lproc_fid.c file just contains functions needed to support debugfs and won’t be discussed in detail here.
 
+FID 相关源代码在 lustre/fid 目录中，称为 fid 内核模块。lustre 客户端使用
+fid 内核模块内置了 fid 相关函数，位于 lustre/fid 目录中。Lustre 客户端使用 lproc_fid.c 和 fid_request.c 构建 fid 内核模块。其中，lproc_fid.c 只包含调试相关的代码。我们不会在本文中深入探讨它。
+
 The fid_request.c file contains the core functions needed to support the FID client functionality. The module entry/exit points are fid_init() and fid_exit(), but these functions just call debugfs_create_dir(...) and debugfs_remove_recursive(...) to add/remove the necessary debugfs entries. The real initialization starts in the client_fid_init function. This function is registered as part of the OBD operations (struct obd_ops) to be invoked by the MDC and OSP subsystems. The function’s main responsibility is to allocate memory for a lu_client_seq structure which is then passed to seq_client_init(..) (an abbreviated version of which is shown in Source Code 26) where the structure is initialized. The cleanup routine starts in client_fid_fini(..) which then calls seq_client_fini(..). These two functions decrement the appropriate reference counts on other structures and free up the memory allocated to the lu_client_seq structure.
 
+fid_request.c 包含 FID 客户端功能的核心代码。模块的入口和退出函数分别是 fid_init() 和 fid_exit()，但也只是调用 debugfs_create_dir(...) 和 debugfs_remove_recursive(...) 去添加或删除必要的 debugfs 条目。真正的初始化是 client_fid_init 函数。它注册到 OBD 操作，以供 MDC 和 OSP 子模块调用。函数的主要负责为 lu_client_seq 申请内存，之后 seq_client_init(..) 初始化 lu_client_seq（源码26，简化了部分代码）。上述两个函数会适当递减其他结构的引用计数，并释放分配给 lu_client_seq 的内存。
+
+Source Code 26: Function seq_client_init used in fid module initialization
+
+```c
+void seq_client_init(struct lu_client_seq *seq, struct obd_export *exp,
+                     enum lu_cli_type type, const char *prefix,
+                     struct lu_server_seq *srv)
+{
+    ...
+        seq->lcs_srv = srv;
+        seq->lcs_type = type;
+        mutex_init(&seq->lcs_mutex);
+        if (type == LUSTRE_SEQ_METADATA)
+                seq->lcs_width = LUSTRE_METADATA_SEQ_MAX_WIDTH;
+        else
+                seq->lcs_width = LUSTRE_DATA_SEQ_MAX_WIDTH;
+        /* Make sure that things are clear before work is started. */
+        seq_client_flush(seq);
+        if (exp) seq->lcs_exp = class_export_get(exp);
+        snprintf(seq->lcs_name, sizeof(seq->lcs_name), "cli-%s", prefix);
+    ...
+}
+```
+
 There are only two other functions exported by the fid module: seq_client_get_seq and seq_client_alloc_fid. The seq_client_get_seq function is mainly used by the OSP subsystem when requesting a new sequence number that will be used for precreating objects. The seq_client_alloc_fid function is used to request a new FID from the client’s currently allocated sequence. If the FID values in the current sequence are exhausted, a call is made to seq_client_alloc_seq to request a new sequence number.
+
+> fid 模块只导出 seq_client_get_seq 和 seq_client_alloc_fid 两个函数。OSP 子系统在预创建对象时，使用 seq_client_get_seq 请求新的序列号；seq_client_alloc_fid 用于从客户端已分配到的序列中请求新的 FID。当序列中的 FID 值耗尽，就调用 seq_client_get_seq 请求新的序列号。
+
+For the sequence controller and sequence manager nodes, the fid kernel module includes code from three additional files: fid_handler.c, fid_store.c, and fid_lib.c. The fid_lib.c file defines some special sequence ranges and reserved FIDs. The fid_store.c file contains functions used to persist sequence information to backend storage. The functions defined in this file are not exported by the module and are just used internally by the code in fid_handler.c. The fid_handler.c file contains the functions used by FID servers to handle requests from FID clients for sequence number allocations. The fid module entry/exit points (fid_init() and fid_exit()) make calls to fid_server_mod_init() and fid_server_mod_exit() to handle server-specific initialization and cleanup. Server requests are handled by the functions seq_server_check_and_alloc_super() and seq_server_alloc_meta().
+
+> 在序列控制器和序列管理器节点中，fid 内核模块额外包含 fid_handler.c、fid_store.c、and fid_lib.c 三个代码文件。fid_lib.c 定义一些特殊的序列范围和保留的 FID。fid_store.c 定义了持久化序列信息的函数，这些函数不会被模块导出，并且只在 fid_handler.c 中使用。fid_handler.c 定义了一些被 FID 服务端使用的函数，用于处理 FID 客户端申请序列号的请求。fid 模块的入口和退出函数（fid_init() and fid_exit()）调用 fid_server_mod_init() 和 fid_server_mod_exit() 处理服务端的初始化和清理流程。seq_server_check_and_alloc_super() 和 seq_server_alloc_meta() 处理服务端请求。
+
+## FID Location Database (FLD)
+
+Since no two storage targets ever share the same sequence numbers, a client can determine the location of an object based on the sequence number in the object's FID. To do this, a lookup table that maps sequence numbers to storage targets must be maintained. This lookup table is called the FID Location Database. The full FLD is stored on MDT0, but each Lustre server will maintain a subset of the FLD for the sequences assigned to it. Clients can send queries to a server to request a FID lookup in the server FLD. The response is then added to the client’s local FLD cache to speed future lookups.
+
+> 因为不同客户端从不共享相同的序列号，所以客户端可以基于 FID 中的序列号确定对象的位置。为了实现该功能，需要维护一个查询表，该表也称为 FID 位置数据库，用于映射序列号和存储目标。MDT0 存放着完整的 FLD，而 Lustre 服务端则维护 分配给它的 FLD 子集。客户端发送 FLD 查询请求，并且在得到响应后，把该响应缓存在本地 FLD 缓存中，用于加速下次查找。
+
+The code related to FLD is contained in the lustre/fld directory. The fld kernel module is built from the following source files:
+
+> FLD 相关的代码在 lsutre/fld 目录中。下列代码文件用于构建 fld 内核模块：
+
+- fld_internal.h - Contains structure definitions for FLD caching (as well as the function declarations used in the other *.c files.
+
+    > fld_internal.h：定义 FLD cache 结构体和相关函数声明
+
+- lproc_fld.c - Defines functions for debugfs support.
+
+    > lproc_fld.c：定义 debugfs 相关函数。
+
+- fld_cache.c - Defines functions for caching results of FLD lookups on clients. These functions are only for internal use and are not exported by the module.
+
+    > fld_cache.c：用于缓存 FLD 查询结果函数。只在模块内部使用。
+
+- fld_request.c - Defines module entry/exit points (fld_init() and fld_exit()) as well as the function used for looking up FLD entries (fld_client_lookup()).
+
+    > fld_request.c：定义模块入口和退出函数，FLD 条目查找函数。
+
+- fld_index.c - Included only by FLD servers. Defines functions for managing the FLD database itself. Only the fld_insert_entry() function is exported for external use. All the other functions in this file are for internal use by the fld module.
+
+    > fld_index.c：仅用于 FLD 服务端。定义管理 FLD 函数。除了 fld_insert_entry() 在外部使用，其他在该文件中的函数都在 fld 模块内部中使用。
+
+- fld_handler.c - Included only by FLD servers. Defines the functions needed to handle FLD queries from clients.
+
+    > fld_handler.c：仅用于 FLD 服务端。定义处理客户端的 FLD 查询请求。
+
+## Object Index (OI)
+
+The Object Storage Device (OSD) layer acts as an abstraction between the MDT/OST layers and the underlying backend file system (ldiskfs or ZFS) used to store the actual objects. Although Lustre may use FIDs to reference all objects, the backend file system does not. It is the responsibility of the OSD abstraction layer to convert a Lustre FID into a storage cookie that can be used by the backend file system to locate the desired object. The term “storage cookie” is used to represent some identifier that is specific to the type of backend file system being used. In the case of ldiskfs, the storage cookie consists of the file system inode and generation number and is encapsulated in the osd_inode_id structure shown in Source Code 27.
+
+> 虽然 Lustre 使用 FID 引用所有的对象，但是后端文件系统没有使用 FID。对象存储设备层（OSD）作为 MDT 或 OST 和实际后端文件系统（ldiskfs 或 ZFS）之间的抽象层，主要负责将 FID 转换为 `storage cookie`。后端文件系统使用 storage cookie 定位所期望的对象，它用于标识特定于所使用的后端文件系统类型的标识符。例如 ldiskfs，storage cookie 包含文件系统 inode 和 生成号，并封装在 osd_inode_id 中（见源码27）。
+
+Source Code 27: osd_inode_id structure (osd-ldiskfs/osd_oi.h)
+
+```c
+/*
+ * Storage cookie. Datum uniquely identifying inode on the underlying file
+ * system.
+ *
+ * osd_inode_id is the internal ldiskfs identifier for an object. It should
+ * not be visible outside of the osd-ldiskfs. Other OSDs may have different
+ * identifiers, so this cannot form any part of the OSD API.
+ */
+struct osd_inode_id {
+        __u32 oii_ino; /* inode number */
+        __u32 oii_gen; /* inode generation */
+};
+```
+
+The OSD layer must maintain a mapping between Lustre FIDs and the corresponding storage cookie. This mapping is referred to as the Object Index (OI). For ldiskfs, OI-related functions are declared in the header file lustre/osd-ldiskfs/osd_oi.h as shown in Source Code 28. The functions themselves are defined in lustre/osd-ldiskfs/osd_oi.c. The OI is implemented using the Index Access Module (IAM) functions defined in the lustre/osd-ldiskfs/osd_iam.* source files. For the ZFS backend, similar functionality is provided by code in lustre/osd-zfs/osd_oi.c although the implementation details differ from osd-ldiskfs.
+
+> OSD 层维护 FID 和 storage cookie 的映射，称为对象索引（OI）。对于 ldiskfs 类型，OI 相关函数在 lustre/osd-ldiskfs/osd_oi.h 声明（见源码28），而相关定义在 lustre/osd-ldiskfs/osd_oi.c 中。OI 使用 索引访问模型（IAM）实现，见 lustre/osd-ldiskfs/osd_iam.* 文件。对于 ZFS 类型，相关功能实现细节有所差异，可见于 lustre/osd-zfs/osd_oi.c 文件。
+
+Source Code 28: Functions for interacting with the Object Index (OI)
+
+```c
+int osd_oi_init(struct osd_thread_info *info, struct osd_device *osd,
+                bool restored);
+void osd_oi_fini(struct osd_thread_info *info, struct osd_device *osd);
+int  osd_oi_lookup(struct osd_thread_info *info, struct osd_device *osd,
+                   const struct lu_fid *fid, struct osd_inode_id *id,
+                   enum oi_check_flags flags);
+int  osd_oi_insert(struct osd_thread_info *info, struct osd_device *osd,
+                   const struct lu_fid *fid, const struct osd_inode_id *id,
+                   handle_t *th, enum oi_check_flags flags, bool *exist);
+int  osd_oi_delete(struct osd_thread_info *info,
+                   struct osd_device *osd, const struct lu_fid *fid,
+                   handle_t *th, enum oi_check_flags flags);
+int  osd_oi_update(struct osd_thread_info *info, struct osd_device *osd,
+                   const struct lu_fid *fid, const struct osd_inode_id *id,
+                   handle_t *th, enum oi_check_flags flags);
+```
 
 [^1]: *lustre 支持多个 MDT（DNE），存在多个 mdc*
 
 [^2]: *严谨一点地说，是在 Lustre 客户端上的第一个组件*
 
-[^3]: *好像也不能翻译为加法，我的理解是，可以把内核中的时间调整，以用于测试*
+[^3]: *好像也不能翻译为加法，我的理解是，调整内核时间，用于测试目的*
