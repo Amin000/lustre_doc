@@ -15,6 +15,14 @@
 
       * [Normal (RAID0) Layouts](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#normal-raid0-layouts)
 
+      * [Composite Layouts](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#composite-layouts)
+
+      * [Distributed Namespace](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#distributed-namespace)
+
+      * [File Identifiers and Layout Attributes](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifiers-and-layout-attributes)
+
+    * [Lustre Software Stack](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-software-stack)
+
   * [TEST](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#test)
 
   * [UTILS](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#utils)

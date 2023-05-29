@@ -33,7 +33,7 @@ Lustre 具有多种特性，以用于性能提升、可用性和稳定性的需�
 
 - Online file system checking: Lustre provides a file system checker (LFSCK) to detect and correct file system inconsistencies. LFSCK can be run while the file system in online and in production, minimizing potential downtime.
 
-> 数据在线校验：Lustre 使用 LFSCK 工具检查文件系统的数据一致性。LFSCK 可以在生产环境中在线运行，减少潜在的存储服务下线时间。
+> 在线校验数据：Lustre 使用 LFSCK 工具检查文件系统的数据一致性。LFSCK 可以在生产环境中在线运行，减少潜在的存储服务下线时间。
 
 - Controlled file layouts: The file layouts that determine how data is placed across the Lustre servers can be customized on a per-file basis. This allows users to optimize the layout to best fit their specific use case.
 
@@ -114,15 +114,25 @@ Figure 1 shows a simplified version of the Lustre file system components in a ba
 
 Lustre stores file data by splitting the file contents into chunks and then storing those chunks across the storage targets. By spreading the file across multiple targets, the file size can exceed the capacity of any one storage target. It also allows clients to access parts of the file from multiple Lustre servers simultaneously, effectively scaling up the bandwidth of the file system. Users have the ability to control many aspects of the file’s layout by means of the lfs setstripe command, and they can query the layout for an existing file using the lfs getstripe command.
 
+> lustre 以块（chunks）为基本单位存放文件数据内容。Lustre 将文件切割为多个块，并将这些块存放到多个存储目标上，这意味着单个文件的大小可以超过单个存储目标的容量大小。Lustre 允许客户端并发访问存放在不同存储目标上的同个文件的不同部分内容，以提升文件系统带宽。用户通过 lfs setstripe 命令控制文件的布局，也可以通过 lfs getstripe 命令获取文件布局信息。
+
 File layouts fall into one of two categories:
+
+> 文件布局分为两类：
 
 1. Normal / RAID0 - File data is striped across multiple OSTs in a round-robin manner.
 
+    > 常规 / RAID0：文件数据通过轮询的方式切割，并且存放在多个 OST 上。
+
 1. Composite - Complex layouts that involve several components with potentially different striping patterns.
+
+    > 复合布局：这种布局比较复杂，包含了多种组件，每个组件的布局都是不同
 
 ### Normal (RAID0) Layouts
 
 A normal layout is characterized by a stripe count and a stripe size. The stripe count determines how many OSTs will be used to store the file data, while the stripe size determines how much data will be written to an OST before moving to the next OST in the layout. As an example, consider the file layouts shown in Figure 2 for a simple file system with 3 OSTs residing on 3 different OSS nodes. Note that Lustre indexes the OSTs starting at zero.
+
+> 常规布局有两个属性：条带数目和条带大小。条带数量决定文件存放到多少个 OST 上；条带大小决定每次写入单个 OST 的数据的大小。例如，如图2中，一个文件存放在3个不同的 OSS 节点上。需要注意的是，OST 的起始下标是 0。
 
 <div align=center style="margin-bottom:12px;margin-top:12px">
     <img src="../../image/Understanding-Lustre-Internals-中文翻译/File_striping.png" alt="Figure 2. Normal RAID0 file striping in Lustre.">
@@ -130,6 +140,50 @@ A normal layout is characterized by a stripe count and a stripe size. The stripe
 </div>
 
 File A has a stripe count of three, so it will utilize all OSTs in the file system. We will assume that it uses the default Lustre stripe size of 1MB. When File A is written, the first 1MB chunk gets written to OST0. Lustre then writes the second 1MB chunk of the file to OST1 and the third chunk to OST2. When the file exceeds 3 MB in size, Lustre will round-robin back to the first allocated OST and write the fourth 1MB chunk to OST0, followed by OST1, etc. This illustrates how Lustre writes data in a RAID0 manner for a file. It should be noted that although File A has three chunks of data on OST0 (chunks #1, #4, and #7), all these chunks reside in a single object on the backend file system. From Lustre’s point of view, File A consists of three objects, one per OST. Files B and C show layouts with the default Lustre stripe count of one, but only File B uses the default stripe size of 1MB. The layout for File C has been modified to use a larger stripe size of 2MB. If both File B and File C are 2MB in size, File B will be treated as two consecutive chunks written to the same OST whereas File C will be treated as a single chunk. However, this difference is mostly irrelevant since both files will still consist of a single 2MB object on their respective OSTs.
+
+> A 文件的条带数据为3。在图中，该文件的数据存放在所有的 OST 上。假设条带大小为 Lustre 默认1M大小，当开始写时，文件第一块 1M 数据将会写到 OST0 上，接下来，第二块 1M 数据写入 OST1 中，最后第三块 1M 数据写入 OST2 中。以此类推，循环将文件的每块 1M 数据反复写入 OST0 至 OST2 三个 OST 中。需要注意的是，OST0 上有三个块，并且这三个块都属于同一个对象。从 Lustre 的角度看，A 文件由三个对象组成，每个 OST 存放一个 对象。B 文件和 C 文件为默认的条带数量1。两个文件中， B 文件为默认1M 的条带大小。C 文件为 2M。B、C 文件大小都为 2M，B 文件可以看作是两个1M 大小的块顺序写入到同一个 OST 上，文件 C 只有一个大小为 2M 的块写入到 OST 上。但是这种不同是无关紧要，因为 B 文件 和 C 文件数据对象都时 2M 的大小。
+
+### Composite Layouts
+
+A composite layout consists of one or more components each with their own specific layout. The most basic composite layout is a Progressive File Layout (PFL). Using PFL, a user can specify the same parameters used for a normal RAID0 layout but additionally specify a start and end point for that RAID0 layout. A PFL can be viewed as an array of normal layouts each of which covers a consecutive non-overlapping region of the file. PFL allows the data placement to change as the file increases in size, and because Lustre uses delayed instantiation, storage for subsequent components is allocated only when needed. This is particularly useful for increasing the stripe count of a file as the file grows in size.
+
+> 由一个或多个组件组成形成的，每个组件的布局都是独有的布局，称为复合布局（composite layout）。渐进式布局（PFL）是一种最基础的复合布局，它使用和常规 RAID0 布局方式相同的参数，并指定该 RAID 布局方式的起始和结束位置。PFL 可以看作是一组常规布局方式，每个布局方式覆盖非重叠的区域。Lustre 实例化延时，子组件只在需要时申请存储空间，所以 PFL 允许在数据大小增大时，改变其存放位置。
+
+The concept of a PFL has been extended to include two other layouts: Data on MDT (DoM) and Self Extending Layout (SEL). A DoM layout is specified just like a PFL except that the first component of the file resides on the same MDT as the file’s metadata. This it typically used to store small amounts of data for quick access. A SEL is just like a PFL with the addition that an extent size can be supplied for one or more of the components. When a component is instantiated, Lustre only instantiates part of the component to cover the extent size. When this limit is exceeded, Lustre examines the OSTs assigned to the component to determine if any of them are running low on space. If not, the component is extended by the extent size. However, if an OST does run low on space, Lustre can dynamically shorten the current component and choose a different set of OSTs to use for the next component of the layout. This can safeguard against full OSTs that might generate a ENOSPC error when a user attempts to append data to a file.
+
+> PFL 概念被扩展到 DoM（数据在 MDT 上）和 自扩展布局（SEL）。DoM 和 PFL 不同的一点是，它的第一个组件和元数据存放在 MDT 上。这种布局常常用于快速访问小容量数据的目的。SEL 比 PFL 多了组件范围大小的属性，每个组件范围大小可以不同。当一个组件实例化时，Lustre 只实例化组件的一部分来覆盖其上的范围大小。当组件上超过限制时，Lustre 会检测组件所在的 OST 容量是否过低，如果不是，则通过范围大小来扩展组件的大小。如果 OST 可用容量过低，Lustre 动态的减少当前组件大小，选择一个新 OST 作为下一个布局的组件。这种方式防止出现满 OST 时，文件添加（append）数据时返回容量不足的错误（ENOSPC）。
+
+Lustre has a feature called File Level Redundancy (FLR) that allows a user to create one or more mirrors of a file, each with its own specific layout (either normal or composite). When the file layout is inspected using lfs getstripe, it appears like any other composite layout. However, the lcme_mirror_id field is used to identify which mirror each component belongs to.
+
+> Lustre 文件级冗余（FLR）创建一个或多个文件的镜像，每个镜像可以不同（常规或复合）。使用命令 lfs getstipe 获取该文件布局，命令返回和其他复合布局的返回相差不多。不同的地方是，返回中带有用于区分组件镜像的 lcme_mirror_id 字段。
+
+### Distributed Namespace
+
+The metatdata for the root of the Lustre file system resides on the primary MDT. By default, the metadata for newly created files and directories will reside on the same MDT as that of the parent directory, so without any configuration changes, the metadata for the entire file system would reside on a single MDT. In recent versions, a featured called Distributed Namespace (DNE) was added to allow Lustre to utilize multiple MDTs and thus scale up metadata operations. DNE was implemented in multiple phases, and DNE Phase 1 is referred to as Remote Directories. Remote Directories allow a Lustre administrator to assign a new subdirectory to a different MDT if its parent directory resides on MDT0. Any files or directories created in the remote directory also reside on the same MDT as the remote directory. This creates a static fan-out of directories from the primary MDT to other MDTs in the file system. While this does allow Lustre to spread overall metadata operations across mutliple servers, operations with any single directory are still constrained by the performance of a single MDS node. The static nature also prevents any sort of dynamic load balancing across MDTs.
+
+DNE Phase 2, also known as Striped Directories, removed some of these limitations. For a striped directory, the metadata for all files and subdirectories contained in that directory are spread across multiple MDTs. Similar to how a file layout contains a stripe count, a striped directory also has a stripe count. This determines how many MDTs will be used to spread out the metadata. However, unlike file layouts which spread data across OSTs in a round-robin manner, a striped directory uses a hash function to calculate the MDT where the metadata should be placed. The upcoming DNE Phase 3 expands upon the ideas in DNE Phase 2 to support the creation of auto-striped directories. An auto-striped directory will start with a stripe count of 1 and then dynamically increase the stripe count as the number of files/subdirectories in that directory grows. Users can then utilize striped directories without knowing a priori how big the directory might become or having to worry about choosing a directory stripe count that is too low or too high.
+
+### File Identifiers and Layout Attributes
+
+Lustre identifies all objects in the file system through the use of File Identifiers (FIDs). A FID is a 128-bit opaque identifier used to uniquely reference an object in the file system in much the same way that ext4 uses inodes or ZFS uses dnodes. When a user accesses a file, the filename is used to lookup the correct directory entry which in turn provides the FID for the MDT object corresponding to that file. The MDT object contains a set of extended attributes, one of which is called the Layout Extended Attribute (or Layout EA). This Layout EA acts as a map for the client to determine where the file data is actually stored, and it contains a list of the OSTs as well as the FIDs for the objects on those OSTs that hold the actual file data. Figure 3 shows an example of accessing a file with a normal layout of stripe count 3.
+
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/LayoutEA.png" alt="Figure 3. Using FID to access a file’s Layout EA and corresponding OST objects.">
+    <figcaption style="font-size:12px">Figure 3. Using FID to access a file’s Layout EA and corresponding OST objects.</figcaption>
+</div>
+
+## Lustre Software Stack
+
+The Lustre software stack is composed of several different layered components. To provide context for more detailed discussions later, a basic diagram of these components is illustrated in Figure 4. The arrows in this diagram represent the flow of a request from a client to the Lustre servers. System calls for operations like read and write go through the Linux Virtual File System (VFS) layer to the Lustre LLITE layer which implements the necessary VFS operations. If the request requires metadata access, it is routed to the Logical Metadata Volume (LMV) that acts as an abstraction layer for the Metadata Client (MDC) components. There is a MDC component for each MDT target in the file system. Similarly, requests for data are routed to the Logical Object Volume (LOV) which acts as an abstraction layer for all of the Object Storage Client (OSC) components. There is an OSC component for each OST target in the file system. Finally, the requests are sent to the Lustre servers by first going through the Portal RPC (PTL-RPC) subsystem and then over the wire via the Lustre Networking (LNet) subsystem.
+
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/Lustre_sw_stack.png" alt="Figure 4. Basic view of Lustre software stack">
+    <figcaption style="font-size:12px">Figure 4. Basic view of Lustre software stack.</figcaption>
+</div>
+
+Requests arriving at the Lustre servers follow the reverse path from the LNet subsystem up through the PTL-RPC layer, finally arriving at either the OSS component (for data requests) or the MDS component (for metadata requests). Both the OSS and MDS components are multi-threaded and can handle requests for multiple storage targets (OSTs or MDTs) on the same server. Any locking requests are passed to the Lustre Distributed Lock Manager (LDLM). Data requests are passed to the OBD Filter Device (OFD) and then to the Object Storage Device (OSD). Metadata requests go from the MDS straight to the OSD. In both cases, the OSD is responsible for interfacing with the backend file system (either ldiskfs or ZFS) through the Linux VFS layer.
+
+Figure 5 provides a simple illustration of the interactions in the Lustre software stack for a client requesting file data. The Portal RPC and LNet layers are represented by the arrows showing communications between the client and the servers. The client begins by sending a request through the MDC to the MDS to open the file. The MDS server responds with the Layout EA for the file. Using this information, the client can determine which OST objects hold the file data and send requests through the LOV/OSC layer to the OSS servers to access the data.
 
 # TEST
 

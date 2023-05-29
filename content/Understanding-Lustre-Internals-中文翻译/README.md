@@ -12,11 +12,19 @@ CTE 4 过线2分的翻译，自己把握哈
 
   * [Lustre Features](./Understanding-Lustre-Internals-中文翻译.md#lustre-features)
 
-  * [Lustre Components](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-components)
+  * [Lustre Components](./Understanding-Lustre-Internals-中文翻译.md#lustre-components)
 
-  * [Lustre File Layouts](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-file-layouts)
+  * [Lustre File Layouts](./Understanding-Lustre-Internals-中文翻译.md#lustre-file-layouts)
 
-    * [Normal (RAID0) Layouts](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#normal-raid0-layouts)
+    * [Normal (RAID0) Layouts](./Understanding-Lustre-Internals-中文翻译.md#normal-raid0-layouts)
+
+    * [Composite Layouts](./Understanding-Lustre-Internals-中文翻译.md#composite-layouts)
+
+    * [Distributed Namespace](./Understanding-Lustre-Internals-中文翻译.md#distributed-namespace)
+
+    * [File Identifiers and Layout Attributes](./Understanding-Lustre-Internals-中文翻译.md#file-identifiers-and-layout-attributes)
+
+  * [Lustre Software Stack](./Understanding-Lustre-Internals-中文翻译.md#lustre-software-stack)
 
 * [TEST](./Understanding-Lustre-Internals-中文翻译.md#test)
 
