@@ -195,7 +195,7 @@ Requests arriving at the Lustre servers follow the reverse path from the LNet su
 
 Figure 5 provides a simple illustration of the interactions in the Lustre software stack for a client requesting file data. The Portal RPC and LNet layers are represented by the arrows showing communications between the client and the servers. The client begins by sending a request through the MDC to the MDS to open the file. The MDS server responds with the Layout EA for the file. Using this information, the client can determine which OST objects hold the file data and send requests through the LOV/OSC layer to the OSS servers to access the data.
 
-> 图5简单地说明 lustre 客户端请求数据时与 lustre 软件栈的交互过程。图中的箭头代表用于客户端和服务端通信的 RPC 和 Lnet 层。客户端一开始通过 MDC 发送打开文件给 MDS，MDS 返回文件的 EA 属性。客户端通过 EA 信息，确定哪个 OST 上的对象存放这文件的数据，之后通过 LOV 和 OSC 层发送访问数据请求到 OSS 上。
+> 图5简单地说明 lustre 客户端请求数据时与 lustre 软件栈的交互过程。图中的箭头代表用于客户端和服务端通信的 RPC 和 Lnet 层。客户端一开始通过 MDC 发送打开文件请求给 MDS，MDS 返回文件的 EA 属性信息。客户端通过该信息，确定哪个 OST 上的对象存放着文件的数据，之后通过 LOV 和 OSC 层发送访问数据请求到确定的 OSS 上。
 
 <div align=center style="margin-bottom:12px;margin-top:12px">
     <img src="../../image/Understanding-Lustre-Internals-中文翻译/Lustre_IO.png" alt="Figure 5. Lustre I/O operation: Lustre client requesting file data">
