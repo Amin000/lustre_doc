@@ -182,6 +182,8 @@ Lustre identifies all objects in the file system through the use of File Identif
 
 The Lustre software stack is composed of several different layered components. To provide context for more detailed discussions later, a basic diagram of these components is illustrated in Figure 4. The arrows in this diagram represent the flow of a request from a client to the Lustre servers. System calls for operations like read and write go through the Linux Virtual File System (VFS) layer to the Lustre LLITE layer which implements the necessary VFS operations. If the request requires metadata access, it is routed to the Logical Metadata Volume (LMV) that acts as an abstraction layer for the Metadata Client (MDC) components. There is a MDC component for each MDT target in the file system. Similarly, requests for data are routed to the Logical Object Volume (LOV) which acts as an abstraction layer for all of the Object Storage Client (OSC) components. There is an OSC component for each OST target in the file system. Finally, the requests are sent to the Lustre servers by first going through the Portal RPC (PTL-RPC) subsystem and then over the wire via the Lustre Networking (LNet) subsystem.
 
+> lustre 软件栈由不同层次的组件组成。为了更加详细的讨论，图4中展示了一个组件的基础架构图。箭头表示了从 lustre 客户端到 lustre 服务端 请求的流向。读写系统调用从 VFS 层开始，再到 Lustre LLITE 层。LLITE 实现了 Linux 虚拟文件系统（VFS）所需要的操作。如果请求是访问元数据，那么它将被导向到 LMV（Logical Metadata Volume，逻辑元数据卷） 层。LMV 是 MDC（Metadata Client，元数据客户端）的抽象。每一个 MDC 对应一个 MDT 的目标（target）。和元数据访问类似，访问数据的请求会被导向 LOV（Logical Object Volume，逻辑对象卷）层。LOV 是 OSC（Object Storage Client，对象存储客户端）的抽象。一个 OSC 对应一个 OST 目标。最后，请求先通过 PTL-RPC（可移植 RPC）子系统，再使用 Lnet 网络发送到 lustre 服务端上。
+
 <div align=center style="margin-bottom:12px;margin-top:12px">
     <img src="../../image/Understanding-Lustre-Internals-中文翻译/Lustre_sw_stack.png" alt="Figure 4. Basic view of Lustre software stack">
     <figcaption style="font-size:12px">Figure 4. Basic view of Lustre software stack.</figcaption>
@@ -189,7 +191,16 @@ The Lustre software stack is composed of several different layered components. T
 
 Requests arriving at the Lustre servers follow the reverse path from the LNet subsystem up through the PTL-RPC layer, finally arriving at either the OSS component (for data requests) or the MDS component (for metadata requests). Both the OSS and MDS components are multi-threaded and can handle requests for multiple storage targets (OSTs or MDTs) on the same server. Any locking requests are passed to the Lustre Distributed Lock Manager (LDLM). Data requests are passed to the OBD Filter Device (OFD) and then to the Object Storage Device (OSD). Metadata requests go from the MDS straight to the OSD. In both cases, the OSD is responsible for interfacing with the backend file system (either ldiskfs or ZFS) through the Linux VFS layer.
 
+> 请求在 Lustre 服务端的处理是反过来的，它首先到达 Lnet 子系统，之后沿着箭头向上到达 PTL-RPC 层，最终到达 OSS 组件或 MDS 组件。OSS 组件处理数据请求，MDS 处理元数据请求。OSS 和 MDS 组件使用多线程处理多个存储目标的请求。锁请求传递给 LDLM（Lustre Distributed Lock Manager，Lustre 分布式锁管理器）。数据请求传递给 OBD 过滤设备层，之后在传给 OSD（Object Storage Device，对象存储设备）。元数据请求直接从 MDS 到达 OSD 上。在这个场景下，OSD 负责后端文件系统（ldiskfs 或 ZFS）与 VFS 的交互。
+
 Figure 5 provides a simple illustration of the interactions in the Lustre software stack for a client requesting file data. The Portal RPC and LNet layers are represented by the arrows showing communications between the client and the servers. The client begins by sending a request through the MDC to the MDS to open the file. The MDS server responds with the Layout EA for the file. Using this information, the client can determine which OST objects hold the file data and send requests through the LOV/OSC layer to the OSS servers to access the data.
+
+> 图5简单地说明 lustre 客户端请求数据时与 lustre 软件栈的交互过程。图中的箭头代表用于客户端和服务端通信的 RPC 和 Lnet 层。客户端一开始通过 MDC 发送打开文件给 MDS，MDS 返回文件的 EA 属性。客户端通过 EA 信息，确定哪个 OST 上的对象存放这文件的数据，之后通过 LOV 和 OSC 层发送访问数据请求到 OSS 上。
+
+<div align=center style="margin-bottom:12px;margin-top:12px">
+    <img src="../../image/Understanding-Lustre-Internals-中文翻译/Lustre_IO.png" alt="Figure 5. Lustre I/O operation: Lustre client requesting file data">
+    <figcaption style="font-size:12px">Figure 5. Lustre I/O operation: Lustre client requesting file data</figcaption>
+</div>
 
 # TEST
 
