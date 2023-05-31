@@ -25,6 +25,20 @@
 
   * [TEST](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#test)
 
+    * [Lustre Test Suites](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-test-suites)
+
+    * [Terminology](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#terminology)
+
+    * [Testing Lustre Code](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#testing-lustre-code)
+
+      * [Bypassing Failures](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#bypassing-failures)
+
+      * [Test Framework Options](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#test-framework-options)
+
+    * [Acceptance Small (acc-sm) Testing on Lustre](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#acceptance-small-acc-sm-testing-on-lustre)
+
+    * [Lustre Tests Environment Variables](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-tests-environment-variables)
+
   * [UTILS](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#utils)
 
   * [MGC](content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc)

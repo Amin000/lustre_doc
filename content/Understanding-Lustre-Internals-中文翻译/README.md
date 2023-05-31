@@ -28,6 +28,20 @@ CTE 4 过线2分的翻译，自己把握哈
 
 * [TEST](./Understanding-Lustre-Internals-中文翻译.md#test)
 
+  * [Lustre Test Suites](./Understanding-Lustre-Internals-中文翻译.md#lustre-test-suites)
+
+  * [Terminology](./Understanding-Lustre-Internals-中文翻译.md#terminology)
+
+  * [Testing Lustre Code](./Understanding-Lustre-Internals-中文翻译.md#testing-lustre-code)
+
+    * [Bypassing Failures](./Understanding-Lustre-Internals-中文翻译.md#bypassing-failures)
+
+    * [Test Framework Options](./Understanding-Lustre-Internals-中文翻译.md#test-framework-options)
+
+  * [Acceptance Small (acc-sm) Testing on Lustre](./Understanding-Lustre-Internals-中文翻译.md#acceptance-small-acc-sm-testing-on-lustre)
+
+  * [Lustre Tests Environment Variables](./Understanding-Lustre-Internals-中文翻译.md#lustre-tests-environment-variables)
+
 * [UTILS](./Understanding-Lustre-Internals-中文翻译.md#utils)
 
 * [MGC](./Understanding-Lustre-Internals-中文翻译.md#mgc)

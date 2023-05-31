@@ -204,7 +204,210 @@ Figure 5 provides a simple illustration of the interactions in the Lustre softwa
 
 # TEST
 
-略
+This Section describes various tests and testing frameworks used to test Lustre functionality and performance.
+
+> 本章讨论 Lustre 测试和其测试框架，它们用于测试 lustre 的功能和性能。
+
+## Lustre Test Suites
+
+Lustre Test Suites (LTS) is the largest collection of tests used to test Lustre file system. LTS consists of over 1600 tests, organized by their purpose and function. It is mainly composed of bash scripts, C programs and external applications. LTS provides various utilities to create, start, stop and execute tests. LTS can be used to execute test process automatically or in discrete steps. Using LTS the test process can be run as a group of tests or individual tests. LTS also allows to experiment with configurations and features such as ldiskfs, ZFS, DNE and HSM (Hierarchical Storage Manager). Tests in LTS are located in /lustre/tests directory in Lustre source tree and the major components in the test suite are given in Table 2.
+
+> Lustre 测试套件集 [^3][（LTS，Lustre Test Suites）是一大堆用于测试 Lustre 文件系统的集合。LTS 按照测试目的和功能组织，包含超过1600个测试。主要由 bash 脚本，C 程序和外部应用构成。LTS 提供多种用于创建、启动、停止和执行测试的工具，可以自动化地执行测试流程或离散分步执行。通过 LTS，测试可以分组执行或单独执行。LTS 还可以对配置（configuration）和特性（feature），如 ldiskfs、ZFS、DNE、HSM（Hierarchical Storage Manager，分层管理器）进行验证。LTS 的测试代码位于源码树中的 /lustre/tests 目录，下表显示测试套件的主要组件。
+
+Name | Description
+:- | :-
+auster | auster is used to run the Lustre tests. It can be used to run groups of tests, individual tests, or sub-tests. It also provides file system setup and cleanup capabilities.
+acceptance-small.sh | The acceptance-small.sh script is a wrapper around auster that runs the test group ‘regression’ unless tests are specified on the command line.
+functions.sh | The functions.sh script provides functions for run_*.sh tests such as run_dd.sh or run_dbench.sh.
+test-framework.sh | The test-framework.sh provides the fundamental functions needed by tests to create, setup, verify, start, stop, and reformat a Lustre file system.
+
+名称 | 描述
+:- | :-
+auster | auster 被用于运行 lustre 测试。可以以组或单一、子模块为单位进行测试。另外还提供文件系统的启动和清理功能。
+acceptance-small.sh | 验收测试集。封装 auster。如果命令行中没有指定测试用例，那么脚本用于回归（regression）测试组测试。
+functions.sh | 功能测试脚本集。提供类似 run_*.sh 测试用例，例如，run_dd.sh 或 run_dbench.sh。
+test-framework.sh | 测试框架脚本。提供给一些如创建、启动、校验、开始、停止、重新格式化 lustre 等测试的所需要的基础函数。
+
+## Terminology
+
+In this Section, we describe relevant terminology related to Lustre Test Suites. All scripts and applications packaged as part of the lustre-tests-*.rpm and lustre-iokit-*.rpm are termed as Lustre Test Suites. The individual suites of tests contained in /usr/lib64/lustre/tests directory are termed as Test Suite. An example test suite is sanity.sh. A test suite is composed of Individual Tests. An example of an individual test is test 4 from large-lun.sh test suite. Test suites can be bundled into a group for back-to-back execution (e.g. regression). Some of the LTS test examples include - Regression (sanity, sanityn), Feature Specific (sanity-hsm, sanity-lfsck, ost-pools), Configuration (conf-sanity), Recovery and Failures (recovery-small, replay-ost-single) and so on. Some of the active Lustre unit, feature and regression tests and their short description are given in Table 3.
+
+> 在这节中，讨论和 LTS 相关的术语。所有被打包到 lustre-tests-\*.rpm 和 lustre-io-kit-\*.rpm 的脚本和应用被称为 lustre 测试套件集(LTS）。单个在 /usr/lib64/lustre/tests 目录下的套件称为测试套件（Test Suite）。例如，sanity.sh 测试套件，由一些独立的测试组成，独立的测试例如 large-lun.sh 测试套件中包含的`测试4`（test 4）。测试套件可以捆绑在一起紧挨着执行（如回归测试，regression）。LTS 包含了回归 - Regression（snaity，sanityn），特定特性 - Feature Specific（sanity-hsm，sanity-lfsck，ost-pools），配置 - Configuration（conf-sanity），恢复 - Recovery 和错误（recovery-small，replay-ost-single）等等测试。下标列出一些还在活跃的单元、特性和回归测试，和它们的简要描述。
+
+Name | Description
+:- | :-
+conf-sanity | A set of unit tests that verify the configuration tolls, and runs Lustre with multiple different setups to ensure correct operation in unusual system configurations.
+insanity | A set of tests that verify the multiple concurrent failure conditions.
+large-scale | Large scale tests that verify version based recovery features.
+metadata-updates | Tests that metadata updates are properly completed when multiple clients delete files and modify the attributes of files.
+parallel-scale | Runs functional tests, performance tests (e.g. IOR), and a stress test (simul).
+posix | Automates POSIX compliance testing. Assuming that the POSIX source is already installed on the system, it sets up loop back ext4 file system, then install, build and run POSIX binaries on ext4. Then runs POSIX again on Lustre and compares results from ext4 and Lustre.
+recovery-small | A set of unit tests that verify RPC replay after communications failure.
+runtests | Simple basic regression tests that verify data persistence across write, unmount, and remount. This is one of the few tests that verifies data integrity across a full file system shutdown and remount, unlike many tests which at most only verify the existence/size of files.
+sanity | A set of regression tests that verify operation under normal operating conditions. This tests a large number of unusual operations that have previously caused functional or data correctness issues with Lustre. Some of the tests are Lustre specific, and hook into the Lustre fault injection framework using lctl set_param fail_loc=X command to activate triggers in the code to simulate unusual operating conditions that would otherwise be difficult or impossible to simulate.
+sanityn | Tests that verify operations from two clients under normal operating conditions. This is done by mounting the same file system twice on a single client, in order to allow a single script/program to execute and verify file system operations on multiple “clients” without having to be a distributed program itself.
+
+名字 | 描述
+:- | :-
+conf-sanity | 一系列验证配置正确性的单元测试。它使用不同的步骤运行 lustre，确保在异常系统配置下的操作正确性。
+insanity | 一些验证并发错误环境的测试。
+large-scale | 大规模测试，验证基于错误恢复特性的版本正确性。
+metadata-updates | 测试在多客户端环境下，删除文件或修改文件属性时，元数据更新是否完成。
+parallel-scale | 功能测试，性能测试（例如 IOR）和压力测试（simul）。
+posix | 自动化 posix 兼容性测试。需要提前安装 POSIX 源码并配置了环回（loop back）ext4 文件系统，之后测试会安装构建代码，并且在 ext4 上运行。最后会在 lustre 上运行一次 POSIX，对比两次运行的结果。
+recovery-small | 一系列单元测试，用于验证 RPC 在连接失败后的应答正确性。
+runtests | 基础回归的简单测试，用于验证在写、解挂、重新挂载后的数据。这个是一种验证在文件系统关闭和重新挂载后数据的完整性测试，而不是用于测试验证文件是否存在，大小是否正常。
+sanity | 一系列回归测试，验证在正常环境下的操作。它测试大量在 lustre 中先前导致功能性或数据正确性问题的异常操作，由于模拟异常非常困难的，一些测试通过 lctl set_param fail_loc=X 命令 hook 到 Lustre 错误注入框架来触发异常代码来模拟异常运行条件。
+sanityn | 测试验证两个客户端在正常环境下操作正确性。为了执行没有分布式功能的单个脚本或程序，和在“多个”客户端上验证文件系统操作，测试用例会在同一个客户端挂载两次文件系统，来模拟多客户端。
+
+## Testing Lustre Code
+
+When programming with Lustre, the best practices for testing are test often and test early in the development cycle. Before submitting the code changes to Lustre source tree, developer must ensure that the code passes acceptance-small test suite. To create a new test case, first find the bug that reproduces an issue, fix the bug and then verify the fixed code passes the existing tests. This means that the newly found bug/defect is not covered by the test cases from the test suite. After making sure that any of the existing test cases do not cover the new defect, a new test case can be introduced to exclusively test the bug.
+
+> 在 lustre 上编程时，最佳实践是经常测试和开发周期的早期测试。开发者在提交代码之前，必须确保提交的代码已经通过了小型验收测试（acceptance-small）套件。为了增加新的测试用例，首先找出 bug 并重现，修复 bug 并验证已修复的代码是否通过了测试用例。这也意味着测试套件中的测试用例没有覆盖到新发现的 bug 或缺陷。在确定已存在的测试用例没有覆盖到新的缺陷后，新的测试用例将会被引入，去专门测试该 bug。
+
+### Bypassing Failures
+
+While testing Lustre, if one or more test cases are failing due to an issue not related to the bug that is currently being fixed, bypass option is available for the failing tests. For e.g., to skip sanity.sh sub-tests 36g and 65 and all of insanity.sh set the environment as,
+
+> 在测试过程中，如果执行测试用例失败是由于与 bug 无关的问题导致的，并且该问题已经被修复，那么可以配置绕过选项参数。例如，绕过 sanity.sh 的“36g”和“65”子测试，和绕过所有的 insanity.sh 测试，可以把环境变量设置为
+
+```c
+export SANITY_EXCEPT="36g 65"
+export INSANITY=no
+```
+
+A single line command can also be used to skip these tests when running acceptance-small test, as shown below.
+
+> 当运行acceptance-small测试时，也可以使用单行的命令绕过测试
+
+```c
+SANITY_EXCEPT="36g 65" INSANITY=no ./acceptance-small.sh
+```
+
+### Test Framework Options
+
+The examples below show how to run a full test or sub-tests from the acceptance-small test suite.
+
+> 下面的例子展示运行完整的 acceptance-small 测试或它的子测试
+
+- Run all tests in a test suite with the default setup.
+
+    > 在测试套件中使用默认配置运行所有的测试
+
+    ```c
+    `cd lustre/tests
+    sh ./acceptance-small.sh
+    ```
+
+- Run only recover-small and conf-sanity tests from acceptance-small test suite.
+
+    > 只运行 acceptance-small中的recover-small 和 conf-sanity 子测试。
+
+    ```c
+    ACC_SM_ONLY="recovery-small conf-sanity" sh ./acceptance-small.sh
+    ```
+
+- Run only tests 1, 3 and 4 from sanity.sh.
+
+    > 只运行sanity.sh中的 1 3 4测试
+
+    ```c
+    ONLY="1 3 4" sh ./sanity.sh
+    ```
+
+- skip tests 1 to 30 and run remaining tests in sanity.sh.
+
+    > 跳过sanity.sh中的1到30测试，并运行剩余的测试
+
+    ```c
+    EXCEPT="`seq 1 30`" sh sanity.sh
+    ```
+
+Lustre provides flexibility to easily add new tests to any of its test scripts.
+
+> lustre 可以方便灵活地添加新的测试用例到测试脚本。
+
+## Acceptance Small (acc-sm) Testing on Lustre
+
+`acceptance small (acc-sm)` testing for Lustre is used to catch bugs in the early development cycles. The acceptance-small.sh test scripts are located in the lustre/tests directory. acc-sm test suite contains three branches - b1_6 branch (18 tests), b1_8_gate branch (28 tests), and HEAD branch (30 tests). The functionality of some of the commonly used tests in acc-sm suite is listed in Table 4. The order in which tests need to be executed is defined in the acceptance-small.sh script and in each test script.
+
+> 小型验收测试（acceptance small，acc-sm）是 lustre 在开发周期早期阶段用来捕获 bug 的测试。小型验收测试脚本代码位于 lustre/tests 目录中。acc-sm 测试套件包含三个分支，b1_6 分支 (18 tests), b1_8_gate 分支 (28 tests), and HEAD 分支(30 tests)。下表展示了 acc-sm 的一些通用测试。一些需要在测试时执行的命令定义在 acceptance-small.sh 和每一个测试脚本中。
+
+Name | Description
+:- | :-
+RUNTESTS | This is a basic regression test with unmount/remount.
+SANITY | Verifies Lustre operation under normal operating conditions.
+DBENCH | Dbench benchmark for simulating N clients to produce the file system load.
+SANITYN | Verifies operations from two clients under normal operating conditions.
+LFSCK | Tests e2fsck and lfsck to detect and fix file system corruption.
+LIBLUSTRE | Runs a test linked to a liblustre client library.
+CONF_SANITY | Verifies various Lustre configurations (including wrong ones), where the system must behave correctly.
+RECOVERY_SMALL | Verifies RPC replay after a communications failure (message loss).
+INSANITY | Tests multiple concurrent failure conditions.
+
+名字 | 描述
+:- | :-
+RUNTESTS | unmount 和 remount 的基础回归测试
+SANITY | 验证在普通环境下操作的正确性
+DBENCH | 模拟 N 个客户端来产生文件系统负载的基准测试
+SANITYN | 验证双客户端在常规运行条件下的操作正确性
+LFSCK | 测试 e2fsck 和 lfsck 对文件系统的错误检测和错误修复
+LIBLUSTRE | 测试链接到 lustre 客户端库的链接
+CONF_SANITY | 测试在不同配置下（包含错误配置）lustre 是否正常运行
+RECOVERY_SMALL | 验证 lustre 在连接失败后（消息丢失），RPC 重播的正确性
+INSANITY | 测试多种并发错误条件
+
+## Lustre Tests Environment Variables
+
+This Section describes environment variables used to drive the Lustre tests. The environment variables are typically stored in a configuration script in lustre/tests/cfg/\$NAME.sh, accessed by NAME=name environment variable within the test scripts. The default configuration for a single-node test is NAME=local, which accesses the lustre/tests/cfg/local.sh configuration file. Some of the important environment variables and their purpose for Lustre cluster configuration are listed in Table 5.
+
+> 本节描述用于测试的环境变量。环境变量通常在 lustre/tests/cfg/$NAME.sh 配置脚本中。在脚本中通过 NAME=name 方式访问环境变量。默认单节点测试配置是 NAME=local，在 lustre/tests/cfg/local.sh 中访问。下表显示了一些重要的环境变量和它们的目的。
+
+Variable | Purpose | Typical Value
+:- | :- | :-
+mds_HOST | The network hostname of the primary MDS host. Uses local host name if unset. | mdsnode-1
+ost_HOST | The network hostname of the primary OSS host. Uses local host name if unset. | ossnode-1
+mgs_HOST | The network hostname of the primary MGS host. Uses $mds_HOST if unset. | mgsnode
+CLIENTS | A comma separated list of the clients to be used for testing. | client-1, client-2, client-3
+RCLIENTS | A comma separated list of the remote clients to be used for testing. One client actually executes the test framework, the other clients are remote clients. | client-1, client-3  (which would imply that client-2 is actually running the test framework.)
+NETTYPE | The network infrastructure to be used in LNet notation. | tcp or o2ib
+mdsfailover_HOST | If testing high availability, the hostname of the backup MDS that can access the MDT storage. | mdsnode-2
+ostfailover_HOST | If testing high availability, the hostname of the backup OSS that can access the OST storage. | ossnode-2
+MDSCOUNT | Number of MDTs to use (valid for Lustre 2.4 and later). | 1
+MDSSIZE | The size of the MDT storage in kilobytes. This can be smaller than the MDT block device, to speed up testing. Use the block device size if unspecified or equal to zero. | 200000
+MGSNID | LNet Node ID if it does not map to the primary address of \$mgs_HOST for \$NETTYPE. | \$mgs_HOST
+MGSSIZE | The size of the MGT stoarge in kilobytes, if it is separate from the MDT device. This can be smaller than the MGT block device, to speed up testing. Use the block device size if unspecified or equal to zero. | 16384
+REFORMAT | Whether the file system will be reformatted between tests. | true
+OSTCOUNT | The number of OSTs that are being provided by the OSS on $ost_HOST. | 1
+OSTSIZE | Size of the OST storage in kilobytes. Can be smaller than the OST block device, to speed up testing. Use the block device size if unspecified or equal to zero. | 1000000
+FSTYPE | File system type to use for all OST and MDT devices. | ldiskfs, zfs
+FSNAME | The Lustre file system name to use for testing. Uses lustre by default. | testfs
+DIR | Directory in which to run the Lustre tests. Must be within the mount point specified by $MOUNT. Defaults to \$MOUNT if unspecified. | \$MOUNT
+TIMEOUT | Lustre timeout to use during testing, in seconds. Reduced from the default to speed testing. | 20
+PDSH | The parallel shell command to use for running shell operations on one or more remote hosts. | pdsh -w nodes[1-5]
+MPIRUN | Command to use for launching MPI test programs. | mpirun
+
+变量 | 目的 | 典型值
+:- | :- | :-
+mds_HOST | 主 MDS 节点的网络主机名。如果没有设置，则使用本地主机名 | mdsnode-1
+ost_HOST | 主 OSS 节点的网络主机名。如果没有设置，则使用本地主机名 | ossnode-1
+mgs_HOST | 主 MGS 节点的网络主机名。如果没有设置，则使用本地主机名 | mgsnode
+CLIENTS | 测试客户端列表，使用逗号分隔 | client-1, client-2, client-3
+RCLIENTS | 远程测试客户端列表，使用逗号分隔。一个客户端真正运行测试框架，其他的客户端为远程客户端 | client-1, client-3（暗示 client-2 实际上运行测试框架）
+NETTYPE | Lnet 使用的网络类型符号 | tcp 或 o2ib
+mdsfailover_HOST | 高可用测试中，用于后备的 mds 主机名。该 mds 可以访问到 MDT | mdsnode-2
+ostfailover_HOST | 高可用测试中，用于后备的 oss 主机名。该 oss 可以访问到 OST | ossnode-2
+MDSCOUNT | 使用的 MDT 数量（2.4版本或以上）| 1
+MDSSIZE | MDT 设备大小，单位为 KB。为了加快测试速度，设置的大小可以小于 MDT 块大小， | 200000
+MGSNID | Lnet 节点 ID。如果它没有映射到 NETTYPE 的 mgs_HOST 主地址。| \$mgs_HOST
+MGSSIZE | MGT 设备的大小，单位为 KB。如果 MGT 和 MDT 设备分离，它的大小可以小于 MGT 块设备大小来加速测试的速度。默认为0。| 1000000
+FSTYPE | 所有 OST 和 MDT 设备使用的文件系统类型 | ldiskfs, zfs
+FSNAME | 测试中使用的文件系统名称。默认为 lustre。| testfs
+DIR | 用于测试的目录。必须在 \$MOUNT 挂载点内部。默认为 \$MOUNT | \$MOUNT
+TIMEOUT | 测试中的超时时间，单位为秒。减少时间能加速测试。 | 20
+PDSH | 在远端一个或多个节点上并行运行的 shell 命令 | pdsh -w nodes[1-5]
+MPIRUN | 用于启动 MPI 测试程序的命令。| mpirun
 
 # UTILS
 
@@ -875,7 +1078,7 @@ All obdclass related function declarations are listed in the file include/obd_cl
 
 Libcfs provides APIs comprising of fundamental primitives for process management and debugging support in Lustre. Libcfs is used throughout LNet, Lustre, and associated utilities. Its APIs define a portable run time environment that is implemented consistently on all supported build targets. Besides debugging support libcfs provides APIs for failure injection, Linux kernel compatibility, encryption for data, Linux 64 bit time addition, log collection using tracefile, string parsing support and capabilities for querying and manipulating CPU partition tables. Libcfs is the first module that Lustre loads. The module loading function can be found in tests/test-framework.sh script as shown in Source Code 17. When Lustre is mounted, mount_facet() function gets invoked and it calls load_modules() function. load_modules() invokes load_modules_local() that loads Lustre modules libcfs, lnet, obdclass, ptl-rpc, fld, fid, and lmv in the same order.
 
-> 在 Lustre 中，Libcfs 提供了进程管理和调试的基础 API。Libcfs 被大量地使用在 LNet、Lustre 和相关工具中。其 API 定义了一套可移植的运行时环境，以追求在所有支持的构建目标上的一致实现。除了调试支持外，Libcfs 还提供了错误注入、Linux 内核兼容性、数据加密、Linux 64 位时间加法[^3]、使用文件跟踪手段进行日志收集、字符串解析支持以及查询和操作 CPU 分区表的功能。当 lustre 被挂载时，mount_facet() 函数被调用，它调用 load_modules() 函数。load_modules() 函数调用 load_modules_local()，用于按顺序加载 lustre 的模块：libcfs, lnet, obdclass, ptl-rpc, fld, fid, and lmv。
+> 在 Lustre 中，Libcfs 提供了进程管理和调试的基础 API。Libcfs 被大量地使用在 LNet、Lustre 和相关工具中。其 API 定义了一套可移植的运行时环境，以追求在所有支持的构建目标上的一致实现。除了调试支持外，Libcfs 还提供了错误注入、Linux 内核兼容性、数据加密、Linux 64 位时间加法[^4]、使用文件跟踪手段进行日志收集、字符串解析支持以及查询和操作 CPU 分区表的功能。当 lustre 被挂载时，mount_facet() 函数被调用，它调用 load_modules() 函数。load_modules() 函数调用 load_modules_local()，用于按顺序加载 lustre 的模块：libcfs, lnet, obdclass, ptl-rpc, fld, fid, and lmv。
 
 In the following Sections we describe libcfs APIs and functionalities in detail.
 
@@ -937,21 +1140,21 @@ Support functions for data encryption are defined in libcfs/libcfs/crypto/crypto
 
 > 支持数据加密的函数定义在 libcfs/libcfs/crypto/crypto.c 文件中。其中包括：
 
-* llcrypt_release_ctx() - Releases a decryption context.
+- llcrypt_release_ctx() - Releases a decryption context.
 
-* llcrypt_get_ctx() - Gets a decryption context.
+- llcrypt_get_ctx() - Gets a decryption context.
 
-* llcrypt_free_bounce_page() - Frees a ciphertext bounce page.
+- llcrypt_free_bounce_page() - Frees a ciphertext bounce page.
 
-* llcrypt_crypt_block() - Encrypts or decrypts a single file system block of file contents.
+- llcrypt_crypt_block() - Encrypts or decrypts a single file system block of file contents.
 
-* llcrypt_encrypt_pagecache_blocks() - Encrypts file system blocks from a page cache page.
+- llcrypt_encrypt_pagecache_blocks() - Encrypts file system blocks from a page cache page.
 
-* llcrypt_encrypt_block_inplace() - Encrypts a file system block in place.
+- llcrypt_encrypt_block_inplace() - Encrypts a file system block in place.
 
-* llcrypt_decrypt_pagecache_blocks() - Decrypts file system blocks in a page cache page.
+- llcrypt_decrypt_pagecache_blocks() - Decrypts file system blocks in a page cache page.
 
-* llcrypt_decrypt_block_inplace() - Decrypts a file system block in place.
+- llcrypt_decrypt_block_inplace() - Decrypts a file system block in place.
 
 Setup and cleanup functions (llcrypt_init(), llcrypt_exit()) for file system encryption are also defined here. fname.c implements functions to encrypt and decrypt filenames, allocate and free buffers for file name encryption and to convert a file name from disk space to user space. keyring.c and keysetup.c implement functions to manage cryptographic master keys and policy.c provides APIs to find supported policies, check the equivalency of two policies and policy context management.
 
@@ -1354,4 +1557,7 @@ int  osd_oi_update(struct osd_thread_info *info, struct osd_device *osd,
 
 [^2]: *严谨一点地说，是在 Lustre 客户端上的第一个组件*
 
-[^3]: *好像也不能翻译为加法，我的理解是，调整内核时间，用于测试目的*
+[^3]: *为了区分单个测试套件和多个测试套件，我把复数形式的测试套件称为“集”*
+
+[^4]: *好像也不能翻译为加法，我的理解是，调整内核时间，用于测试目的*
+
