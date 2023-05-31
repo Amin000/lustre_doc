@@ -5,13 +5,13 @@
 
 Lustre is a GNU General Public licensed, open-source distributed parallel file system developed and maintained by DataDirect Networks (DDN). Due to the extremely scalable architecture of the Lustre file system, Lustre deployments are popular in scientific supercomputing, as well as in the oil and gas, manufacturing, rich media, and finance sectors. Lustre presents a POSIX interface to its clients with parallel access capabilities to the shared file objects. As of this writing, Lustre is the most widely used file system on the top 500 fastest computers in the world. Lustre is the file system of choice on 7 out of the top 10 fastest computers in the world today, over 70% of the top 100, and also for over 60% of the top 500。
 
-> Lustre 是一个由 DDN 开发和维护的、开源的、GPL协议下的分布式并行文件系统。Lustre 架构具有极强的扩展性，在超算，石油，天然气，制造业，富媒体，金融行业等领域大量部署。Lustre 向其客户端提供具有并行访问共享文件对象的 POSIX 接口。截至目前，Lustre 是全球最快计算机 TOP 500榜单中使用最多的文件系统。在前十名中，有7台选择 Lustre 作为文件系统，并且在前100名中，超过70%的使用率；在前500名中，也超过60%的使用率。
+> Lustre 是一个由 DDN 开发和维护的、开源的、GPL协议下的分布式并行文件系统。Lustre 架构具有极强的扩展性，大量部署在超算，石油，天然气，制造业，富媒体，金融行业等领域。Lustre 客户端兼容 POSIX，并可以并行访问共享文件对象。截至目前，Lustre 是全球最快计算机 TOP 500榜单中使用最多的文件系统。在前十名中，有7台选择 Lustre 作为文件系统，并且在前100名中，超过70%的使用率；在前500名中，也超过60%的使用率。
 
 ## Lustre Features
 
 Lustre is designed for scalability and performance. The aggregate storage capacity and file system bandwidth can be scaled up by adding more servers to the file system, and performance for parallel applications can often be increased by utilizing more Lustre clients. Some practical limits are shown in Table 1 along with values from known production file systems.
 
-> Lustre 为了扩展性和性能的目录而设计。它的存储容量和聚合性能随着服务器增加不断扩展，并且提供给并行应用的性能可以随着客户端的增加而增长。下表展示一些当前的理论限制范围和在已知生产系统中的实践值。
+> Lustre 为扩展性和性能目的设计。它的存储容量和聚合性能随着服务器增加不断扩展，并且提供给并行应用的性能可以随着客户端的增加而增长。下表展示一些当前的理论限制范围和在已知生产系统中的实践值。
 
 特性 | 理论限制范围 | 已知生产系统的实践值
 :- | :- | :-
@@ -114,7 +114,7 @@ Figure 1 shows a simplified version of the Lustre file system components in a ba
 
 Lustre stores file data by splitting the file contents into chunks and then storing those chunks across the storage targets. By spreading the file across multiple targets, the file size can exceed the capacity of any one storage target. It also allows clients to access parts of the file from multiple Lustre servers simultaneously, effectively scaling up the bandwidth of the file system. Users have the ability to control many aspects of the file’s layout by means of the lfs setstripe command, and they can query the layout for an existing file using the lfs getstripe command.
 
-> lustre 以块（chunks）为基本单位存放文件数据内容。Lustre 将文件切割为多个块，并将这些块存放到多个存储目标上，这意味着单个文件的大小可以超过单个存储目标的容量大小。Lustre 允许客户端并发访问存放在不同存储目标上的同个文件的不同部分内容，以提升文件系统带宽。用户通过 lfs setstripe 命令控制文件的布局，也可以通过 lfs getstripe 命令获取文件布局信息。
+> lustre 存储文件数据的基本单位是块（chunk）。Lustre 将文件切割为多个块，并将这些块存放到多个存储目标上，这意味着单个文件的大小可以超过单个存储目标的容量大小。Lustre 允许客户端并发访问存放在不同存储目标上的同个文件的不同部分内容，以提升文件系统带宽。用户通过 lfs setstripe 命令控制文件的布局，也可以通过 lfs getstripe 命令获取文件布局信息。
 
 File layouts fall into one of two categories:
 
