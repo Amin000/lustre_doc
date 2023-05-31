@@ -327,6 +327,123 @@
             
 
             
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.2.1" data-path="Understanding-Lustre-Internals-中文翻译.html">
+            
+                <a href="Understanding-Lustre-Internals-中文翻译.html#lustre-test-suites">
+            
+                    
+                        <b>1.2.2.1.</b>
+                    
+                    Lustre Test Suites
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2.2" data-path="Understanding-Lustre-Internals-中文翻译.html">
+            
+                <a href="Understanding-Lustre-Internals-中文翻译.html#terminology">
+            
+                    
+                        <b>1.2.2.2.</b>
+                    
+                    Terminology
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2.3" data-path="Understanding-Lustre-Internals-中文翻译.html">
+            
+                <a href="Understanding-Lustre-Internals-中文翻译.html#testing-lustre-code">
+            
+                    
+                        <b>1.2.2.3.</b>
+                    
+                    Testing Lustre Code
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.2.3.1" data-path="Understanding-Lustre-Internals-中文翻译.html">
+            
+                <a href="Understanding-Lustre-Internals-中文翻译.html#bypassing-failures">
+            
+                    
+                        <b>1.2.2.3.1.</b>
+                    
+                    Bypassing Failures
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2.3.2" data-path="Understanding-Lustre-Internals-中文翻译.html">
+            
+                <a href="Understanding-Lustre-Internals-中文翻译.html#test-framework-options">
+            
+                    
+                        <b>1.2.2.3.2.</b>
+                    
+                    Test Framework Options
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2.4" data-path="Understanding-Lustre-Internals-中文翻译.html">
+            
+                <a href="Understanding-Lustre-Internals-中文翻译.html#acceptance-small-acc-sm-testing-on-lustre">
+            
+                    
+                        <b>1.2.2.4.</b>
+                    
+                    Acceptance Small (acc-sm) Testing on Lustre
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2.5" data-path="Understanding-Lustre-Internals-中文翻译.html">
+            
+                <a href="Understanding-Lustre-Internals-中文翻译.html#lustre-tests-environment-variables">
+            
+                    
+                        <b>1.2.2.5.</b>
+                    
+                    Lustre Tests Environment Variables
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
         </li>
     
         <li class="chapter " data-level="1.2.3" data-path="Understanding-Lustre-Internals-中文翻译.html">
@@ -1196,7 +1313,550 @@
 </div>
 
 <h1 id="test"><a name="test" class="plugin-anchor" href="#test"><i class="fa fa-link" aria-hidden="true"></i></a>TEST</h1>
-<p>&#x7565;</p>
+<p>This Section describes various tests and testing frameworks used to test Lustre functionality and performance.</p>
+<blockquote>
+<p>&#x672C;&#x7AE0;&#x8BA8;&#x8BBA; Lustre &#x6D4B;&#x8BD5;&#x548C;&#x5176;&#x6D4B;&#x8BD5;&#x6846;&#x67B6;&#xFF0C;&#x5B83;&#x4EEC;&#x7528;&#x4E8E;&#x6D4B;&#x8BD5; lustre &#x7684;&#x529F;&#x80FD;&#x548C;&#x6027;&#x80FD;&#x3002;</p>
+</blockquote>
+<h2 id="lustre-test-suites"><a name="lustre-test-suites" class="plugin-anchor" href="#lustre-test-suites"><i class="fa fa-link" aria-hidden="true"></i></a>Lustre Test Suites</h2>
+<p>Lustre Test Suites (LTS) is the largest collection of tests used to test Lustre file system. LTS consists of over 1600 tests, organized by their purpose and function. It is mainly composed of bash scripts, C programs and external applications. LTS provides various utilities to create, start, stop and execute tests. LTS can be used to execute test process automatically or in discrete steps. Using LTS the test process can be run as a group of tests or individual tests. LTS also allows to experiment with configurations and features such as ldiskfs, ZFS, DNE and HSM (Hierarchical Storage Manager). Tests in LTS are located in /lustre/tests directory in Lustre source tree and the major components in the test suite are given in Table 2.</p>
+<blockquote>
+<p>Lustre &#x6D4B;&#x8BD5;&#x5957;&#x4EF6;&#x96C6; <sup><a href="#fn_3" id="reffn_3">3</a></sup>[&#xFF08;LTS&#xFF0C;Lustre Test Suites&#xFF09;&#x662F;&#x4E00;&#x5927;&#x5806;&#x7528;&#x4E8E;&#x6D4B;&#x8BD5; Lustre &#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x96C6;&#x5408;&#x3002;LTS &#x6309;&#x7167;&#x6D4B;&#x8BD5;&#x76EE;&#x7684;&#x548C;&#x529F;&#x80FD;&#x7EC4;&#x7EC7;&#xFF0C;&#x5305;&#x542B;&#x8D85;&#x8FC7;1600&#x4E2A;&#x6D4B;&#x8BD5;&#x3002;&#x4E3B;&#x8981;&#x7531; bash &#x811A;&#x672C;&#xFF0C;C &#x7A0B;&#x5E8F;&#x548C;&#x5916;&#x90E8;&#x5E94;&#x7528;&#x6784;&#x6210;&#x3002;LTS &#x63D0;&#x4F9B;&#x591A;&#x79CD;&#x7528;&#x4E8E;&#x521B;&#x5EFA;&#x3001;&#x542F;&#x52A8;&#x3001;&#x505C;&#x6B62;&#x548C;&#x6267;&#x884C;&#x6D4B;&#x8BD5;&#x7684;&#x5DE5;&#x5177;&#xFF0C;&#x53EF;&#x4EE5;&#x81EA;&#x52A8;&#x5316;&#x5730;&#x6267;&#x884C;&#x6D4B;&#x8BD5;&#x6D41;&#x7A0B;&#x6216;&#x79BB;&#x6563;&#x5206;&#x6B65;&#x6267;&#x884C;&#x3002;&#x901A;&#x8FC7; LTS&#xFF0C;&#x6D4B;&#x8BD5;&#x53EF;&#x4EE5;&#x5206;&#x7EC4;&#x6267;&#x884C;&#x6216;&#x5355;&#x72EC;&#x6267;&#x884C;&#x3002;LTS &#x8FD8;&#x53EF;&#x4EE5;&#x5BF9;&#x914D;&#x7F6E;&#xFF08;configuration&#xFF09;&#x548C;&#x7279;&#x6027;&#xFF08;feature&#xFF09;&#xFF0C;&#x5982; ldiskfs&#x3001;ZFS&#x3001;DNE&#x3001;HSM&#xFF08;Hierarchical Storage Manager&#xFF0C;&#x5206;&#x5C42;&#x7BA1;&#x7406;&#x5668;&#xFF09;&#x8FDB;&#x884C;&#x9A8C;&#x8BC1;&#x3002;LTS &#x7684;&#x6D4B;&#x8BD5;&#x4EE3;&#x7801;&#x4F4D;&#x4E8E;&#x6E90;&#x7801;&#x6811;&#x4E2D;&#x7684; /lustre/tests &#x76EE;&#x5F55;&#xFF0C;&#x4E0B;&#x8868;&#x663E;&#x793A;&#x6D4B;&#x8BD5;&#x5957;&#x4EF6;&#x7684;&#x4E3B;&#x8981;&#x7EC4;&#x4EF6;&#x3002;</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Name</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">auster</td>
+<td style="text-align:left">auster is used to run the Lustre tests. It can be used to run groups of tests, individual tests, or sub-tests. It also provides file system setup and cleanup capabilities.</td>
+</tr>
+<tr>
+<td style="text-align:left">acceptance-small.sh</td>
+<td style="text-align:left">The acceptance-small.sh script is a wrapper around auster that runs the test group &#x2018;regression&#x2019; unless tests are specified on the command line.</td>
+</tr>
+<tr>
+<td style="text-align:left">functions.sh</td>
+<td style="text-align:left">The functions.sh script provides functions for run_*.sh tests such as run_dd.sh or run_dbench.sh.</td>
+</tr>
+<tr>
+<td style="text-align:left">test-framework.sh</td>
+<td style="text-align:left">The test-framework.sh provides the fundamental functions needed by tests to create, setup, verify, start, stop, and reformat a Lustre file system.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">&#x540D;&#x79F0;</th>
+<th style="text-align:left">&#x63CF;&#x8FF0;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">auster</td>
+<td style="text-align:left">auster &#x88AB;&#x7528;&#x4E8E;&#x8FD0;&#x884C; lustre &#x6D4B;&#x8BD5;&#x3002;&#x53EF;&#x4EE5;&#x4EE5;&#x7EC4;&#x6216;&#x5355;&#x4E00;&#x3001;&#x5B50;&#x6A21;&#x5757;&#x4E3A;&#x5355;&#x4F4D;&#x8FDB;&#x884C;&#x6D4B;&#x8BD5;&#x3002;&#x53E6;&#x5916;&#x8FD8;&#x63D0;&#x4F9B;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x542F;&#x52A8;&#x548C;&#x6E05;&#x7406;&#x529F;&#x80FD;&#x3002;</td>
+</tr>
+<tr>
+<td style="text-align:left">acceptance-small.sh</td>
+<td style="text-align:left">&#x9A8C;&#x6536;&#x6D4B;&#x8BD5;&#x96C6;&#x3002;&#x5C01;&#x88C5; auster&#x3002;&#x5982;&#x679C;&#x547D;&#x4EE4;&#x884C;&#x4E2D;&#x6CA1;&#x6709;&#x6307;&#x5B9A;&#x6D4B;&#x8BD5;&#x7528;&#x4F8B;&#xFF0C;&#x90A3;&#x4E48;&#x811A;&#x672C;&#x7528;&#x4E8E;&#x56DE;&#x5F52;&#xFF08;regression&#xFF09;&#x6D4B;&#x8BD5;&#x7EC4;&#x6D4B;&#x8BD5;&#x3002;</td>
+</tr>
+<tr>
+<td style="text-align:left">functions.sh</td>
+<td style="text-align:left">&#x529F;&#x80FD;&#x6D4B;&#x8BD5;&#x811A;&#x672C;&#x96C6;&#x3002;&#x63D0;&#x4F9B;&#x7C7B;&#x4F3C; run_*.sh &#x6D4B;&#x8BD5;&#x7528;&#x4F8B;&#xFF0C;&#x4F8B;&#x5982;&#xFF0C;run_dd.sh &#x6216; run_dbench.sh&#x3002;</td>
+</tr>
+<tr>
+<td style="text-align:left">test-framework.sh</td>
+<td style="text-align:left">&#x6D4B;&#x8BD5;&#x6846;&#x67B6;&#x811A;&#x672C;&#x3002;&#x63D0;&#x4F9B;&#x7ED9;&#x4E00;&#x4E9B;&#x5982;&#x521B;&#x5EFA;&#x3001;&#x542F;&#x52A8;&#x3001;&#x6821;&#x9A8C;&#x3001;&#x5F00;&#x59CB;&#x3001;&#x505C;&#x6B62;&#x3001;&#x91CD;&#x65B0;&#x683C;&#x5F0F;&#x5316; lustre &#x7B49;&#x6D4B;&#x8BD5;&#x7684;&#x6240;&#x9700;&#x8981;&#x7684;&#x57FA;&#x7840;&#x51FD;&#x6570;&#x3002;</td>
+</tr>
+</tbody>
+</table>
+<h2 id="terminology"><a name="terminology" class="plugin-anchor" href="#terminology"><i class="fa fa-link" aria-hidden="true"></i></a>Terminology</h2>
+<p>In this Section, we describe relevant terminology related to Lustre Test Suites. All scripts and applications packaged as part of the lustre-tests-<em>.rpm and lustre-iokit-</em>.rpm are termed as Lustre Test Suites. The individual suites of tests contained in /usr/lib64/lustre/tests directory are termed as Test Suite. An example test suite is sanity.sh. A test suite is composed of Individual Tests. An example of an individual test is test 4 from large-lun.sh test suite. Test suites can be bundled into a group for back-to-back execution (e.g. regression). Some of the LTS test examples include - Regression (sanity, sanityn), Feature Specific (sanity-hsm, sanity-lfsck, ost-pools), Configuration (conf-sanity), Recovery and Failures (recovery-small, replay-ost-single) and so on. Some of the active Lustre unit, feature and regression tests and their short description are given in Table 3.</p>
+<blockquote>
+<p>&#x5728;&#x8FD9;&#x8282;&#x4E2D;&#xFF0C;&#x8BA8;&#x8BBA;&#x548C; LTS &#x76F8;&#x5173;&#x7684;&#x672F;&#x8BED;&#x3002;&#x6240;&#x6709;&#x88AB;&#x6253;&#x5305;&#x5230; lustre-tests-*.rpm &#x548C; lustre-io-kit-*.rpm &#x7684;&#x811A;&#x672C;&#x548C;&#x5E94;&#x7528;&#x88AB;&#x79F0;&#x4E3A; lustre &#x6D4B;&#x8BD5;&#x5957;&#x4EF6;&#x96C6;(LTS&#xFF09;&#x3002;&#x5355;&#x4E2A;&#x5728; /usr/lib64/lustre/tests &#x76EE;&#x5F55;&#x4E0B;&#x7684;&#x5957;&#x4EF6;&#x79F0;&#x4E3A;&#x6D4B;&#x8BD5;&#x5957;&#x4EF6;&#xFF08;Test Suite&#xFF09;&#x3002;&#x4F8B;&#x5982;&#xFF0C;sanity.sh &#x6D4B;&#x8BD5;&#x5957;&#x4EF6;&#xFF0C;&#x7531;&#x4E00;&#x4E9B;&#x72EC;&#x7ACB;&#x7684;&#x6D4B;&#x8BD5;&#x7EC4;&#x6210;&#xFF0C;&#x72EC;&#x7ACB;&#x7684;&#x6D4B;&#x8BD5;&#x4F8B;&#x5982; large-lun.sh &#x6D4B;&#x8BD5;&#x5957;&#x4EF6;&#x4E2D;&#x5305;&#x542B;&#x7684;<code>&#x6D4B;&#x8BD5;4</code>&#xFF08;test 4&#xFF09;&#x3002;&#x6D4B;&#x8BD5;&#x5957;&#x4EF6;&#x53EF;&#x4EE5;&#x6346;&#x7ED1;&#x5728;&#x4E00;&#x8D77;&#x7D27;&#x6328;&#x7740;&#x6267;&#x884C;&#xFF08;&#x5982;&#x56DE;&#x5F52;&#x6D4B;&#x8BD5;&#xFF0C;regression&#xFF09;&#x3002;LTS &#x5305;&#x542B;&#x4E86;&#x56DE;&#x5F52; - Regression&#xFF08;snaity&#xFF0C;sanityn&#xFF09;&#xFF0C;&#x7279;&#x5B9A;&#x7279;&#x6027; - Feature Specific&#xFF08;sanity-hsm&#xFF0C;sanity-lfsck&#xFF0C;ost-pools&#xFF09;&#xFF0C;&#x914D;&#x7F6E; - Configuration&#xFF08;conf-sanity&#xFF09;&#xFF0C;&#x6062;&#x590D; - Recovery &#x548C;&#x9519;&#x8BEF;&#xFF08;recovery-small&#xFF0C;replay-ost-single&#xFF09;&#x7B49;&#x7B49;&#x6D4B;&#x8BD5;&#x3002;&#x4E0B;&#x6807;&#x5217;&#x51FA;&#x4E00;&#x4E9B;&#x8FD8;&#x5728;&#x6D3B;&#x8DC3;&#x7684;&#x5355;&#x5143;&#x3001;&#x7279;&#x6027;&#x548C;&#x56DE;&#x5F52;&#x6D4B;&#x8BD5;&#xFF0C;&#x548C;&#x5B83;&#x4EEC;&#x7684;&#x7B80;&#x8981;&#x63CF;&#x8FF0;&#x3002;</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Name</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">conf-sanity</td>
+<td style="text-align:left">A set of unit tests that verify the configuration tolls, and runs Lustre with multiple different setups to ensure correct operation in unusual system configurations.</td>
+</tr>
+<tr>
+<td style="text-align:left">insanity</td>
+<td style="text-align:left">A set of tests that verify the multiple concurrent failure conditions.</td>
+</tr>
+<tr>
+<td style="text-align:left">large-scale</td>
+<td style="text-align:left">Large scale tests that verify version based recovery features.</td>
+</tr>
+<tr>
+<td style="text-align:left">metadata-updates</td>
+<td style="text-align:left">Tests that metadata updates are properly completed when multiple clients delete files and modify the attributes of files.</td>
+</tr>
+<tr>
+<td style="text-align:left">parallel-scale</td>
+<td style="text-align:left">Runs functional tests, performance tests (e.g. IOR), and a stress test (simul).</td>
+</tr>
+<tr>
+<td style="text-align:left">posix</td>
+<td style="text-align:left">Automates POSIX compliance testing. Assuming that the POSIX source is already installed on the system, it sets up loop back ext4 file system, then install, build and run POSIX binaries on ext4. Then runs POSIX again on Lustre and compares results from ext4 and Lustre.</td>
+</tr>
+<tr>
+<td style="text-align:left">recovery-small</td>
+<td style="text-align:left">A set of unit tests that verify RPC replay after communications failure.</td>
+</tr>
+<tr>
+<td style="text-align:left">runtests</td>
+<td style="text-align:left">Simple basic regression tests that verify data persistence across write, unmount, and remount. This is one of the few tests that verifies data integrity across a full file system shutdown and remount, unlike many tests which at most only verify the existence/size of files.</td>
+</tr>
+<tr>
+<td style="text-align:left">sanity</td>
+<td style="text-align:left">A set of regression tests that verify operation under normal operating conditions. This tests a large number of unusual operations that have previously caused functional or data correctness issues with Lustre. Some of the tests are Lustre specific, and hook into the Lustre fault injection framework using lctl set_param fail_loc=X command to activate triggers in the code to simulate unusual operating conditions that would otherwise be difficult or impossible to simulate.</td>
+</tr>
+<tr>
+<td style="text-align:left">sanityn</td>
+<td style="text-align:left">Tests that verify operations from two clients under normal operating conditions. This is done by mounting the same file system twice on a single client, in order to allow a single script/program to execute and verify file system operations on multiple &#x201C;clients&#x201D; without having to be a distributed program itself.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">&#x540D;&#x5B57;</th>
+<th style="text-align:left">&#x63CF;&#x8FF0;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">conf-sanity</td>
+<td style="text-align:left">&#x4E00;&#x7CFB;&#x5217;&#x9A8C;&#x8BC1;&#x914D;&#x7F6E;&#x6B63;&#x786E;&#x6027;&#x7684;&#x5355;&#x5143;&#x6D4B;&#x8BD5;&#x3002;&#x5B83;&#x4F7F;&#x7528;&#x4E0D;&#x540C;&#x7684;&#x6B65;&#x9AA4;&#x8FD0;&#x884C; lustre&#xFF0C;&#x786E;&#x4FDD;&#x5728;&#x5F02;&#x5E38;&#x7CFB;&#x7EDF;&#x914D;&#x7F6E;&#x4E0B;&#x7684;&#x64CD;&#x4F5C;&#x6B63;&#x786E;&#x6027;&#x3002;</td>
+</tr>
+<tr>
+<td style="text-align:left">insanity</td>
+<td style="text-align:left">&#x4E00;&#x4E9B;&#x9A8C;&#x8BC1;&#x5E76;&#x53D1;&#x9519;&#x8BEF;&#x73AF;&#x5883;&#x7684;&#x6D4B;&#x8BD5;&#x3002;</td>
+</tr>
+<tr>
+<td style="text-align:left">large-scale</td>
+<td style="text-align:left">&#x5927;&#x89C4;&#x6A21;&#x6D4B;&#x8BD5;&#xFF0C;&#x9A8C;&#x8BC1;&#x57FA;&#x4E8E;&#x9519;&#x8BEF;&#x6062;&#x590D;&#x7279;&#x6027;&#x7684;&#x7248;&#x672C;&#x6B63;&#x786E;&#x6027;&#x3002;</td>
+</tr>
+<tr>
+<td style="text-align:left">metadata-updates</td>
+<td style="text-align:left">&#x6D4B;&#x8BD5;&#x5728;&#x591A;&#x5BA2;&#x6237;&#x7AEF;&#x73AF;&#x5883;&#x4E0B;&#xFF0C;&#x5220;&#x9664;&#x6587;&#x4EF6;&#x6216;&#x4FEE;&#x6539;&#x6587;&#x4EF6;&#x5C5E;&#x6027;&#x65F6;&#xFF0C;&#x5143;&#x6570;&#x636E;&#x66F4;&#x65B0;&#x662F;&#x5426;&#x5B8C;&#x6210;&#x3002;</td>
+</tr>
+<tr>
+<td style="text-align:left">parallel-scale</td>
+<td style="text-align:left">&#x529F;&#x80FD;&#x6D4B;&#x8BD5;&#xFF0C;&#x6027;&#x80FD;&#x6D4B;&#x8BD5;&#xFF08;&#x4F8B;&#x5982; IOR&#xFF09;&#x548C;&#x538B;&#x529B;&#x6D4B;&#x8BD5;&#xFF08;simul&#xFF09;&#x3002;</td>
+</tr>
+<tr>
+<td style="text-align:left">posix</td>
+<td style="text-align:left">&#x81EA;&#x52A8;&#x5316; posix &#x517C;&#x5BB9;&#x6027;&#x6D4B;&#x8BD5;&#x3002;&#x9700;&#x8981;&#x63D0;&#x524D;&#x5B89;&#x88C5; POSIX &#x6E90;&#x7801;&#x5E76;&#x914D;&#x7F6E;&#x4E86;&#x73AF;&#x56DE;&#xFF08;loop back&#xFF09;ext4 &#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;&#x4E4B;&#x540E;&#x6D4B;&#x8BD5;&#x4F1A;&#x5B89;&#x88C5;&#x6784;&#x5EFA;&#x4EE3;&#x7801;&#xFF0C;&#x5E76;&#x4E14;&#x5728; ext4 &#x4E0A;&#x8FD0;&#x884C;&#x3002;&#x6700;&#x540E;&#x4F1A;&#x5728; lustre &#x4E0A;&#x8FD0;&#x884C;&#x4E00;&#x6B21; POSIX&#xFF0C;&#x5BF9;&#x6BD4;&#x4E24;&#x6B21;&#x8FD0;&#x884C;&#x7684;&#x7ED3;&#x679C;&#x3002;</td>
+</tr>
+<tr>
+<td style="text-align:left">recovery-small</td>
+<td style="text-align:left">&#x4E00;&#x7CFB;&#x5217;&#x5355;&#x5143;&#x6D4B;&#x8BD5;&#xFF0C;&#x7528;&#x4E8E;&#x9A8C;&#x8BC1; RPC &#x5728;&#x8FDE;&#x63A5;&#x5931;&#x8D25;&#x540E;&#x7684;&#x5E94;&#x7B54;&#x6B63;&#x786E;&#x6027;&#x3002;</td>
+</tr>
+<tr>
+<td style="text-align:left">runtests</td>
+<td style="text-align:left">&#x57FA;&#x7840;&#x56DE;&#x5F52;&#x7684;&#x7B80;&#x5355;&#x6D4B;&#x8BD5;&#xFF0C;&#x7528;&#x4E8E;&#x9A8C;&#x8BC1;&#x5728;&#x5199;&#x3001;&#x89E3;&#x6302;&#x3001;&#x91CD;&#x65B0;&#x6302;&#x8F7D;&#x540E;&#x7684;&#x6570;&#x636E;&#x3002;&#x8FD9;&#x4E2A;&#x662F;&#x4E00;&#x79CD;&#x9A8C;&#x8BC1;&#x5728;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x5173;&#x95ED;&#x548C;&#x91CD;&#x65B0;&#x6302;&#x8F7D;&#x540E;&#x6570;&#x636E;&#x7684;&#x5B8C;&#x6574;&#x6027;&#x6D4B;&#x8BD5;&#xFF0C;&#x800C;&#x4E0D;&#x662F;&#x7528;&#x4E8E;&#x6D4B;&#x8BD5;&#x9A8C;&#x8BC1;&#x6587;&#x4EF6;&#x662F;&#x5426;&#x5B58;&#x5728;&#xFF0C;&#x5927;&#x5C0F;&#x662F;&#x5426;&#x6B63;&#x5E38;&#x3002;</td>
+</tr>
+<tr>
+<td style="text-align:left">sanity</td>
+<td style="text-align:left">&#x4E00;&#x7CFB;&#x5217;&#x56DE;&#x5F52;&#x6D4B;&#x8BD5;&#xFF0C;&#x9A8C;&#x8BC1;&#x5728;&#x6B63;&#x5E38;&#x73AF;&#x5883;&#x4E0B;&#x7684;&#x64CD;&#x4F5C;&#x3002;&#x5B83;&#x6D4B;&#x8BD5;&#x5927;&#x91CF;&#x5728; lustre &#x4E2D;&#x5148;&#x524D;&#x5BFC;&#x81F4;&#x529F;&#x80FD;&#x6027;&#x6216;&#x6570;&#x636E;&#x6B63;&#x786E;&#x6027;&#x95EE;&#x9898;&#x7684;&#x5F02;&#x5E38;&#x64CD;&#x4F5C;&#xFF0C;&#x7531;&#x4E8E;&#x6A21;&#x62DF;&#x5F02;&#x5E38;&#x975E;&#x5E38;&#x56F0;&#x96BE;&#x7684;&#xFF0C;&#x4E00;&#x4E9B;&#x6D4B;&#x8BD5;&#x901A;&#x8FC7; lctl set_param fail_loc=X &#x547D;&#x4EE4; hook &#x5230; Lustre &#x9519;&#x8BEF;&#x6CE8;&#x5165;&#x6846;&#x67B6;&#x6765;&#x89E6;&#x53D1;&#x5F02;&#x5E38;&#x4EE3;&#x7801;&#x6765;&#x6A21;&#x62DF;&#x5F02;&#x5E38;&#x8FD0;&#x884C;&#x6761;&#x4EF6;&#x3002;</td>
+</tr>
+<tr>
+<td style="text-align:left">sanityn</td>
+<td style="text-align:left">&#x6D4B;&#x8BD5;&#x9A8C;&#x8BC1;&#x4E24;&#x4E2A;&#x5BA2;&#x6237;&#x7AEF;&#x5728;&#x6B63;&#x5E38;&#x73AF;&#x5883;&#x4E0B;&#x64CD;&#x4F5C;&#x6B63;&#x786E;&#x6027;&#x3002;&#x4E3A;&#x4E86;&#x6267;&#x884C;&#x6CA1;&#x6709;&#x5206;&#x5E03;&#x5F0F;&#x529F;&#x80FD;&#x7684;&#x5355;&#x4E2A;&#x811A;&#x672C;&#x6216;&#x7A0B;&#x5E8F;&#xFF0C;&#x548C;&#x5728;&#x201C;&#x591A;&#x4E2A;&#x201D;&#x5BA2;&#x6237;&#x7AEF;&#x4E0A;&#x9A8C;&#x8BC1;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x64CD;&#x4F5C;&#xFF0C;&#x6D4B;&#x8BD5;&#x7528;&#x4F8B;&#x4F1A;&#x5728;&#x540C;&#x4E00;&#x4E2A;&#x5BA2;&#x6237;&#x7AEF;&#x6302;&#x8F7D;&#x4E24;&#x6B21;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;&#x6765;&#x6A21;&#x62DF;&#x591A;&#x5BA2;&#x6237;&#x7AEF;&#x3002;</td>
+</tr>
+</tbody>
+</table>
+<h2 id="testing-lustre-code"><a name="testing-lustre-code" class="plugin-anchor" href="#testing-lustre-code"><i class="fa fa-link" aria-hidden="true"></i></a>Testing Lustre Code</h2>
+<p>When programming with Lustre, the best practices for testing are test often and test early in the development cycle. Before submitting the code changes to Lustre source tree, developer must ensure that the code passes acceptance-small test suite. To create a new test case, first find the bug that reproduces an issue, fix the bug and then verify the fixed code passes the existing tests. This means that the newly found bug/defect is not covered by the test cases from the test suite. After making sure that any of the existing test cases do not cover the new defect, a new test case can be introduced to exclusively test the bug.</p>
+<blockquote>
+<p>&#x5728; lustre &#x4E0A;&#x7F16;&#x7A0B;&#x65F6;&#xFF0C;&#x6700;&#x4F73;&#x5B9E;&#x8DF5;&#x662F;&#x7ECF;&#x5E38;&#x6D4B;&#x8BD5;&#x548C;&#x5F00;&#x53D1;&#x5468;&#x671F;&#x7684;&#x65E9;&#x671F;&#x6D4B;&#x8BD5;&#x3002;&#x5F00;&#x53D1;&#x8005;&#x5728;&#x63D0;&#x4EA4;&#x4EE3;&#x7801;&#x4E4B;&#x524D;&#xFF0C;&#x5FC5;&#x987B;&#x786E;&#x4FDD;&#x63D0;&#x4EA4;&#x7684;&#x4EE3;&#x7801;&#x5DF2;&#x7ECF;&#x901A;&#x8FC7;&#x4E86;&#x5C0F;&#x578B;&#x9A8C;&#x6536;&#x6D4B;&#x8BD5;&#xFF08;acceptance-small&#xFF09;&#x5957;&#x4EF6;&#x3002;&#x4E3A;&#x4E86;&#x589E;&#x52A0;&#x65B0;&#x7684;&#x6D4B;&#x8BD5;&#x7528;&#x4F8B;&#xFF0C;&#x9996;&#x5148;&#x627E;&#x51FA; bug &#x5E76;&#x91CD;&#x73B0;&#xFF0C;&#x4FEE;&#x590D; bug &#x5E76;&#x9A8C;&#x8BC1;&#x5DF2;&#x4FEE;&#x590D;&#x7684;&#x4EE3;&#x7801;&#x662F;&#x5426;&#x901A;&#x8FC7;&#x4E86;&#x6D4B;&#x8BD5;&#x7528;&#x4F8B;&#x3002;&#x8FD9;&#x4E5F;&#x610F;&#x5473;&#x7740;&#x6D4B;&#x8BD5;&#x5957;&#x4EF6;&#x4E2D;&#x7684;&#x6D4B;&#x8BD5;&#x7528;&#x4F8B;&#x6CA1;&#x6709;&#x8986;&#x76D6;&#x5230;&#x65B0;&#x53D1;&#x73B0;&#x7684; bug &#x6216;&#x7F3A;&#x9677;&#x3002;&#x5728;&#x786E;&#x5B9A;&#x5DF2;&#x5B58;&#x5728;&#x7684;&#x6D4B;&#x8BD5;&#x7528;&#x4F8B;&#x6CA1;&#x6709;&#x8986;&#x76D6;&#x5230;&#x65B0;&#x7684;&#x7F3A;&#x9677;&#x540E;&#xFF0C;&#x65B0;&#x7684;&#x6D4B;&#x8BD5;&#x7528;&#x4F8B;&#x5C06;&#x4F1A;&#x88AB;&#x5F15;&#x5165;&#xFF0C;&#x53BB;&#x4E13;&#x95E8;&#x6D4B;&#x8BD5;&#x8BE5; bug&#x3002;</p>
+</blockquote>
+<h3 id="bypassing-failures"><a name="bypassing-failures" class="plugin-anchor" href="#bypassing-failures"><i class="fa fa-link" aria-hidden="true"></i></a>Bypassing Failures</h3>
+<p>While testing Lustre, if one or more test cases are failing due to an issue not related to the bug that is currently being fixed, bypass option is available for the failing tests. For e.g., to skip sanity.sh sub-tests 36g and 65 and all of insanity.sh set the environment as,</p>
+<blockquote>
+<p>&#x5728;&#x6D4B;&#x8BD5;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x5982;&#x679C;&#x6267;&#x884C;&#x6D4B;&#x8BD5;&#x7528;&#x4F8B;&#x5931;&#x8D25;&#x662F;&#x7531;&#x4E8E;&#x4E0E; bug &#x65E0;&#x5173;&#x7684;&#x95EE;&#x9898;&#x5BFC;&#x81F4;&#x7684;&#xFF0C;&#x5E76;&#x4E14;&#x8BE5;&#x95EE;&#x9898;&#x5DF2;&#x7ECF;&#x88AB;&#x4FEE;&#x590D;&#xFF0C;&#x90A3;&#x4E48;&#x53EF;&#x4EE5;&#x914D;&#x7F6E;&#x7ED5;&#x8FC7;&#x9009;&#x9879;&#x53C2;&#x6570;&#x3002;&#x4F8B;&#x5982;&#xFF0C;&#x7ED5;&#x8FC7; sanity.sh &#x7684;&#x201C;36g&#x201D;&#x548C;&#x201C;65&#x201D;&#x5B50;&#x6D4B;&#x8BD5;&#xFF0C;&#x548C;&#x7ED5;&#x8FC7;&#x6240;&#x6709;&#x7684; insanity.sh &#x6D4B;&#x8BD5;&#xFF0C;&#x53EF;&#x4EE5;&#x628A;&#x73AF;&#x5883;&#x53D8;&#x91CF;&#x8BBE;&#x7F6E;&#x4E3A;</p>
+</blockquote>
+<pre><code class="lang-c"><span class="hljs-keyword">export</span> SANITY_EXCEPT=<span class="hljs-string">&quot;36g 65&quot;</span>
+<span class="hljs-keyword">export</span> INSANITY=no
+</code></pre>
+<p>A single line command can also be used to skip these tests when running acceptance-small test, as shown below.</p>
+<blockquote>
+<p>&#x5F53;&#x8FD0;&#x884C;acceptance-small&#x6D4B;&#x8BD5;&#x65F6;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x5355;&#x884C;&#x7684;&#x547D;&#x4EE4;&#x7ED5;&#x8FC7;&#x6D4B;&#x8BD5;</p>
+</blockquote>
+<pre><code class="lang-c">SANITY_EXCEPT=<span class="hljs-string">&quot;36g 65&quot;</span> INSANITY=no ./acceptance-small.sh
+</code></pre>
+<h3 id="test-framework-options"><a name="test-framework-options" class="plugin-anchor" href="#test-framework-options"><i class="fa fa-link" aria-hidden="true"></i></a>Test Framework Options</h3>
+<p>The examples below show how to run a full test or sub-tests from the acceptance-small test suite.</p>
+<blockquote>
+<p>&#x4E0B;&#x9762;&#x7684;&#x4F8B;&#x5B50;&#x5C55;&#x793A;&#x8FD0;&#x884C;&#x5B8C;&#x6574;&#x7684; acceptance-small &#x6D4B;&#x8BD5;&#x6216;&#x5B83;&#x7684;&#x5B50;&#x6D4B;&#x8BD5;</p>
+</blockquote>
+<ul>
+<li><p>Run all tests in a test suite with the default setup.</p>
+<blockquote>
+<p>&#x5728;&#x6D4B;&#x8BD5;&#x5957;&#x4EF6;&#x4E2D;&#x4F7F;&#x7528;&#x9ED8;&#x8BA4;&#x914D;&#x7F6E;&#x8FD0;&#x884C;&#x6240;&#x6709;&#x7684;&#x6D4B;&#x8BD5;</p>
+</blockquote>
+<pre><code class="lang-c">  `cd lustre/tests
+  sh ./acceptance-small.sh
+</code></pre>
+</li>
+<li><p>Run only recover-small and conf-sanity tests from acceptance-small test suite.</p>
+<blockquote>
+<p>&#x53EA;&#x8FD0;&#x884C; acceptance-small&#x4E2D;&#x7684;recover-small &#x548C; conf-sanity &#x5B50;&#x6D4B;&#x8BD5;&#x3002;</p>
+</blockquote>
+<pre><code class="lang-c">  ACC_SM_ONLY=<span class="hljs-string">&quot;recovery-small conf-sanity&quot;</span> sh ./acceptance-small.sh
+</code></pre>
+</li>
+<li><p>Run only tests 1, 3 and 4 from sanity.sh.</p>
+<blockquote>
+<p>&#x53EA;&#x8FD0;&#x884C;sanity.sh&#x4E2D;&#x7684; 1 3 4&#x6D4B;&#x8BD5;</p>
+</blockquote>
+<pre><code class="lang-c">  ONLY=<span class="hljs-string">&quot;1 3 4&quot;</span> sh ./sanity.sh
+</code></pre>
+</li>
+<li><p>skip tests 1 to 30 and run remaining tests in sanity.sh.</p>
+<blockquote>
+<p>&#x8DF3;&#x8FC7;sanity.sh&#x4E2D;&#x7684;1&#x5230;30&#x6D4B;&#x8BD5;&#xFF0C;&#x5E76;&#x8FD0;&#x884C;&#x5269;&#x4F59;&#x7684;&#x6D4B;&#x8BD5;</p>
+</blockquote>
+<pre><code class="lang-c">  EXCEPT=<span class="hljs-string">&quot;`seq 1 30`&quot;</span> sh sanity.sh
+</code></pre>
+</li>
+</ul>
+<p>Lustre provides flexibility to easily add new tests to any of its test scripts.</p>
+<blockquote>
+<p>lustre &#x53EF;&#x4EE5;&#x65B9;&#x4FBF;&#x7075;&#x6D3B;&#x5730;&#x6DFB;&#x52A0;&#x65B0;&#x7684;&#x6D4B;&#x8BD5;&#x7528;&#x4F8B;&#x5230;&#x6D4B;&#x8BD5;&#x811A;&#x672C;&#x3002;</p>
+</blockquote>
+<h2 id="acceptance-small-acc-sm-testing-on-lustre"><a name="acceptance-small-acc-sm-testing-on-lustre" class="plugin-anchor" href="#acceptance-small-acc-sm-testing-on-lustre"><i class="fa fa-link" aria-hidden="true"></i></a>Acceptance Small (acc-sm) Testing on Lustre</h2>
+<p><code>acceptance small (acc-sm)</code> testing for Lustre is used to catch bugs in the early development cycles. The acceptance-small.sh test scripts are located in the lustre/tests directory. acc-sm test suite contains three branches - b1_6 branch (18 tests), b1_8_gate branch (28 tests), and HEAD branch (30 tests). The functionality of some of the commonly used tests in acc-sm suite is listed in Table 4. The order in which tests need to be executed is defined in the acceptance-small.sh script and in each test script.</p>
+<blockquote>
+<p>&#x5C0F;&#x578B;&#x9A8C;&#x6536;&#x6D4B;&#x8BD5;&#xFF08;acceptance small&#xFF0C;acc-sm&#xFF09;&#x662F; lustre &#x5728;&#x5F00;&#x53D1;&#x5468;&#x671F;&#x65E9;&#x671F;&#x9636;&#x6BB5;&#x7528;&#x6765;&#x6355;&#x83B7; bug &#x7684;&#x6D4B;&#x8BD5;&#x3002;&#x5C0F;&#x578B;&#x9A8C;&#x6536;&#x6D4B;&#x8BD5;&#x811A;&#x672C;&#x4EE3;&#x7801;&#x4F4D;&#x4E8E; lustre/tests &#x76EE;&#x5F55;&#x4E2D;&#x3002;acc-sm &#x6D4B;&#x8BD5;&#x5957;&#x4EF6;&#x5305;&#x542B;&#x4E09;&#x4E2A;&#x5206;&#x652F;&#xFF0C;b1_6 &#x5206;&#x652F; (18 tests), b1_8_gate &#x5206;&#x652F; (28 tests), and HEAD &#x5206;&#x652F;(30 tests)&#x3002;&#x4E0B;&#x8868;&#x5C55;&#x793A;&#x4E86; acc-sm &#x7684;&#x4E00;&#x4E9B;&#x901A;&#x7528;&#x6D4B;&#x8BD5;&#x3002;&#x4E00;&#x4E9B;&#x9700;&#x8981;&#x5728;&#x6D4B;&#x8BD5;&#x65F6;&#x6267;&#x884C;&#x7684;&#x547D;&#x4EE4;&#x5B9A;&#x4E49;&#x5728; acceptance-small.sh &#x548C;&#x6BCF;&#x4E00;&#x4E2A;&#x6D4B;&#x8BD5;&#x811A;&#x672C;&#x4E2D;&#x3002;</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Name</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">RUNTESTS</td>
+<td style="text-align:left">This is a basic regression test with unmount/remount.</td>
+</tr>
+<tr>
+<td style="text-align:left">SANITY</td>
+<td style="text-align:left">Verifies Lustre operation under normal operating conditions.</td>
+</tr>
+<tr>
+<td style="text-align:left">DBENCH</td>
+<td style="text-align:left">Dbench benchmark for simulating N clients to produce the file system load.</td>
+</tr>
+<tr>
+<td style="text-align:left">SANITYN</td>
+<td style="text-align:left">Verifies operations from two clients under normal operating conditions.</td>
+</tr>
+<tr>
+<td style="text-align:left">LFSCK</td>
+<td style="text-align:left">Tests e2fsck and lfsck to detect and fix file system corruption.</td>
+</tr>
+<tr>
+<td style="text-align:left">LIBLUSTRE</td>
+<td style="text-align:left">Runs a test linked to a liblustre client library.</td>
+</tr>
+<tr>
+<td style="text-align:left">CONF_SANITY</td>
+<td style="text-align:left">Verifies various Lustre configurations (including wrong ones), where the system must behave correctly.</td>
+</tr>
+<tr>
+<td style="text-align:left">RECOVERY_SMALL</td>
+<td style="text-align:left">Verifies RPC replay after a communications failure (message loss).</td>
+</tr>
+<tr>
+<td style="text-align:left">INSANITY</td>
+<td style="text-align:left">Tests multiple concurrent failure conditions.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">&#x540D;&#x5B57;</th>
+<th style="text-align:left">&#x63CF;&#x8FF0;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">RUNTESTS</td>
+<td style="text-align:left">unmount &#x548C; remount &#x7684;&#x57FA;&#x7840;&#x56DE;&#x5F52;&#x6D4B;&#x8BD5;</td>
+</tr>
+<tr>
+<td style="text-align:left">SANITY</td>
+<td style="text-align:left">&#x9A8C;&#x8BC1;&#x5728;&#x666E;&#x901A;&#x73AF;&#x5883;&#x4E0B;&#x64CD;&#x4F5C;&#x7684;&#x6B63;&#x786E;&#x6027;</td>
+</tr>
+<tr>
+<td style="text-align:left">DBENCH</td>
+<td style="text-align:left">&#x6A21;&#x62DF; N &#x4E2A;&#x5BA2;&#x6237;&#x7AEF;&#x6765;&#x4EA7;&#x751F;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x8D1F;&#x8F7D;&#x7684;&#x57FA;&#x51C6;&#x6D4B;&#x8BD5;</td>
+</tr>
+<tr>
+<td style="text-align:left">SANITYN</td>
+<td style="text-align:left">&#x9A8C;&#x8BC1;&#x53CC;&#x5BA2;&#x6237;&#x7AEF;&#x5728;&#x5E38;&#x89C4;&#x8FD0;&#x884C;&#x6761;&#x4EF6;&#x4E0B;&#x7684;&#x64CD;&#x4F5C;&#x6B63;&#x786E;&#x6027;</td>
+</tr>
+<tr>
+<td style="text-align:left">LFSCK</td>
+<td style="text-align:left">&#x6D4B;&#x8BD5; e2fsck &#x548C; lfsck &#x5BF9;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x9519;&#x8BEF;&#x68C0;&#x6D4B;&#x548C;&#x9519;&#x8BEF;&#x4FEE;&#x590D;</td>
+</tr>
+<tr>
+<td style="text-align:left">LIBLUSTRE</td>
+<td style="text-align:left">&#x6D4B;&#x8BD5;&#x94FE;&#x63A5;&#x5230; lustre &#x5BA2;&#x6237;&#x7AEF;&#x5E93;&#x7684;&#x94FE;&#x63A5;</td>
+</tr>
+<tr>
+<td style="text-align:left">CONF_SANITY</td>
+<td style="text-align:left">&#x6D4B;&#x8BD5;&#x5728;&#x4E0D;&#x540C;&#x914D;&#x7F6E;&#x4E0B;&#xFF08;&#x5305;&#x542B;&#x9519;&#x8BEF;&#x914D;&#x7F6E;&#xFF09;lustre &#x662F;&#x5426;&#x6B63;&#x5E38;&#x8FD0;&#x884C;</td>
+</tr>
+<tr>
+<td style="text-align:left">RECOVERY_SMALL</td>
+<td style="text-align:left">&#x9A8C;&#x8BC1; lustre &#x5728;&#x8FDE;&#x63A5;&#x5931;&#x8D25;&#x540E;&#xFF08;&#x6D88;&#x606F;&#x4E22;&#x5931;&#xFF09;&#xFF0C;RPC &#x91CD;&#x64AD;&#x7684;&#x6B63;&#x786E;&#x6027;</td>
+</tr>
+<tr>
+<td style="text-align:left">INSANITY</td>
+<td style="text-align:left">&#x6D4B;&#x8BD5;&#x591A;&#x79CD;&#x5E76;&#x53D1;&#x9519;&#x8BEF;&#x6761;&#x4EF6;</td>
+</tr>
+</tbody>
+</table>
+<h2 id="lustre-tests-environment-variables"><a name="lustre-tests-environment-variables" class="plugin-anchor" href="#lustre-tests-environment-variables"><i class="fa fa-link" aria-hidden="true"></i></a>Lustre Tests Environment Variables</h2>
+<p>This Section describes environment variables used to drive the Lustre tests. The environment variables are typically stored in a configuration script in lustre/tests/cfg/$NAME.sh, accessed by NAME=name environment variable within the test scripts. The default configuration for a single-node test is NAME=local, which accesses the lustre/tests/cfg/local.sh configuration file. Some of the important environment variables and their purpose for Lustre cluster configuration are listed in Table 5.</p>
+<blockquote>
+<p>&#x672C;&#x8282;&#x63CF;&#x8FF0;&#x7528;&#x4E8E;&#x6D4B;&#x8BD5;&#x7684;&#x73AF;&#x5883;&#x53D8;&#x91CF;&#x3002;&#x73AF;&#x5883;&#x53D8;&#x91CF;&#x901A;&#x5E38;&#x5728; lustre/tests/cfg/$NAME.sh &#x914D;&#x7F6E;&#x811A;&#x672C;&#x4E2D;&#x3002;&#x5728;&#x811A;&#x672C;&#x4E2D;&#x901A;&#x8FC7; NAME=name &#x65B9;&#x5F0F;&#x8BBF;&#x95EE;&#x73AF;&#x5883;&#x53D8;&#x91CF;&#x3002;&#x9ED8;&#x8BA4;&#x5355;&#x8282;&#x70B9;&#x6D4B;&#x8BD5;&#x914D;&#x7F6E;&#x662F; NAME=local&#xFF0C;&#x5728; lustre/tests/cfg/local.sh &#x4E2D;&#x8BBF;&#x95EE;&#x3002;&#x4E0B;&#x8868;&#x663E;&#x793A;&#x4E86;&#x4E00;&#x4E9B;&#x91CD;&#x8981;&#x7684;&#x73AF;&#x5883;&#x53D8;&#x91CF;&#x548C;&#x5B83;&#x4EEC;&#x7684;&#x76EE;&#x7684;&#x3002;</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Variable</th>
+<th style="text-align:left">Purpose</th>
+<th style="text-align:left">Typical Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">mds_HOST</td>
+<td style="text-align:left">The network hostname of the primary MDS host. Uses local host name if unset.</td>
+<td style="text-align:left">mdsnode-1</td>
+</tr>
+<tr>
+<td style="text-align:left">ost_HOST</td>
+<td style="text-align:left">The network hostname of the primary OSS host. Uses local host name if unset.</td>
+<td style="text-align:left">ossnode-1</td>
+</tr>
+<tr>
+<td style="text-align:left">mgs_HOST</td>
+<td style="text-align:left">The network hostname of the primary MGS host. Uses $mds_HOST if unset.</td>
+<td style="text-align:left">mgsnode</td>
+</tr>
+<tr>
+<td style="text-align:left">CLIENTS</td>
+<td style="text-align:left">A comma separated list of the clients to be used for testing.</td>
+<td style="text-align:left">client-1, client-2, client-3</td>
+</tr>
+<tr>
+<td style="text-align:left">RCLIENTS</td>
+<td style="text-align:left">A comma separated list of the remote clients to be used for testing. One client actually executes the test framework, the other clients are remote clients.</td>
+<td style="text-align:left">client-1, client-3  (which would imply that client-2 is actually running the test framework.)</td>
+</tr>
+<tr>
+<td style="text-align:left">NETTYPE</td>
+<td style="text-align:left">The network infrastructure to be used in LNet notation.</td>
+<td style="text-align:left">tcp or o2ib</td>
+</tr>
+<tr>
+<td style="text-align:left">mdsfailover_HOST</td>
+<td style="text-align:left">If testing high availability, the hostname of the backup MDS that can access the MDT storage.</td>
+<td style="text-align:left">mdsnode-2</td>
+</tr>
+<tr>
+<td style="text-align:left">ostfailover_HOST</td>
+<td style="text-align:left">If testing high availability, the hostname of the backup OSS that can access the OST storage.</td>
+<td style="text-align:left">ossnode-2</td>
+</tr>
+<tr>
+<td style="text-align:left">MDSCOUNT</td>
+<td style="text-align:left">Number of MDTs to use (valid for Lustre 2.4 and later).</td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left">MDSSIZE</td>
+<td style="text-align:left">The size of the MDT storage in kilobytes. This can be smaller than the MDT block device, to speed up testing. Use the block device size if unspecified or equal to zero.</td>
+<td style="text-align:left">200000</td>
+</tr>
+<tr>
+<td style="text-align:left">MGSNID</td>
+<td style="text-align:left">LNet Node ID if it does not map to the primary address of $mgs_HOST for $NETTYPE.</td>
+<td style="text-align:left">$mgs_HOST</td>
+</tr>
+<tr>
+<td style="text-align:left">MGSSIZE</td>
+<td style="text-align:left">The size of the MGT stoarge in kilobytes, if it is separate from the MDT device. This can be smaller than the MGT block device, to speed up testing. Use the block device size if unspecified or equal to zero.</td>
+<td style="text-align:left">16384</td>
+</tr>
+<tr>
+<td style="text-align:left">REFORMAT</td>
+<td style="text-align:left">Whether the file system will be reformatted between tests.</td>
+<td style="text-align:left">true</td>
+</tr>
+<tr>
+<td style="text-align:left">OSTCOUNT</td>
+<td style="text-align:left">The number of OSTs that are being provided by the OSS on $ost_HOST.</td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left">OSTSIZE</td>
+<td style="text-align:left">Size of the OST storage in kilobytes. Can be smaller than the OST block device, to speed up testing. Use the block device size if unspecified or equal to zero.</td>
+<td style="text-align:left">1000000</td>
+</tr>
+<tr>
+<td style="text-align:left">FSTYPE</td>
+<td style="text-align:left">File system type to use for all OST and MDT devices.</td>
+<td style="text-align:left">ldiskfs, zfs</td>
+</tr>
+<tr>
+<td style="text-align:left">FSNAME</td>
+<td style="text-align:left">The Lustre file system name to use for testing. Uses lustre by default.</td>
+<td style="text-align:left">testfs</td>
+</tr>
+<tr>
+<td style="text-align:left">DIR</td>
+<td style="text-align:left">Directory in which to run the Lustre tests. Must be within the mount point specified by $MOUNT. Defaults to $MOUNT if unspecified.</td>
+<td style="text-align:left">$MOUNT</td>
+</tr>
+<tr>
+<td style="text-align:left">TIMEOUT</td>
+<td style="text-align:left">Lustre timeout to use during testing, in seconds. Reduced from the default to speed testing.</td>
+<td style="text-align:left">20</td>
+</tr>
+<tr>
+<td style="text-align:left">PDSH</td>
+<td style="text-align:left">The parallel shell command to use for running shell operations on one or more remote hosts.</td>
+<td style="text-align:left">pdsh -w nodes[1-5]</td>
+</tr>
+<tr>
+<td style="text-align:left">MPIRUN</td>
+<td style="text-align:left">Command to use for launching MPI test programs.</td>
+<td style="text-align:left">mpirun</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">&#x53D8;&#x91CF;</th>
+<th style="text-align:left">&#x76EE;&#x7684;</th>
+<th style="text-align:left">&#x5178;&#x578B;&#x503C;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">mds_HOST</td>
+<td style="text-align:left">&#x4E3B; MDS &#x8282;&#x70B9;&#x7684;&#x7F51;&#x7EDC;&#x4E3B;&#x673A;&#x540D;&#x3002;&#x5982;&#x679C;&#x6CA1;&#x6709;&#x8BBE;&#x7F6E;&#xFF0C;&#x5219;&#x4F7F;&#x7528;&#x672C;&#x5730;&#x4E3B;&#x673A;&#x540D;</td>
+<td style="text-align:left">mdsnode-1</td>
+</tr>
+<tr>
+<td style="text-align:left">ost_HOST</td>
+<td style="text-align:left">&#x4E3B; OSS &#x8282;&#x70B9;&#x7684;&#x7F51;&#x7EDC;&#x4E3B;&#x673A;&#x540D;&#x3002;&#x5982;&#x679C;&#x6CA1;&#x6709;&#x8BBE;&#x7F6E;&#xFF0C;&#x5219;&#x4F7F;&#x7528;&#x672C;&#x5730;&#x4E3B;&#x673A;&#x540D;</td>
+<td style="text-align:left">ossnode-1</td>
+</tr>
+<tr>
+<td style="text-align:left">mgs_HOST</td>
+<td style="text-align:left">&#x4E3B; MGS &#x8282;&#x70B9;&#x7684;&#x7F51;&#x7EDC;&#x4E3B;&#x673A;&#x540D;&#x3002;&#x5982;&#x679C;&#x6CA1;&#x6709;&#x8BBE;&#x7F6E;&#xFF0C;&#x5219;&#x4F7F;&#x7528;&#x672C;&#x5730;&#x4E3B;&#x673A;&#x540D;</td>
+<td style="text-align:left">mgsnode</td>
+</tr>
+<tr>
+<td style="text-align:left">CLIENTS</td>
+<td style="text-align:left">&#x6D4B;&#x8BD5;&#x5BA2;&#x6237;&#x7AEF;&#x5217;&#x8868;&#xFF0C;&#x4F7F;&#x7528;&#x9017;&#x53F7;&#x5206;&#x9694;</td>
+<td style="text-align:left">client-1, client-2, client-3</td>
+</tr>
+<tr>
+<td style="text-align:left">RCLIENTS</td>
+<td style="text-align:left">&#x8FDC;&#x7A0B;&#x6D4B;&#x8BD5;&#x5BA2;&#x6237;&#x7AEF;&#x5217;&#x8868;&#xFF0C;&#x4F7F;&#x7528;&#x9017;&#x53F7;&#x5206;&#x9694;&#x3002;&#x4E00;&#x4E2A;&#x5BA2;&#x6237;&#x7AEF;&#x771F;&#x6B63;&#x8FD0;&#x884C;&#x6D4B;&#x8BD5;&#x6846;&#x67B6;&#xFF0C;&#x5176;&#x4ED6;&#x7684;&#x5BA2;&#x6237;&#x7AEF;&#x4E3A;&#x8FDC;&#x7A0B;&#x5BA2;&#x6237;&#x7AEF;</td>
+<td style="text-align:left">client-1, client-3&#xFF08;&#x6697;&#x793A; client-2 &#x5B9E;&#x9645;&#x4E0A;&#x8FD0;&#x884C;&#x6D4B;&#x8BD5;&#x6846;&#x67B6;&#xFF09;</td>
+</tr>
+<tr>
+<td style="text-align:left">NETTYPE</td>
+<td style="text-align:left">Lnet &#x4F7F;&#x7528;&#x7684;&#x7F51;&#x7EDC;&#x7C7B;&#x578B;&#x7B26;&#x53F7;</td>
+<td style="text-align:left">tcp &#x6216; o2ib</td>
+</tr>
+<tr>
+<td style="text-align:left">mdsfailover_HOST</td>
+<td style="text-align:left">&#x9AD8;&#x53EF;&#x7528;&#x6D4B;&#x8BD5;&#x4E2D;&#xFF0C;&#x7528;&#x4E8E;&#x540E;&#x5907;&#x7684; mds &#x4E3B;&#x673A;&#x540D;&#x3002;&#x8BE5; mds &#x53EF;&#x4EE5;&#x8BBF;&#x95EE;&#x5230; MDT</td>
+<td style="text-align:left">mdsnode-2</td>
+</tr>
+<tr>
+<td style="text-align:left">ostfailover_HOST</td>
+<td style="text-align:left">&#x9AD8;&#x53EF;&#x7528;&#x6D4B;&#x8BD5;&#x4E2D;&#xFF0C;&#x7528;&#x4E8E;&#x540E;&#x5907;&#x7684; oss &#x4E3B;&#x673A;&#x540D;&#x3002;&#x8BE5; oss &#x53EF;&#x4EE5;&#x8BBF;&#x95EE;&#x5230; OST</td>
+<td style="text-align:left">ossnode-2</td>
+</tr>
+<tr>
+<td style="text-align:left">MDSCOUNT</td>
+<td style="text-align:left">&#x4F7F;&#x7528;&#x7684; MDT &#x6570;&#x91CF;&#xFF08;2.4&#x7248;&#x672C;&#x6216;&#x4EE5;&#x4E0A;&#xFF09;</td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left">MDSSIZE</td>
+<td style="text-align:left">MDT &#x8BBE;&#x5907;&#x5927;&#x5C0F;&#xFF0C;&#x5355;&#x4F4D;&#x4E3A; KB&#x3002;&#x4E3A;&#x4E86;&#x52A0;&#x5FEB;&#x6D4B;&#x8BD5;&#x901F;&#x5EA6;&#xFF0C;&#x8BBE;&#x7F6E;&#x7684;&#x5927;&#x5C0F;&#x53EF;&#x4EE5;&#x5C0F;&#x4E8E; MDT &#x5757;&#x5927;&#x5C0F;&#xFF0C;</td>
+<td style="text-align:left">200000</td>
+</tr>
+<tr>
+<td style="text-align:left">MGSNID</td>
+<td style="text-align:left">Lnet &#x8282;&#x70B9; ID&#x3002;&#x5982;&#x679C;&#x5B83;&#x6CA1;&#x6709;&#x6620;&#x5C04;&#x5230; NETTYPE &#x7684; mgs_HOST &#x4E3B;&#x5730;&#x5740;&#x3002;</td>
+<td style="text-align:left">$mgs_HOST</td>
+</tr>
+<tr>
+<td style="text-align:left">MGSSIZE</td>
+<td style="text-align:left">MGT &#x8BBE;&#x5907;&#x7684;&#x5927;&#x5C0F;&#xFF0C;&#x5355;&#x4F4D;&#x4E3A; KB&#x3002;&#x5982;&#x679C; MGT &#x548C; MDT &#x8BBE;&#x5907;&#x5206;&#x79BB;&#xFF0C;&#x5B83;&#x7684;&#x5927;&#x5C0F;&#x53EF;&#x4EE5;&#x5C0F;&#x4E8E; MGT &#x5757;&#x8BBE;&#x5907;&#x5927;&#x5C0F;&#x6765;&#x52A0;&#x901F;&#x6D4B;&#x8BD5;&#x7684;&#x901F;&#x5EA6;&#x3002;&#x9ED8;&#x8BA4;&#x4E3A;0&#x3002;</td>
+<td style="text-align:left">1000000</td>
+</tr>
+<tr>
+<td style="text-align:left">FSTYPE</td>
+<td style="text-align:left">&#x6240;&#x6709; OST &#x548C; MDT &#x8BBE;&#x5907;&#x4F7F;&#x7528;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7C7B;&#x578B;</td>
+<td style="text-align:left">ldiskfs, zfs</td>
+</tr>
+<tr>
+<td style="text-align:left">FSNAME</td>
+<td style="text-align:left">&#x6D4B;&#x8BD5;&#x4E2D;&#x4F7F;&#x7528;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x540D;&#x79F0;&#x3002;&#x9ED8;&#x8BA4;&#x4E3A; lustre&#x3002;</td>
+<td style="text-align:left">testfs</td>
+</tr>
+<tr>
+<td style="text-align:left">DIR</td>
+<td style="text-align:left">&#x7528;&#x4E8E;&#x6D4B;&#x8BD5;&#x7684;&#x76EE;&#x5F55;&#x3002;&#x5FC5;&#x987B;&#x5728; $MOUNT &#x6302;&#x8F7D;&#x70B9;&#x5185;&#x90E8;&#x3002;&#x9ED8;&#x8BA4;&#x4E3A; $MOUNT</td>
+<td style="text-align:left">$MOUNT</td>
+</tr>
+<tr>
+<td style="text-align:left">TIMEOUT</td>
+<td style="text-align:left">&#x6D4B;&#x8BD5;&#x4E2D;&#x7684;&#x8D85;&#x65F6;&#x65F6;&#x95F4;&#xFF0C;&#x5355;&#x4F4D;&#x4E3A;&#x79D2;&#x3002;&#x51CF;&#x5C11;&#x65F6;&#x95F4;&#x80FD;&#x52A0;&#x901F;&#x6D4B;&#x8BD5;&#x3002;</td>
+<td style="text-align:left">20</td>
+</tr>
+<tr>
+<td style="text-align:left">PDSH</td>
+<td style="text-align:left">&#x5728;&#x8FDC;&#x7AEF;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x8282;&#x70B9;&#x4E0A;&#x5E76;&#x884C;&#x8FD0;&#x884C;&#x7684; shell &#x547D;&#x4EE4;</td>
+<td style="text-align:left">pdsh -w nodes[1-5]</td>
+</tr>
+<tr>
+<td style="text-align:left">MPIRUN</td>
+<td style="text-align:left">&#x7528;&#x4E8E;&#x542F;&#x52A8; MPI &#x6D4B;&#x8BD5;&#x7A0B;&#x5E8F;&#x7684;&#x547D;&#x4EE4;&#x3002;</td>
+<td style="text-align:left">mpirun</td>
+</tr>
+</tbody>
+</table>
 <h1 id="utils"><a name="utils" class="plugin-anchor" href="#utils"><i class="fa fa-link" aria-hidden="true"></i></a>UTILS</h1>
 <p>&#x7565;</p>
 <h1 id="mgc"><a name="mgc" class="plugin-anchor" href="#mgc"><i class="fa fa-link" aria-hidden="true"></i></a>MGC</h1>
@@ -1837,7 +2497,7 @@
 
 <p>Libcfs provides APIs comprising of fundamental primitives for process management and debugging support in Lustre. Libcfs is used throughout LNet, Lustre, and associated utilities. Its APIs define a portable run time environment that is implemented consistently on all supported build targets. Besides debugging support libcfs provides APIs for failure injection, Linux kernel compatibility, encryption for data, Linux 64 bit time addition, log collection using tracefile, string parsing support and capabilities for querying and manipulating CPU partition tables. Libcfs is the first module that Lustre loads. The module loading function can be found in tests/test-framework.sh script as shown in Source Code 17. When Lustre is mounted, mount_facet() function gets invoked and it calls load_modules() function. load_modules() invokes load_modules_local() that loads Lustre modules libcfs, lnet, obdclass, ptl-rpc, fld, fid, and lmv in the same order.</p>
 <blockquote>
-<p>&#x5728; Lustre &#x4E2D;&#xFF0C;Libcfs &#x63D0;&#x4F9B;&#x4E86;&#x8FDB;&#x7A0B;&#x7BA1;&#x7406;&#x548C;&#x8C03;&#x8BD5;&#x7684;&#x57FA;&#x7840; API&#x3002;Libcfs &#x88AB;&#x5927;&#x91CF;&#x5730;&#x4F7F;&#x7528;&#x5728; LNet&#x3001;Lustre &#x548C;&#x76F8;&#x5173;&#x5DE5;&#x5177;&#x4E2D;&#x3002;&#x5176; API &#x5B9A;&#x4E49;&#x4E86;&#x4E00;&#x5957;&#x53EF;&#x79FB;&#x690D;&#x7684;&#x8FD0;&#x884C;&#x65F6;&#x73AF;&#x5883;&#xFF0C;&#x4EE5;&#x8FFD;&#x6C42;&#x5728;&#x6240;&#x6709;&#x652F;&#x6301;&#x7684;&#x6784;&#x5EFA;&#x76EE;&#x6807;&#x4E0A;&#x7684;&#x4E00;&#x81F4;&#x5B9E;&#x73B0;&#x3002;&#x9664;&#x4E86;&#x8C03;&#x8BD5;&#x652F;&#x6301;&#x5916;&#xFF0C;Libcfs &#x8FD8;&#x63D0;&#x4F9B;&#x4E86;&#x9519;&#x8BEF;&#x6CE8;&#x5165;&#x3001;Linux &#x5185;&#x6838;&#x517C;&#x5BB9;&#x6027;&#x3001;&#x6570;&#x636E;&#x52A0;&#x5BC6;&#x3001;Linux 64 &#x4F4D;&#x65F6;&#x95F4;&#x52A0;&#x6CD5;<sup><a href="#fn_3" id="reffn_3">3</a></sup>&#x3001;&#x4F7F;&#x7528;&#x6587;&#x4EF6;&#x8DDF;&#x8E2A;&#x624B;&#x6BB5;&#x8FDB;&#x884C;&#x65E5;&#x5FD7;&#x6536;&#x96C6;&#x3001;&#x5B57;&#x7B26;&#x4E32;&#x89E3;&#x6790;&#x652F;&#x6301;&#x4EE5;&#x53CA;&#x67E5;&#x8BE2;&#x548C;&#x64CD;&#x4F5C; CPU &#x5206;&#x533A;&#x8868;&#x7684;&#x529F;&#x80FD;&#x3002;&#x5F53; lustre &#x88AB;&#x6302;&#x8F7D;&#x65F6;&#xFF0C;mount_facet() &#x51FD;&#x6570;&#x88AB;&#x8C03;&#x7528;&#xFF0C;&#x5B83;&#x8C03;&#x7528; load_modules() &#x51FD;&#x6570;&#x3002;load_modules() &#x51FD;&#x6570;&#x8C03;&#x7528; load_modules_local()&#xFF0C;&#x7528;&#x4E8E;&#x6309;&#x987A;&#x5E8F;&#x52A0;&#x8F7D; lustre &#x7684;&#x6A21;&#x5757;&#xFF1A;libcfs, lnet, obdclass, ptl-rpc, fld, fid, and lmv&#x3002;</p>
+<p>&#x5728; Lustre &#x4E2D;&#xFF0C;Libcfs &#x63D0;&#x4F9B;&#x4E86;&#x8FDB;&#x7A0B;&#x7BA1;&#x7406;&#x548C;&#x8C03;&#x8BD5;&#x7684;&#x57FA;&#x7840; API&#x3002;Libcfs &#x88AB;&#x5927;&#x91CF;&#x5730;&#x4F7F;&#x7528;&#x5728; LNet&#x3001;Lustre &#x548C;&#x76F8;&#x5173;&#x5DE5;&#x5177;&#x4E2D;&#x3002;&#x5176; API &#x5B9A;&#x4E49;&#x4E86;&#x4E00;&#x5957;&#x53EF;&#x79FB;&#x690D;&#x7684;&#x8FD0;&#x884C;&#x65F6;&#x73AF;&#x5883;&#xFF0C;&#x4EE5;&#x8FFD;&#x6C42;&#x5728;&#x6240;&#x6709;&#x652F;&#x6301;&#x7684;&#x6784;&#x5EFA;&#x76EE;&#x6807;&#x4E0A;&#x7684;&#x4E00;&#x81F4;&#x5B9E;&#x73B0;&#x3002;&#x9664;&#x4E86;&#x8C03;&#x8BD5;&#x652F;&#x6301;&#x5916;&#xFF0C;Libcfs &#x8FD8;&#x63D0;&#x4F9B;&#x4E86;&#x9519;&#x8BEF;&#x6CE8;&#x5165;&#x3001;Linux &#x5185;&#x6838;&#x517C;&#x5BB9;&#x6027;&#x3001;&#x6570;&#x636E;&#x52A0;&#x5BC6;&#x3001;Linux 64 &#x4F4D;&#x65F6;&#x95F4;&#x52A0;&#x6CD5;<sup><a href="#fn_4" id="reffn_4">4</a></sup>&#x3001;&#x4F7F;&#x7528;&#x6587;&#x4EF6;&#x8DDF;&#x8E2A;&#x624B;&#x6BB5;&#x8FDB;&#x884C;&#x65E5;&#x5FD7;&#x6536;&#x96C6;&#x3001;&#x5B57;&#x7B26;&#x4E32;&#x89E3;&#x6790;&#x652F;&#x6301;&#x4EE5;&#x53CA;&#x67E5;&#x8BE2;&#x548C;&#x64CD;&#x4F5C; CPU &#x5206;&#x533A;&#x8868;&#x7684;&#x529F;&#x80FD;&#x3002;&#x5F53; lustre &#x88AB;&#x6302;&#x8F7D;&#x65F6;&#xFF0C;mount_facet() &#x51FD;&#x6570;&#x88AB;&#x8C03;&#x7528;&#xFF0C;&#x5B83;&#x8C03;&#x7528; load_modules() &#x51FD;&#x6570;&#x3002;load_modules() &#x51FD;&#x6570;&#x8C03;&#x7528; load_modules_local()&#xFF0C;&#x7528;&#x4E8E;&#x6309;&#x987A;&#x5E8F;&#x52A0;&#x8F7D; lustre &#x7684;&#x6A21;&#x5757;&#xFF1A;libcfs, lnet, obdclass, ptl-rpc, fld, fid, and lmv&#x3002;</p>
 </blockquote>
 <p>In the following Sections we describe libcfs APIs and functionalities in detail.</p>
 <blockquote>
@@ -2280,7 +2940,10 @@ fid &#x5185;&#x6838;&#x6A21;&#x5757;&#x5185;&#x7F6E;&#x4E86; fid &#x76F8;&#x5173
 <sup>2</sup>. <em>&#x4E25;&#x8C28;&#x4E00;&#x70B9;&#x5730;&#x8BF4;&#xFF0C;&#x662F;&#x5728; Lustre &#x5BA2;&#x6237;&#x7AEF;&#x4E0A;&#x7684;&#x7B2C;&#x4E00;&#x4E2A;&#x7EC4;&#x4EF6;</em><a href="#reffn_2" title="Jump back to footnote [2] in the text."> &#x21A9;</a>
 </blockquote>
 <blockquote id="fn_3">
-<sup>3</sup>. <em>&#x597D;&#x50CF;&#x4E5F;&#x4E0D;&#x80FD;&#x7FFB;&#x8BD1;&#x4E3A;&#x52A0;&#x6CD5;&#xFF0C;&#x6211;&#x7684;&#x7406;&#x89E3;&#x662F;&#xFF0C;&#x8C03;&#x6574;&#x5185;&#x6838;&#x65F6;&#x95F4;&#xFF0C;&#x7528;&#x4E8E;&#x6D4B;&#x8BD5;&#x76EE;&#x7684;</em><a href="#reffn_3" title="Jump back to footnote [3] in the text."> &#x21A9;</a>
+<sup>3</sup>. <em>&#x4E3A;&#x4E86;&#x533A;&#x5206;&#x5355;&#x4E2A;&#x6D4B;&#x8BD5;&#x5957;&#x4EF6;&#x548C;&#x591A;&#x4E2A;&#x6D4B;&#x8BD5;&#x5957;&#x4EF6;&#xFF0C;&#x6211;&#x628A;&#x590D;&#x6570;&#x5F62;&#x5F0F;&#x7684;&#x6D4B;&#x8BD5;&#x5957;&#x4EF6;&#x79F0;&#x4E3A;&#x201C;&#x96C6;&#x201D;</em><a href="#reffn_3" title="Jump back to footnote [3] in the text."> &#x21A9;</a>
+</blockquote>
+<blockquote id="fn_4">
+<sup>4</sup>. <em>&#x597D;&#x50CF;&#x4E5F;&#x4E0D;&#x80FD;&#x7FFB;&#x8BD1;&#x4E3A;&#x52A0;&#x6CD5;&#xFF0C;&#x6211;&#x7684;&#x7406;&#x89E3;&#x662F;&#xFF0C;&#x8C03;&#x6574;&#x5185;&#x6838;&#x65F6;&#x95F4;&#xFF0C;&#x7528;&#x4E8E;&#x6D4B;&#x8BD5;&#x76EE;&#x7684;</em><a href="#reffn_4" title="Jump back to footnote [4] in the text."> &#x21A9;</a>
 </blockquote>
 <script type="text/javascript">var className='atoc';</script>
                                 
@@ -2309,7 +2972,7 @@ fid &#x5185;&#x6838;&#x6A21;&#x5757;&#x5185;&#x7F6E;&#x4E86; fid &#x76F8;&#x5173
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Lustre Architecture","level":"1.2.1","depth":2,"next":{"title":"What is Lustre?","level":"1.2.1.1","depth":3,"anchor":"#what-is-lustre","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#what-is-lustre","articles":[]},"previous":{"title":"Understanding Lustre Internals 中文翻译","level":"1.2","depth":1,"path":"content/Understanding-Lustre-Internals-中文翻译/README.md","ref":"content/Understanding-Lustre-Internals-中文翻译/README.md","articles":[{"title":"Lustre Architecture","level":"1.2.1","depth":2,"anchor":"#lustre-architecture","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-architecture","articles":[{"title":"What is Lustre?","level":"1.2.1.1","depth":3,"anchor":"#what-is-lustre","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#what-is-lustre","articles":[]},{"title":"Lustre Features","level":"1.2.1.2","depth":3,"anchor":"#lustre-features","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-features","articles":[]},{"title":"Lustre Components","level":"1.2.1.3","depth":3,"anchor":"#lustre-components","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-components","articles":[]},{"title":"Lustre File Layouts","level":"1.2.1.4","depth":3,"anchor":"#lustre-file-layouts","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-file-layouts","articles":[{"title":"Normal (RAID0) Layouts","level":"1.2.1.4.1","depth":4,"anchor":"#normal-raid0-layouts","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#normal-raid0-layouts","articles":[]},{"title":"Composite Layouts","level":"1.2.1.4.2","depth":4,"anchor":"#composite-layouts","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#composite-layouts","articles":[]},{"title":"Distributed Namespace","level":"1.2.1.4.3","depth":4,"anchor":"#distributed-namespace","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#distributed-namespace","articles":[]},{"title":"File Identifiers and Layout Attributes","level":"1.2.1.4.4","depth":4,"anchor":"#file-identifiers-and-layout-attributes","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifiers-and-layout-attributes","articles":[]}]},{"title":"Lustre Software Stack","level":"1.2.1.5","depth":3,"anchor":"#lustre-software-stack","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-software-stack","articles":[]}]},{"title":"TEST","level":"1.2.2","depth":2,"anchor":"#test","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#test","articles":[]},{"title":"UTILS","level":"1.2.3","depth":2,"anchor":"#utils","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#utils","articles":[]},{"title":"MGC","level":"1.2.4","depth":2,"anchor":"#mgc","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc","articles":[{"title":"Introduction","level":"1.2.4.1","depth":3,"anchor":"#mgc-introduction","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-introduction","articles":[]},{"title":"MGC Module Initialization","level":"1.2.4.2","depth":3,"anchor":"#mgc-module-initialization","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-module-initialization","articles":[]},{"title":"MGC obd Operations","level":"1.2.4.3","depth":3,"anchor":"#mgc-obd-operations","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-obd-operations","articles":[]},{"title":"mgc_setup()","level":"1.2.4.4","depth":3,"anchor":"#mgcsetup","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgcsetup","articles":[{"title":"Operation","level":"1.2.4.4.1","depth":4,"anchor":"#operation","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#operation","articles":[]}]},{"title":"Lustre Log Handling","level":"1.2.4.5","depth":3,"anchor":"#lustre-log-handling","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-log-handling","articles":[{"title":"Log Processing in MGC","level":"1.2.4.5.1","depth":4,"anchor":"#log-processing-in-mgc","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#log-processing-in-mgc","articles":[]}]},{"title":"mgc_precleanup() and mgc_cleanup()","level":"1.2.4.6","depth":3,"anchor":"#mgcprecleanup-and-mgccleanup","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgcprecleanup-and-mgccleanup","articles":[]},{"title":"mgc_import_event()","level":"1.2.4.7","depth":3,"anchor":"#mgcimportevent","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgcimportevent","articles":[]}]},{"title":"OBDCLASS","level":"1.2.5","depth":2,"anchor":"#obdclass","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obdclass","articles":[{"title":"Introduction","level":"1.2.5.1","depth":3,"anchor":"#obdclass-introduction","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obdclass-introduction","articles":[]},{"title":"obd_device Structure","level":"1.2.5.2","depth":3,"anchor":"#obddevice-structure","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obddevice-structure","articles":[]},{"title":"MGC Life Cycle","level":"1.2.5.3","depth":3,"anchor":"#mgc-life-cycle","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-life-cycle","articles":[]},{"title":"Obd Device Life Cycle","level":"1.2.5.4","depth":3,"anchor":"#obd-device-life-cycle","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obd-device-life-cycle","articles":[{"title":"class_attach()","level":"1.2.5.4.1","depth":4,"anchor":"#classattach","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#classattach","articles":[]},{"title":"obd_export Structure","level":"1.2.5.4.2","depth":4,"anchor":"#obdexport-structure","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obdexport-structure","articles":[]},{"title":"class_setup()","level":"1.2.5.4.3","depth":4,"anchor":"#classsetup","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#classsetup","articles":[]},{"title":"class_precleanup() and class_cleanup()","level":"1.2.5.4.4","depth":4,"anchor":"#classprecleanup-and-classcleanup","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#classprecleanup-and-classcleanup","articles":[]}]},{"title":"Imports and Exports","level":"1.2.5.5","depth":3,"anchor":"#imports-and-exports","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#imports-and-exports","articles":[]},{"title":"Useful APIs in Obdclass","level":"1.2.5.6","depth":3,"anchor":"#useful-apis-in-obdclass","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#useful-apis-in-obdclass","articles":[]}]},{"title":"LIBCFS","level":"1.2.6","depth":2,"anchor":"#libcfs","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#libcfs","articles":[{"title":"Introduction","level":"1.2.6.1","depth":3,"anchor":"#libcfs-introduction","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#libcfs-introduction","articles":[]},{"title":"Data Encryption Support in Libcfs","level":"1.2.6.2","depth":3,"anchor":"#data-encryption-support-in-libcfs","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#data-encryption-support-in-libcfs","articles":[]},{"title":"CPU Partition Table Management","level":"1.2.6.3","depth":3,"anchor":"#cpu-partition-table-management","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#cpu-partition-table-management","articles":[]},{"title":"Debugging Support and Failure Injection","level":"1.2.6.4","depth":3,"anchor":"#debugging-support-and-failure-injection","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#debugging-support-and-failure-injection","articles":[]},{"title":"Additional Supporting Software in Libcfs","level":"1.2.6.5","depth":3,"anchor":"#additional-supporting-software-in-libcfs","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#additional-supporting-software-in-libcfs","articles":[]}]},{"title":"File Identifiers, FID Location Database, and Object Index","level":"1.2.7","depth":2,"anchor":"#file-identifiers-fid-location-database-and-object-index","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifiers-fid-location-database-and-object-index","articles":[{"title":"File Identifier (FID)","level":"1.2.7.1","depth":3,"anchor":"#file-identifier-fid","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifier-fid","articles":[{"title":"Reserved Sequence Numbers and Object IDs","level":"1.2.7.1.1","depth":4,"anchor":"#reserved-sequence-numbers-and-object-ids","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#reserved-sequence-numbers-and-object-ids","articles":[]},{"title":"fid Kernel Module","level":"1.2.7.1.2","depth":4,"anchor":"#fid-kernel-module","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#fid-kernel-module","articles":[]}]},{"title":"FID Location Database (FLD)","level":"1.2.7.2","depth":3,"anchor":"#fid-location-database-fld","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#fid-location-database-fld","articles":[]},{"title":"Object Index (OI)","level":"1.2.7.3","depth":3,"anchor":"#object-index-oi","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#object-index-oi","articles":[]}]}]},"dir":"ltr"},"config":{"plugins":["code","pageview-count","-search","splitter","atoc","anchors","theme-default","expandable-chapters","theme-comscore","back-to-top-button","auto-scroll-table","katex"],"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"},"pluginsConfig":{"atoc":{"addClass":true,"className":"atoc"},"splitter":{},"auto-scroll-table":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"code":{"copyButtons":true},"katex":{},"fontsettings":{"theme":"white","family":"sans","size":2},"fontSettings":{"theme":"white","family":"serif","size":4},"highlight":{},"theme-comscore":{},"back-to-top-button":{},"pageview-count":{},"ga":{"token":"UA-39088953-8"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"showLevel":true,"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"}},"anchors":{},"expandable-chapters":{}},"theme":"default","keywords":"Lustre，storage，filesystem","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":36,"bottom":36},"toc":true},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Lustre doc","language":"zh-hans","introduction":{"path":"README.md","title":"Lustre 文档收集概述"},"gitbook":"*","description":"收集一些 lustre 文档和笔记"},"file":{"path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","mtime":"2023-05-31T01:30:19.334Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2023-05-31T01:31:13.009Z"},"basePath":"../..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Lustre Architecture","level":"1.2.1","depth":2,"next":{"title":"What is Lustre?","level":"1.2.1.1","depth":3,"anchor":"#what-is-lustre","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#what-is-lustre","articles":[]},"previous":{"title":"Understanding Lustre Internals 中文翻译","level":"1.2","depth":1,"path":"content/Understanding-Lustre-Internals-中文翻译/README.md","ref":"content/Understanding-Lustre-Internals-中文翻译/README.md","articles":[{"title":"Lustre Architecture","level":"1.2.1","depth":2,"anchor":"#lustre-architecture","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-architecture","articles":[{"title":"What is Lustre?","level":"1.2.1.1","depth":3,"anchor":"#what-is-lustre","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#what-is-lustre","articles":[]},{"title":"Lustre Features","level":"1.2.1.2","depth":3,"anchor":"#lustre-features","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-features","articles":[]},{"title":"Lustre Components","level":"1.2.1.3","depth":3,"anchor":"#lustre-components","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-components","articles":[]},{"title":"Lustre File Layouts","level":"1.2.1.4","depth":3,"anchor":"#lustre-file-layouts","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-file-layouts","articles":[{"title":"Normal (RAID0) Layouts","level":"1.2.1.4.1","depth":4,"anchor":"#normal-raid0-layouts","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#normal-raid0-layouts","articles":[]},{"title":"Composite Layouts","level":"1.2.1.4.2","depth":4,"anchor":"#composite-layouts","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#composite-layouts","articles":[]},{"title":"Distributed Namespace","level":"1.2.1.4.3","depth":4,"anchor":"#distributed-namespace","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#distributed-namespace","articles":[]},{"title":"File Identifiers and Layout Attributes","level":"1.2.1.4.4","depth":4,"anchor":"#file-identifiers-and-layout-attributes","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifiers-and-layout-attributes","articles":[]}]},{"title":"Lustre Software Stack","level":"1.2.1.5","depth":3,"anchor":"#lustre-software-stack","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-software-stack","articles":[]}]},{"title":"TEST","level":"1.2.2","depth":2,"anchor":"#test","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#test","articles":[{"title":"Lustre Test Suites","level":"1.2.2.1","depth":3,"anchor":"#lustre-test-suites","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-test-suites","articles":[]},{"title":"Terminology","level":"1.2.2.2","depth":3,"anchor":"#terminology","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#terminology","articles":[]},{"title":"Testing Lustre Code","level":"1.2.2.3","depth":3,"anchor":"#testing-lustre-code","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#testing-lustre-code","articles":[{"title":"Bypassing Failures","level":"1.2.2.3.1","depth":4,"anchor":"#bypassing-failures","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#bypassing-failures","articles":[]},{"title":"Test Framework Options","level":"1.2.2.3.2","depth":4,"anchor":"#test-framework-options","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#test-framework-options","articles":[]}]},{"title":"Acceptance Small (acc-sm) Testing on Lustre","level":"1.2.2.4","depth":3,"anchor":"#acceptance-small-acc-sm-testing-on-lustre","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#acceptance-small-acc-sm-testing-on-lustre","articles":[]},{"title":"Lustre Tests Environment Variables","level":"1.2.2.5","depth":3,"anchor":"#lustre-tests-environment-variables","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-tests-environment-variables","articles":[]}]},{"title":"UTILS","level":"1.2.3","depth":2,"anchor":"#utils","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#utils","articles":[]},{"title":"MGC","level":"1.2.4","depth":2,"anchor":"#mgc","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc","articles":[{"title":"Introduction","level":"1.2.4.1","depth":3,"anchor":"#mgc-introduction","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-introduction","articles":[]},{"title":"MGC Module Initialization","level":"1.2.4.2","depth":3,"anchor":"#mgc-module-initialization","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-module-initialization","articles":[]},{"title":"MGC obd Operations","level":"1.2.4.3","depth":3,"anchor":"#mgc-obd-operations","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-obd-operations","articles":[]},{"title":"mgc_setup()","level":"1.2.4.4","depth":3,"anchor":"#mgcsetup","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgcsetup","articles":[{"title":"Operation","level":"1.2.4.4.1","depth":4,"anchor":"#operation","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#operation","articles":[]}]},{"title":"Lustre Log Handling","level":"1.2.4.5","depth":3,"anchor":"#lustre-log-handling","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#lustre-log-handling","articles":[{"title":"Log Processing in MGC","level":"1.2.4.5.1","depth":4,"anchor":"#log-processing-in-mgc","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#log-processing-in-mgc","articles":[]}]},{"title":"mgc_precleanup() and mgc_cleanup()","level":"1.2.4.6","depth":3,"anchor":"#mgcprecleanup-and-mgccleanup","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgcprecleanup-and-mgccleanup","articles":[]},{"title":"mgc_import_event()","level":"1.2.4.7","depth":3,"anchor":"#mgcimportevent","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgcimportevent","articles":[]}]},{"title":"OBDCLASS","level":"1.2.5","depth":2,"anchor":"#obdclass","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obdclass","articles":[{"title":"Introduction","level":"1.2.5.1","depth":3,"anchor":"#obdclass-introduction","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obdclass-introduction","articles":[]},{"title":"obd_device Structure","level":"1.2.5.2","depth":3,"anchor":"#obddevice-structure","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obddevice-structure","articles":[]},{"title":"MGC Life Cycle","level":"1.2.5.3","depth":3,"anchor":"#mgc-life-cycle","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#mgc-life-cycle","articles":[]},{"title":"Obd Device Life Cycle","level":"1.2.5.4","depth":3,"anchor":"#obd-device-life-cycle","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obd-device-life-cycle","articles":[{"title":"class_attach()","level":"1.2.5.4.1","depth":4,"anchor":"#classattach","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#classattach","articles":[]},{"title":"obd_export Structure","level":"1.2.5.4.2","depth":4,"anchor":"#obdexport-structure","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#obdexport-structure","articles":[]},{"title":"class_setup()","level":"1.2.5.4.3","depth":4,"anchor":"#classsetup","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#classsetup","articles":[]},{"title":"class_precleanup() and class_cleanup()","level":"1.2.5.4.4","depth":4,"anchor":"#classprecleanup-and-classcleanup","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#classprecleanup-and-classcleanup","articles":[]}]},{"title":"Imports and Exports","level":"1.2.5.5","depth":3,"anchor":"#imports-and-exports","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#imports-and-exports","articles":[]},{"title":"Useful APIs in Obdclass","level":"1.2.5.6","depth":3,"anchor":"#useful-apis-in-obdclass","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#useful-apis-in-obdclass","articles":[]}]},{"title":"LIBCFS","level":"1.2.6","depth":2,"anchor":"#libcfs","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#libcfs","articles":[{"title":"Introduction","level":"1.2.6.1","depth":3,"anchor":"#libcfs-introduction","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#libcfs-introduction","articles":[]},{"title":"Data Encryption Support in Libcfs","level":"1.2.6.2","depth":3,"anchor":"#data-encryption-support-in-libcfs","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#data-encryption-support-in-libcfs","articles":[]},{"title":"CPU Partition Table Management","level":"1.2.6.3","depth":3,"anchor":"#cpu-partition-table-management","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#cpu-partition-table-management","articles":[]},{"title":"Debugging Support and Failure Injection","level":"1.2.6.4","depth":3,"anchor":"#debugging-support-and-failure-injection","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#debugging-support-and-failure-injection","articles":[]},{"title":"Additional Supporting Software in Libcfs","level":"1.2.6.5","depth":3,"anchor":"#additional-supporting-software-in-libcfs","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#additional-supporting-software-in-libcfs","articles":[]}]},{"title":"File Identifiers, FID Location Database, and Object Index","level":"1.2.7","depth":2,"anchor":"#file-identifiers-fid-location-database-and-object-index","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifiers-fid-location-database-and-object-index","articles":[{"title":"File Identifier (FID)","level":"1.2.7.1","depth":3,"anchor":"#file-identifier-fid","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#file-identifier-fid","articles":[{"title":"Reserved Sequence Numbers and Object IDs","level":"1.2.7.1.1","depth":4,"anchor":"#reserved-sequence-numbers-and-object-ids","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#reserved-sequence-numbers-and-object-ids","articles":[]},{"title":"fid Kernel Module","level":"1.2.7.1.2","depth":4,"anchor":"#fid-kernel-module","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#fid-kernel-module","articles":[]}]},{"title":"FID Location Database (FLD)","level":"1.2.7.2","depth":3,"anchor":"#fid-location-database-fld","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#fid-location-database-fld","articles":[]},{"title":"Object Index (OI)","level":"1.2.7.3","depth":3,"anchor":"#object-index-oi","path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","ref":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md#object-index-oi","articles":[]}]}]},"dir":"ltr"},"config":{"plugins":["code","pageview-count","-search","splitter","atoc","anchors","theme-default","expandable-chapters","theme-comscore","back-to-top-button","auto-scroll-table","katex"],"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"},"pluginsConfig":{"atoc":{"addClass":true,"className":"atoc"},"splitter":{},"auto-scroll-table":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"code":{"copyButtons":true},"katex":{},"fontsettings":{"theme":"white","family":"sans","size":2},"fontSettings":{"theme":"white","family":"serif","size":4},"highlight":{},"theme-comscore":{},"back-to-top-button":{},"pageview-count":{},"ga":{"token":"UA-39088953-8"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"showLevel":true,"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"}},"anchors":{},"expandable-chapters":{}},"theme":"default","keywords":"Lustre，storage，filesystem","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":36,"bottom":36},"toc":true},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Lustre doc","language":"zh-hans","introduction":{"path":"README.md","title":"Lustre 文档收集概述"},"gitbook":"*","description":"收集一些 lustre 文档和笔记"},"file":{"path":"content/Understanding-Lustre-Internals-中文翻译/Understanding-Lustre-Internals-中文翻译.md","mtime":"2023-05-31T16:27:21.739Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2023-05-31T16:28:17.251Z"},"basePath":"../..","book":{"language":""}});
         });
     </script>
 </div>
