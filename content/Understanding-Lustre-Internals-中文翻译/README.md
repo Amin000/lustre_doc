@@ -44,6 +44,24 @@ CTE 4 过线2分的翻译，自己把握哈
 
 * [UTILS](./Understanding-Lustre-Internals-中文翻译.md#utils)
 
+  * [Introduction](./Understanding-Lustre-Internals-中文翻译.md#utils-introduction)
+
+  * [User Utilities](./Understanding-Lustre-Internals-中文翻译.md#user-utilities)
+
+    * [lfs](./Understanding-Lustre-Internals-中文翻译.md#lfs)
+
+    * [lfs _migrate](./Understanding-Lustre-Internals-中文翻译.md#lfs-migrate)
+
+    * [lctl](./Understanding-Lustre-Internals-中文翻译.md#lctl)
+
+    * [llog_reader](./Understanding-Lustre-Internals-中文翻译.md#llogreader)
+
+    * [mkfs.lustre](./Understanding-Lustre-Internals-中文翻译.md#mkfslustre)
+
+  * [mount.lustre](./Understanding-Lustre-Internals-中文翻译.md#mountlustre)
+
+  * [tunefs.lustre](./Understanding-Lustre-Internals-中文翻译.md#tunefslustre)
+
 * [MGC](./Understanding-Lustre-Internals-中文翻译.md#mgc)
 
   * [Introduction](./Understanding-Lustre-Internals-中文翻译.md#mgc-introduction)

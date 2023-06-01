@@ -411,7 +411,226 @@ MPIRUN | 用于启动 MPI 测试程序的命令。| mpirun
 
 # UTILS
 
-略
+<h2 id="utils-introduction">Introduction</h2>
+
+The administrative utilities provided with Lustre software allow to set up Lustre file system in different configurations. Lustre utilities provide a wide range of configuration options for creating a file system on a block device, scaling Lustre file system by adding additional OSTs or clients, changing stripe layout for data etc. Examples of some Lustre utilities include,
+
+> lustre 使用管理工具包设置配置。lustre 工具包提供丰富的选项用于在块设备上创建文件系统，扩展文件系统（增加 OST 或客户端的方式），修改文件的条带布局等等。下面列出一些 lustre 工具包的例子：
+
+- `mkfs.lustre` - This utility is used to format a disk for a Lustre service.
+
+    > lustre 格式化硬盘的工具。
+
+- `tunefs.lustre` - This is used to modify configuration information on a Lustre target disk.
+
+    > 修改目标硬盘的配置信息。
+
+- `lctl` - lctl is used to control Lustre features via ioctl interfaces, including various configuration, maintenance and debugging features.
+
+    > 通过 ioctl 接口管理 lustre 特性，包括配置、维护和调试特性。
+
+- `mount.lustre` - This is used to start Lustre client or server on a target.
+
+    > 用于启动 lustre 客户端或服务端。
+
+- `lfs` - lfs is used for configuring and querying options related to files.
+
+    > 配置或查询文件的配置信息。
+
+In the following Sections we describe various user utilities and system configuration utilities in detail.
+
+> 下面的章节我们会详细讨论多种用户工具和系统配置工具。
+
+## User Utilities
+
+In this Section we describe a few important user utilities provided with Lustre.
+
+在这一节中，我们讨论一些重要的用户工具包。
+
+### lfs
+
+lfs can be used for configuring and monitoring Lustre file system. Some of most common uses of lfs are, create a new file with a specific striping pattern, determine default striping pattern, gather extended attributes for specific files, find files with specific attributes, list OST information and set quota limits. Some of the important lfs options are shown in Table 6.
+
+> lfs 用于配置和管理文件系统。lfs 常用于创建特定条带的文件，检测默认条带模式，收集指定文件扩展信息，文件指定特性的文件，显示 OST 信息和设置配额限制。一些重要的 lfs 选项下表显示：
+
+选项 | 描述
+:- | :-
+changelog | changelog 记录 MDT 上的元数据更新信息。用户可以指定起点和终点选项。
+df | 报告已挂载 lustre 的使用率，每一个目标的 UUID、已使用容量、剩余容量和挂载点。`path`参数指定显示它相关联的文件系统。
+find | 和 linux find 命令类似，用于查找文件或目录。
+getstripe | 获取文件或目录的条带信息。
+setstripe | 设置文件或目录条带或布局方式。注：修改已有文件不能使用该选项。
+
+- A few examples on the usage of lfs utility is shown below.
+
+> 下面为 lfs 工具的一些示例：
+
+Create a file name file1 striped on three OSTs with 32KB on each stripe
+
+    > 创建一个三个条带数量，每个条带大小32k。
+
+```shell
+\$ lfs setstripe -s 32k -c 3 /mnt/lustre/file1
+```
+
+- Show the default stripe pattern on a given directory (dir1).
+
+    > 显示目录的条带模式
+
+```shell
+$ lfs getstripe -d /mnt/lustre/dir1
+```
+
+- List detailed stripe allocation for a give file, file2.
+
+    > 显示文件的详细条带信息
+
+```shell
+lfs getstripe -v /mnt/lustre/file2
+```
+
+### lfs _migrate
+
+The lfs_migrate utility is used to migrate file data between Lustre OSTs. This utility does the migration in two steps. It first copies the specified files to set of temporary files. This can be performed using lfs setstripe options, if specified. It can also optionally verify if the file contents have changed or not. The second step is to then swap the layout between the temporary file and the original file (or even renaming the temporary file to the original filename). lfs_migrate is a tool that helps users to balance or manage space usage among Lustre OSTs.
+
+> lfs_migrate 工具用于迁移 lustre OST之间的数据。该工具迁移分为两步：1. 复制指定的数据到临时文件。复制时，可以使用`lfs setstripe`选项。它也可以验证数据内容是否被修改过。2. 替换原始文件和临时文件的布局，或者只是将临时文件重命名为原始文件。lfs_migrate 用于管理和均衡多个 OST 之间的空间。
+
+### lctl
+
+The lctl utility is used for controlling and configuring Lustre file system. lctl allows the following capabilities - control Lustre via an ioctl interface, setup Lustre in various configurations, and access debugging features of Lustre. Issuing lctl command on Lustre client gives a prompt that allows to execute lctl sub-commands. Some of the common commands associated with lctl are dl, device, network up/down, list_nids, ping nid, and conn_list.
+
+> lctl 工具用于控制和配置 lustre 文件系统。lctl 具有一下功能：通过 ioctl 接口控制 lustre；设置各种配置、访问调试属性；在客户端上运行 lctl 命令执行 lctl 的子命令。一些常用的命令是 dl、device、network up/down、ping nid 和 conn_list。
+
+To get help with lctl commands `lctl help <COMMAND>` or `lctl --list-commands` can be used.
+
+> lctl 命令的帮助信息是：`lctl help <COMMAND>` 和 `lctl --list-commands`。
+
+Another important use of lctl command is accessing Lustre parameters. lctl get, set_param provides a platform-independent interface to the Lustre tunables. When the file system is running, lctl set_param command can be used to set parameters temporarily on the affected nodes. The syntax of this command is,
+
+> lctl 另外一个重要的使用方式是访问 lustre 参数。lct get,set_param 提供可以在运行时调整 lustre 独立的接口。lctl set_param 用于在节点上设置临时参数。该方式的语法如下：
+
+```shell
+lctl set_param [-P] [-d] obdtype.obdname.property=value 
+```
+  
+In this command, -P option is used to set parameters permanently, -d deletes permanent parameters. To obtain current Lustre parameter settings, lctl get_param command can be used on the desired node. For example,
+
+> 命令中`-P`选项用于固化参数，`-d`删除固化的参数。lctl get_param 命令用于在节点上获取当前 lustre 参数设置。例如：
+
+```shell
+lctl get_param [-n] obdtype.obdname.parameter
+```
+
+Some of the common commands associated with lctl and their description are shown in Table 7.
+
+> 一些 lctl 命令的常用方式和描述如下表：
+
+选项 | 描述
+:- | :-
+dl | 显示本地 lustre OBD 信息
+list_nids | 显示节点本地的所有 nids 列表。Lnet 必须在运行状态才可以执行该命令
+ping nids | 检测节点之间 Lnet 的连接。网络类型可以为 TCP 或 IB
+network <up/down>|<tcp/o2ib> | 启动或停止 Lnet，或为 lctl 的其他命令选择一种网络类型
+device devname | 选择一个 OBD，接下来其他的命令都基于该设备。
+conn_list | 根据所给网络类型，显示所有连接的远端 nid 列表
+
+### llog_reader
+
+The llog_reader utility translates a Lustre configuration log into human-readable form. The syntax of this utility is,
+
+> llog_reader 工具用于把 lustre 配置日志翻译为人类可读的格式，命令语法为：
+
+```shell
+llog_reader filename
+```
+
+llog_reader reads and parses the binary formatted Lustre’s on-disk configuration logs. To examine a log file on a stopped Lustre server, mount its backing file system as ldiskfs or zfs, then use llog_reader to dump the log file’s contents. For example,
+
+> llog_reader 读取并解析 lustre 在磁盘的二进制配置日志。在停服的节点上查询日志文件，挂载 ost 的后端文件系统（如 ldiskfs 或 zfs），然后使用 llog_reader 导出日志文件的内容。例如：
+
+```shell
+mount -t ldiskfs /dev/sda /mnt/mgs
+llog_reader /mnt/mgsCONFIGS/tfs-client
+```
+
+This utility can also be used to examine the log files when Lustre server is running. The ldiskfs-enabled debugfs utility can be used to extract the log file, for example,
+
+> 该工具也可以用于在 lustre 运行时查询日志文件。它需要使用 ldiskfs 的调试工具 debugfs 获取日志文件，例如：
+
+```shell
+debugfs -c -R 'dump CONFIGS/tfs-client /tmp/tfs-client' /dev/sds
+llog_reader /tmp/tfs-client
+```
+
+### mkfs.lustre
+
+The mkfs.lustre utility is used to format a Lustre target disk. The syntax of this utility is,
+
+> mkfs.lustre 工具用于格式化 lustre 目标硬盘。工具的语法为：
+
+```shell
+    mkfs.lustre target_type [options] device
+```
+
+where target_type can be OST, MDT, networks to which to restrict this OST/MDT and MGS. After formatting, the disk using mkfs.lustre, it can be mounted to start the Lustre service. Two important options that can be specified along with this command are --backfstype=fstype and --fsname=filesystem_name. The former forces a particular format for the backing file system such as ldiskfs (default) or zfs and the later specifies the Lustre file system name of which the disk is part of (default name for file system is lustre).
+
+> target_type 可以是 OST、MDT、MGS，网络方向用于限制 OST 和 MDT。在格式化后，使用 mkfs.lustre 格式化后，可以使用 mount 启动 lustre 服务。mkfs 中有两个重要的选项：--backfstype=fstype 和 --fsname=filesystem_name 需要指定。第一个选项指定后端文件系统的类型：ldiskfs 或 zfs，默认为 ldiskfs。第二个参数指定指定 lustre 文件系统的文件名称，默认为 lustre。
+
+## mount.lustre
+
+The mount.lustre utility is used to mount the Lustre file system on a target or client. The syntax of this utility is,
+
+> mount.lustre 工具用于在客户端上挂载文件系统或在服务端上挂载目标，工具语法为：
+
+```shell
+mount -t lustre [-o options] device mountpoint
+```
+
+After mounting users can use the Lustre file system to create files/directories and execute several other Lustre utilities on the file system. To unmount a mounted file system the umount command can be used as shown below.
+
+> 挂载后，用户可以使用 lustre 文件系统创建文件或目录，在文件系统上执行不同的 lustre 工具。解挂文件系统的命令如下：
+
+```shell
+umount device mountpoint
+```
+
+Some of the important options used along with this utility are discussed below with the help of examples.
+
+> 一些重要的挂载选项将会在下面的例子中详细讨论。
+
+The following mount command mounts Lustre on a client at the mount point /mnt/lustre with MGS running on a node with nid 10.1.0.1@tcp.
+
+> 下面的挂载命令挂载客户端到 /mnt/lustre 挂载点上。在例子的中，MGS 运行的节点 nid 是 10.1.0.1@tcp。
+
+```shell
+mount -t lustre 10.1.0.1@tcp:/lustre /mnt/lustre 
+```
+
+To start the Lustre metadata service from /dev/sda on a mount point /mnt/mdt the following command can be used.
+
+> 挂载 /dev/sda 到 /mnt/mdt 挂载点并启动 lustre 元数据服务如下面命令：
+
+```shell
+mount -t lustre /dev/sda /mnt/mdt
+```
+
+## tunefs.lustre
+
+The tunefs.lustre utility is used to modify configuration information on a Lustre target disk. The syntax of this utility is,
+
+> tunefs.lustre 工具用于修改在硬盘上的 lustre 配置信息，工具语法为：
+
+```shell
+tunefs.lustre [options] /dev/device
+```
+
+However the tunefs utility does not reformat the disk or erase the contents on the disk. The parameters specified using tunefs are set in addition to the old parameters by default. To erase old parameters and use newly specified parameters, use the following options with tunefs.
+
+> tunefs 工具没有重新格式化或擦除在硬盘上的内容。tunefs 默认将参数添加到原有参数后。为了擦除原有参数和使用新参数，tunefs 使用下列命令选项：
+
+```shell
+tunefs.lustre --erase-params --param=new_parameters
+```
 
 # MGC
 
@@ -529,13 +748,13 @@ enum lcfg_command_type {
 
 The first lcfg_command that is being passed to do_lcfg() routine is LCFG_ATTACH which will result in the invocation of obdclass function class_attach(). We will describe class_attach() in detail in Section 5. The second lcfg_command passed to do_lcfg() function is LCFG_SETUP which will result in the invocation of mgc_setup() eventually. do_lcfg() calls class_process_config() (defined in obdclass/obd_config.c) and passes the lcfg_command that it received. In case of LCFG_SETUP command the class_setup() routine gets invoked. This is defined in the same file and its primary duty is to create hashes and self export and call obd device specific setup. The device specific setup call is in turn invoked through another routine called obd_setup(). obd_setup() is defined in include/obd_class.h as an inline function in the same way obd_get_info() is defined. obd_setup() calls the device specific setup routine with the help of the OBP macro (refer Section 4.3 and Figure 6). Here, in case of MGC obd device mgc_setup() defined as part of the mgc_obd_ops structure (shown in Source Code 2) gets invoked by the obd_setup() routine. Note that the yellow colored blocks in Figure 8 will be referenced again in Section 5 to illustrate the lifecycle of the MGC obd device.
 
-> 第一个被作为 do_lcfg() 参数的 lcfg_command 是 LCFG_ATTACH，并最终调用 obdclass 的函数 class_attach()。我们将在第5节详细介绍class_attach()。第二个作为 do_lcfg()的 lcfg_command 是 LCFG_SETUP，并最终调用 mgc_setup()。do_lcfg() 调用 class_process_config()（在obdclass/obd_config.c中定义）并传递接收到的 lcfg_command。对于 LCFG_SETUP 宏，将调用 class_setup()。该函数在相同的文件中定义，其主要任务是创建散列和自导出（self export），然后调用 obd 设备特定的设置流程。设备特定的设置流程被另一个 obd_setup() 调用。obd_setup()在 include/obd_class.h 中定义为内联函数，就像 obd_get_info() 一样。obd_setup() 通过 OBP 宏的帮助调用设备特定的设置流程（参见第4.3节和图6）。在这里，对于 MGC obd 设备，obd_setup() 会调用 mgc_setup()，而 mgc_setup() 是 mgc_obd_ops 结构的一部分（如源代码2所示）。注意，图8中的黄色块将在第5节中再次被引用，以说明 MGC obd 设备的生命周期。
+> 第一个被作为 do_lcfg() 参数的 lcfg_command 是 LCFG_ATTACH，这个参数将会导致 obdclass 的函数 class_attach() 的调用。我们将在第5节详细介绍 class_attach()。第二个作为 do_lcfg()的 lcfg_command 是 LCFG_SETUP，并最终调用 mgc_setup()。do_lcfg() 调用 class_process_config()（在obdclass/obd_config.c中定义）并传递接收到的 lcfg_command。对于 LCFG_SETUP 宏，将调用 class_setup()。该函数在相同的文件中定义，其主要任务是创建散列和自导出（self export），然后调用 obd 设备特定的设置流程。设备特定的设置流程被另一个 obd_setup() 调用。obd_setup()在 include/obd_class.h 中定义为内联函数，就像 obd_get_info() 一样。obd_setup() 通过 OBP 宏的帮助调用设备特定的设置流程（参见第4.3节和图6）。在这里，对于 MGC obd 设备，obd_setup() 会调用 mgc_setup()，而 mgc_setup() 是 mgc_obd_ops 结构的一部分（如源代码2所示）。注意，图8中的黄色块将在第5节中再次被引用，以说明 MGC obd 设备的生命周期。
 
 ### Operation
 
 mgc_setup() first adds a reference to the underlying Lustre PTL-RPC layer. Then it sets up an RPC client for the obd device using client_obd_setup() (defined in ldlm/ldlm_lib.c). Next mgc_llog_init() initializes Lustre logs which will be processed by MGC at the MGS server. These logs are also sent to the Lustre client and the client side MGC mirrors these logs to process the data. The tunable parameters persistently set at MGS are sent to MGC and Lustre logs processed at the MGC initializes these parameters. In Lustre the tunables have to be set before Lustre logs are processed and mgc_tunables_init() helps to initialize these tunables. Few examples of the tunables set by this function are conn_uuid, uuid, ping and dynamic_nids and can be viewed in /sys/fs/lustre/mgc directory by logging into any Lustre client. kthread_run() starts an mgc_requeue_thread which keeps reading the lustre logs as the entries come in. A flowchart showing the mgc_setup() workflow is shown in Figure 10.
 
-> mgc_setup()首先添加对底层 Lustre PTL-RPC 的引用。然后，它使用 client_obd_setup()（在ldlm/ldlm_lib.c中定义）为 obd 设备设置一个 RPC 客户端。接下来，MGC 调用 mgc_llog_init() 初始化 Lustre 日志，这些日志将在 MGS 服务器上进行处理。这些日志也会发送到 Lustre 客户端，客户端端的 MGC 会复制这些日志以处理数据。在 MGS 上可调的持久性参数被发送到 MGC，并且在 MGC 上的 Lustre 日志处理初始化这些参数。在 Lustre 中，必须在处理 Lustre 日志之前设置这些可调参数，而 mgc_tunables_init() 帮助初始化这些可调参数。例如，该函数设置包括 conn_uuid、uuid、ping 和 dynamic_nids，这些都可以在任何 Lustre 客户端上的 /sys/fs/lustre/mgc 目录进行查看。kthread_run() 启动一个mgc_requeue_thread，它会不断地读取 Lustre 日志条目。图10显示了 mgc_setup() 的流程图。
+> mgc_setup()首先添加对底层 Lustre PTL-RPC 的引用。然后，它使用 client_obd_setup()（在ldlm/ldlm_lib.c中定义）为 obd 设备设置一个 RPC 客户端。接下来，MGC 调用 mgc_llog_init() 初始化 Lustre 日志，这些日志将在 MGS 服务器上进行处理。这些日志也会发送到 Lustre 客户端，客户端端的 MGC 会复制这些日志以处理数据。在 MGS 上可调的持久性参数被发送到 MGC，并且在 MGC 上的 Lustre 日志处理初始化这些参数。在 Lustre 中，必须在处理 Lustre 日志之前设置这些可调参数，而 mgc_tunables_init() 协助初始化这些可调参数。例如，该函数设置包括 conn_uuid、uuid、ping 和 dynamic_nids，这些都可以在任何 Lustre 客户端上的 /sys/fs/lustre/mgc 目录进行查看。kthread_run() 启动一个mgc_requeue_thread，它会不断地读取 Lustre 日志条目。图10显示了 mgc_setup() 的流程图。
 
 <div align=center style="margin-bottom:12px;margin-top:12px">
     <img src="../../image/Understanding-Lustre-Internals-中文翻译/Mgc_setup_vs_cleanup.png" alt="Figure 10. mgc_setup() vs. mgc_cleanup()">
