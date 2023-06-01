@@ -415,7 +415,7 @@ MPIRUN | 用于启动 MPI 测试程序的命令。| mpirun
 
 The administrative utilities provided with Lustre software allow to set up Lustre file system in different configurations. Lustre utilities provide a wide range of configuration options for creating a file system on a block device, scaling Lustre file system by adding additional OSTs or clients, changing stripe layout for data etc. Examples of some Lustre utilities include,
 
-> lustre 使用管理工具包设置配置。lustre 工具包提供丰富的选项用于在块设备上创建文件系统，扩展文件系统（增加 OST 或客户端的方式），修改文件的条带布局等等。下面列出一些 lustre 工具包的例子：
+> lustre 提供一系列的工具包使用配置 lustre。lustre 工具包提供在块设备上创建文件系统，扩展文件系统（增加 OST 或客户端的方式），修改文件的条带布局等等功能。下面列出一些工具的说明：
 
 - `mkfs.lustre` - This utility is used to format a disk for a Lustre service.
 
@@ -427,7 +427,7 @@ The administrative utilities provided with Lustre software allow to set up Lustr
 
 - `lctl` - lctl is used to control Lustre features via ioctl interfaces, including various configuration, maintenance and debugging features.
 
-    > 通过 ioctl 接口管理 lustre 特性，包括配置、维护和调试特性。
+    > 使用 ioctl 管理 lustre 特性，包括配置、维护和调试特性。
 
 - `mount.lustre` - This is used to start Lustre client or server on a target.
 
@@ -451,15 +451,15 @@ In this Section we describe a few important user utilities provided with Lustre.
 
 lfs can be used for configuring and monitoring Lustre file system. Some of most common uses of lfs are, create a new file with a specific striping pattern, determine default striping pattern, gather extended attributes for specific files, find files with specific attributes, list OST information and set quota limits. Some of the important lfs options are shown in Table 6.
 
-> lfs 用于配置和管理文件系统。lfs 常用于创建特定条带的文件，检测默认条带模式，收集指定文件扩展信息，文件指定特性的文件，显示 OST 信息和设置配额限制。一些重要的 lfs 选项下表显示：
+> lfs 用于配置和管理文件系统。lfs 常用于创建特定条带的文件，查询默认条带模式，查询指定文件扩展信息，查找指定特性的文件，查询 OST 信息和设置配额限制。一些重要的 lfs 选项如下表下表所示：
 
 选项 | 描述
 :- | :-
 changelog | changelog 记录 MDT 上的元数据更新信息。用户可以指定起点和终点选项。
-df | 报告已挂载 lustre 的使用率，每一个目标的 UUID、已使用容量、剩余容量和挂载点。`path`参数指定显示它相关联的文件系统。
+df | 显示已挂载 lustre 的使用率，每一个目标设备的 UUID、已使用容量、剩余容量和挂载点。path参数指定显示它相关联的文件系统。
 find | 和 linux find 命令类似，用于查找文件或目录。
 getstripe | 获取文件或目录的条带信息。
-setstripe | 设置文件或目录条带或布局方式。注：修改已有文件不能使用该选项。
+setstripe | 设置文件或目录条带或布局方式。注：修改已存在的文件不能使用该选项。
 
 - A few examples on the usage of lfs utility is shown below.
 
@@ -467,7 +467,7 @@ setstripe | 设置文件或目录条带或布局方式。注：修改已有文�
 
 Create a file name file1 striped on three OSTs with 32KB on each stripe
 
-    > 创建一个三个条带数量，每个条带大小32k。
+> 创建一个条带数量为3，每个条带大小32k的文件
 
 ```shell
 \$ lfs setstripe -s 32k -c 3 /mnt/lustre/file1
@@ -475,10 +475,10 @@ Create a file name file1 striped on three OSTs with 32KB on each stripe
 
 - Show the default stripe pattern on a given directory (dir1).
 
-    > 显示目录的条带模式
+    > 显示目录的条带信息
 
 ```shell
-$ lfs getstripe -d /mnt/lustre/dir1
+\$ lfs getstripe -d /mnt/lustre/dir1
 ```
 
 - List detailed stripe allocation for a give file, file2.
@@ -493,21 +493,21 @@ lfs getstripe -v /mnt/lustre/file2
 
 The lfs_migrate utility is used to migrate file data between Lustre OSTs. This utility does the migration in two steps. It first copies the specified files to set of temporary files. This can be performed using lfs setstripe options, if specified. It can also optionally verify if the file contents have changed or not. The second step is to then swap the layout between the temporary file and the original file (or even renaming the temporary file to the original filename). lfs_migrate is a tool that helps users to balance or manage space usage among Lustre OSTs.
 
-> lfs_migrate 工具用于迁移 lustre OST之间的数据。该工具迁移分为两步：1. 复制指定的数据到临时文件。复制时，可以使用`lfs setstripe`选项。它也可以验证数据内容是否被修改过。2. 替换原始文件和临时文件的布局，或者只是将临时文件重命名为原始文件。lfs_migrate 用于管理和均衡多个 OST 之间的空间。
+> lfs_migrate 工具用于迁移 lustre OST 之间的数据。该工具数据迁移分为两步：1. 复制指定的文件数据到临时文件。复制时，可以使用 lfs setstripe 选项。它也可以验证数据内容是否被修改过。2. 替换原始文件和临时文件的布局，或者只是将临时文件重命名为原始文件。lfs_migrate 用于管理和均衡多个 OST 之间的使用空间。
 
 ### lctl
 
 The lctl utility is used for controlling and configuring Lustre file system. lctl allows the following capabilities - control Lustre via an ioctl interface, setup Lustre in various configurations, and access debugging features of Lustre. Issuing lctl command on Lustre client gives a prompt that allows to execute lctl sub-commands. Some of the common commands associated with lctl are dl, device, network up/down, list_nids, ping nid, and conn_list.
 
-> lctl 工具用于控制和配置 lustre 文件系统。lctl 具有一下功能：通过 ioctl 接口控制 lustre；设置各种配置、访问调试属性；在客户端上运行 lctl 命令执行 lctl 的子命令。一些常用的命令是 dl、device、network up/down、ping nid 和 conn_list。
+> lctl 工具用于控制和配置 lustre 文件系统。lctl 具有一下功能：通过 ioctl 控制 lustre；设置各种配置信息、访问调试属性。执行 lctl 后会进入子命令提示命令行。一些常用的命令是 dl、device、network up/down、ping nid 和 conn_list。
 
 To get help with lctl commands `lctl help <COMMAND>` or `lctl --list-commands` can be used.
 
-> lctl 命令的帮助信息是：`lctl help <COMMAND>` 和 `lctl --list-commands`。
+> lctl 帮助信息的命令是：`lctl help <COMMAND>` 和 `lctl --list-commands`。
 
 Another important use of lctl command is accessing Lustre parameters. lctl get, set_param provides a platform-independent interface to the Lustre tunables. When the file system is running, lctl set_param command can be used to set parameters temporarily on the affected nodes. The syntax of this command is,
 
-> lctl 另外一个重要的使用方式是访问 lustre 参数。lct get,set_param 提供可以在运行时调整 lustre 独立的接口。lctl set_param 用于在节点上设置临时参数。该方式的语法如下：
+> lctl 另外一个重要的功能是访问 lustre 参数。lct get/set_param 是一个平台无关的获取设置可调参数接口。当文件系统运行时，lctl set_param 临时设置 lustre 参数。该命令的语法如下：
 
 ```shell
 lctl set_param [-P] [-d] obdtype.obdname.property=value 
@@ -523,7 +523,7 @@ lctl get_param [-n] obdtype.obdname.parameter
 
 Some of the common commands associated with lctl and their description are shown in Table 7.
 
-> 一些 lctl 命令的常用方式和描述如下表：
+> 一些 lctl 命令的常用选项和描述如下表：
 
 选项 | 描述
 :- | :-
