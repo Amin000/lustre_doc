@@ -626,7 +626,7 @@ tunefs.lustre [options] /dev/device
 
 However the tunefs utility does not reformat the disk or erase the contents on the disk. The parameters specified using tunefs are set in addition to the old parameters by default. To erase old parameters and use newly specified parameters, use the following options with tunefs.
 
-> tunefs 工具没有重新格式化或擦除在硬盘上的内容。tunefs 默认将参数添加到原有参数后。为了擦除原有参数和使用新参数，tunefs 使用下列命令选项：
+> 然而 tunefs 工具不会重新格式化或擦除在硬盘上的内容。tunefs 默认将参数添加到原有参数后。为了擦除原有参数和使用新参数，tunefs 使用下列命令选项：
 
 ```shell
 tunefs.lustre --erase-params --param=new_parameters
