@@ -206,7 +206,7 @@ Figure 5 provides a simple illustration of the interactions in the Lustre softwa
 
 This Section describes various tests and testing frameworks used to test Lustre functionality and performance.
 
-> 本章讨论 Lustre 测试和其测试框架，它们用于测试 lustre 的功能和性能。
+> 本章讨论 lustre 的功能和性能的测试框架。
 
 ## Lustre Test Suites
 
@@ -232,7 +232,7 @@ test-framework.sh | 测试框架脚本。提供给一些如创建、启动、校
 
 In this Section, we describe relevant terminology related to Lustre Test Suites. All scripts and applications packaged as part of the lustre-tests-*.rpm and lustre-iokit-*.rpm are termed as Lustre Test Suites. The individual suites of tests contained in /usr/lib64/lustre/tests directory are termed as Test Suite. An example test suite is sanity.sh. A test suite is composed of Individual Tests. An example of an individual test is test 4 from large-lun.sh test suite. Test suites can be bundled into a group for back-to-back execution (e.g. regression). Some of the LTS test examples include - Regression (sanity, sanityn), Feature Specific (sanity-hsm, sanity-lfsck, ost-pools), Configuration (conf-sanity), Recovery and Failures (recovery-small, replay-ost-single) and so on. Some of the active Lustre unit, feature and regression tests and their short description are given in Table 3.
 
-> 在这节中，讨论和 LTS 相关的术语。所有被打包到 lustre-tests-\*.rpm 和 lustre-io-kit-\*.rpm 的脚本和应用被称为 lustre 测试套件集(LTS）。单个在 /usr/lib64/lustre/tests 目录下的套件称为测试套件（Test Suite）。例如，sanity.sh 测试套件，由一些独立的测试组成，独立的测试例如 large-lun.sh 测试套件中包含的`测试4`（test 4）。测试套件可以捆绑在一起紧挨着执行（如回归测试，regression）。LTS 包含了回归 - Regression（snaity，sanityn），特定特性 - Feature Specific（sanity-hsm，sanity-lfsck，ost-pools），配置 - Configuration（conf-sanity），恢复 - Recovery 和错误（recovery-small，replay-ost-single）等等测试。下标列出一些还在活跃的单元、特性和回归测试，和它们的简要描述。
+> 在这节中，讨论和 LTS 相关的术语。所有被打包到 lustre-tests-\*.rpm 和 lustre-io-kit-\*.rpm 的脚本和应用被称为 lustre 测试套件集(LTS）。在 /usr/lib64/lustre/tests 目录下的一个套件称为测试套件（Test Suite）。例如，sanity.sh 测试套件，由一些独立的测试组成，独立的测试例如 large-lun.sh 测试套件中包含的`测试4`（test 4）。测试套件可以捆绑在一起紧挨着执行（如回归测试，regression）。LTS 包含了回归 - Regression（snaity，sanityn），特定特性 - Feature Specific（sanity-hsm，sanity-lfsck，ost-pools），配置 - Configuration（conf-sanity），恢复 - Recovery 和错误（recovery-small，replay-ost-single）等等测试。下标列出一些还在活跃的单元、特性和回归测试，和它们的简要描述。
 
 Name | Description
 :- | :-
@@ -270,18 +270,18 @@ When programming with Lustre, the best practices for testing are test often and 
 
 While testing Lustre, if one or more test cases are failing due to an issue not related to the bug that is currently being fixed, bypass option is available for the failing tests. For e.g., to skip sanity.sh sub-tests 36g and 65 and all of insanity.sh set the environment as,
 
-> 在测试过程中，如果执行测试用例失败是由于与 bug 无关的问题导致的，并且该问题已经被修复，那么可以配置绕过选项参数。例如，绕过 sanity.sh 的“36g”和“65”子测试，和绕过所有的 insanity.sh 测试，可以把环境变量设置为
+> 在测试过程中，如果执行测试用例失败是由于与 bug 无关的问题导致的，并且该问题已经被修复，那么可以配置规避选项参数。例如，规避 sanity.sh 的“36g”和“65”子测试，和规避所有的 insanity.sh 测试，可以把环境变量设置为
 
-```c
+```bash
 export SANITY_EXCEPT="36g 65"
 export INSANITY=no
 ```
 
 A single line command can also be used to skip these tests when running acceptance-small test, as shown below.
 
-> 当运行acceptance-small测试时，也可以使用单行的命令绕过测试
+> 当运行 acceptance-small 测试时，也可以使用单行的命令规避测试
 
-```c
+```bash
 SANITY_EXCEPT="36g 65" INSANITY=no ./acceptance-small.sh
 ```
 
@@ -295,8 +295,8 @@ The examples below show how to run a full test or sub-tests from the acceptance-
 
     > 在测试套件中使用默认配置运行所有的测试
 
-    ```c
-    `cd lustre/tests
+    ```bash
+    cd lustre/tests
     sh ./acceptance-small.sh
     ```
 
@@ -304,7 +304,7 @@ The examples below show how to run a full test or sub-tests from the acceptance-
 
     > 只运行 acceptance-small中的recover-small 和 conf-sanity 子测试。
 
-    ```c
+    ```bash
     ACC_SM_ONLY="recovery-small conf-sanity" sh ./acceptance-small.sh
     ```
 
@@ -312,15 +312,15 @@ The examples below show how to run a full test or sub-tests from the acceptance-
 
     > 只运行sanity.sh中的 1 3 4测试
 
-    ```c
+    ```bash
     ONLY="1 3 4" sh ./sanity.sh
     ```
 
 - skip tests 1 to 30 and run remaining tests in sanity.sh.
 
-    > 跳过sanity.sh中的1到30测试，并运行剩余的测试
+    > 跳过 sanity.s h中的1到30测试，并运行剩余的测试
 
-    ```c
+    ```shell
     EXCEPT="`seq 1 30`" sh sanity.sh
     ```
 
