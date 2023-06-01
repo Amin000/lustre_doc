@@ -574,13 +574,13 @@ The mkfs.lustre utility is used to format a Lustre target disk. The syntax of th
 
 where target_type can be OST, MDT, networks to which to restrict this OST/MDT and MGS. After formatting, the disk using mkfs.lustre, it can be mounted to start the Lustre service. Two important options that can be specified along with this command are --backfstype=fstype and --fsname=filesystem_name. The former forces a particular format for the backing file system such as ldiskfs (default) or zfs and the later specifies the Lustre file system name of which the disk is part of (default name for file system is lustre).
 
-> target_type 可以是 OST、MDT、MGS，网络方向用于限制 OST 和 MDT。在格式化后，使用 mkfs.lustre 格式化后，可以使用 mount 启动 lustre 服务。mkfs 中有两个重要的选项：--backfstype=fstype 和 --fsname=filesystem_name 需要指定。第一个选项指定后端文件系统的类型：ldiskfs 或 zfs，默认为 ldiskfs。第二个参数指定指定 lustre 文件系统的文件名称，默认为 lustre。
+> target_type 可以是 OST、MDT、限制此 OST、MDT 和 MGS 的网络。在格式化后，使用 mkfs.lustre 格式化后，可以使用 mount 启动 lustre 服务。mkfs 中有两个重要的选项：--backfstype=fstype 和 --fsname=filesystem_name 需要指定。第一个选项指定后端文件系统的类型：ldiskfs 或 zfs，默认为 ldiskfs。第二个参数指定指定 lustre 文件系统的文件名称，默认为 lustre。
 
 ## mount.lustre
 
 The mount.lustre utility is used to mount the Lustre file system on a target or client. The syntax of this utility is,
 
-> mount.lustre 工具用于在客户端上挂载文件系统或在服务端上挂载目标，工具语法为：
+> mount.lustre 工具用于在客户端上挂载文件系统或在服务端上挂载存储目标，工具语法为：
 
 ```shell
 mount -t lustre [-o options] device mountpoint
@@ -588,7 +588,7 @@ mount -t lustre [-o options] device mountpoint
 
 After mounting users can use the Lustre file system to create files/directories and execute several other Lustre utilities on the file system. To unmount a mounted file system the umount command can be used as shown below.
 
-> 挂载后，用户可以使用 lustre 文件系统创建文件或目录，在文件系统上执行不同的 lustre 工具。解挂文件系统的命令如下：
+> 挂载后，用户可以使用 lustre 文件系统创建文件或目录，在文件系统上执行不同的 lustre 工具命令。解挂文件系统的命令如下：
 
 ```shell
 umount device mountpoint
